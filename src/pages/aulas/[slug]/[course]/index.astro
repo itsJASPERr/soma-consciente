@@ -7,6 +7,7 @@ import { loadCourses, loadSections, loadLessons, courseTree, lessonHref } from '
 import { path } from '../../../../lib/paths';
 import { renderLearningMarkdown } from '../../../../lib/markdown';
 import SomaAulaSymbol from '../../../../components/SomaAulaSymbol.astro';
+import { mediaUrl } from '../../../../lib/media';
 import CourseOutline from '../../../../components/CourseOutline.astro';
 import { Icon } from 'astro-icon/components';
 export async function getStaticPaths() {
@@ -36,7 +37,11 @@ const first=tree.sections.flatMap(group=>group.lessons.filter(l=>l.status==='pub
       </div>
       <p class="course-hero__availability"><Icon name="iconoir:open-book" size={18}/> {tree.available.length} {tree.available.length===1?'lección abierta':'lecciones abiertas'} · {tree.sections.length} etapas · a tu ritmo</p>
     </div>
-    <div class="course-hero__visual" aria-hidden="true"><div class="course-hero__visual-mark"><SomaAulaSymbol symbol={aula.symbol} eager/></div><span class="course-hero__visual-script">Escuchar. Sentir. Habitar.</span></div>
+    <div class:list={['course-hero__visual',{'course-hero__visual--photo':!!course.image}]}>
+      {mediaUrl(course.image) && <img class="course-hero__photo" src={mediaUrl(course.image) || ''} alt={course.imageAlt || 'Imagen ilustrativa del recorrido'} loading="eager" decoding="async" width="1100" height="900"/>}
+      <div class="course-hero__visual-mark" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} eager/></div>
+      <span class="course-hero__visual-script">Escuchar. Sentir. Habitar.</span>
+    </div>
   </div></section>
   <section class="section--tight course-about"><div class="container course-about__grid">
     <div><span class="eyebrow">Una invitación a explorar</span><h2>El sentido de este recorrido</h2><div class="lesson-richtext" set:html={renderLearningMarkdown(course.description)}/></div>

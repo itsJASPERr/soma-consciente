@@ -6,6 +6,7 @@
 
 - Astro 5 + TypeScript, HTML estático para GitHub Pages
 - Astro Content Collections (JSON validado con Zod)
+- Imágenes editoriales configurables por Pages CMS para portada, Aulas, cursos, Biblioteca, Núcleo y Encuentros
 - Pages CMS, ya conectado a GitHub; el archivo `.pages.yml` configura los editores
 - Iconoir (a través de `astro-icon`) para iconos de interfaz
 - Arte vectorial propio para las cuatro Aulas y El Núcleo
@@ -33,7 +34,9 @@ Si Pages aún no está habilitado, el build puede finalizar correctamente pero l
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
 
-- Cuatro Aulas: `src/content/aulas/*.json`\n- Cursos, secciones y lecciones: `src/content/cursos/*.json`, `src/content/secciones/*.json`, `src/content/lecciones/*.json`
+- Inicio (imágenes): `src/content/home/home.json`
+- Cuatro Aulas (fotos de portada): `src/content/aulas/*.json`
+- Cursos, secciones y lecciones: `src/content/cursos/*.json`, `src/content/secciones/*.json`, `src/content/lecciones/*.json`
 - Biblioteca: `src/content/recursos/*.json`
 - Campos del editor: `.pages.yml`
 - Validación tipada: `src/content.config.ts`
@@ -44,11 +47,11 @@ Cada archivo es la fuente de verdad; evitamos duplicar textos en código TypeScr
 
 ## Identidad visual
 
-La marca pública es **SOMA CONSCIENTE**, no SOMA CONCIENCIA. Los cuatro símbolos del logo aportado guían los emblemas SVG implementados. La marca en el sitio es una **adaptación vectorial**: el PNG original no fue incorporado como archivo de imagen al repositorio. Para fidelidad perfecta, reemplazar el SVG por el original vectorizado o subir el PNG al directorio `public/media/brand/` desde Pages CMS y referenciarlo.
+La marca pública es **SOMA CONSCIENTE**. El emblema original y los cuatro símbolos extraídos de él están en `public/media/` y se usan sin reconstrucciones. Las fotografías nuevas son editoriales e ilustrativas, no retratos de las personas del equipo. Pueden cambiarse directamente desde Pages CMS.
 
 ## Backend Mágico OS
 
-El sitio sigue independiente. En v0.2 todo el contenido público está en Git; no hay login, disponibilidad de reservas o eventos inventados. Mágico OS podrá ofrecer APIs para agenda, reservas, suscripciones, acceso de miembros y progreso cuando sus contratos estén aprobados.
+El sitio sigue independiente. En esta etapa el contenido público está en Git; no hay login, disponibilidad de reservas o eventos inventados. Mágico OS podrá ofrecer APIs para agenda, reservas, suscripciones, acceso de miembros y progreso cuando sus contratos estén aprobados.
 
 Arquitectura: `docs/architecture.md`.
 

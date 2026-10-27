@@ -1,9 +1,12 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { path } from '../lib/paths';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
+const home = await loadHomepage();
 ---
 <SiteLayout title="Encuentros y experiencias">
   <section class="page-hero"><div class="container"><span class="eyebrow">La dimensión presencial de SOMA</span><h1>Encontrarnos también es aprender.</h1><p>Experiencias, talleres y espacios de práctica donde las personas, las herramientas y el territorio se encuentran. Son una posibilidad de profundizar el camino, no una condición para formar parte de SOMA.</p></div></section>
-  <section class="section"><div class="container intro-grid"><div><span class="eyebrow">Agenda en preparación</span><h2>Próximos encuentros</h2><p class="section-intro">Todavía no hay encuentros con fechas y disponibilidad confirmadas para publicar. Cuando se abra una propuesta, acá vas a encontrar sus detalles, responsables y acceso a reservas.</p><p class="section-intro">SOMA podrá conectar su agenda con una instalación independiente de Mágico OS, sin mezclar reservas ni datos con otros proyectos.</p></div><div class="encounter-art" role="img" aria-label="Ilustración de montañas al atardecer"></div></div></section>
+  <section class="section"><div class="container intro-grid"><div><span class="eyebrow">Agenda en preparación</span><h2>Próximos encuentros</h2><p class="section-intro">Todavía no hay encuentros con fechas y disponibilidad confirmadas para publicar. Cuando se abra una propuesta, acá vas a encontrar sus detalles, responsables y acceso a reservas.</p><p class="section-intro">SOMA podrá conectar su agenda con una instalación independiente de Mágico OS, sin mezclar reservas ni datos con otros proyectos.</p></div><figure class="encounter-page-photo"><img src={mediaUrl(home.encountersImage) || ''} alt={home.encountersAlt} loading="lazy" decoding="async" width="1100" height="780"/><figcaption>Imagen ilustrativa de un encuentro comunitario</figcaption></figure></div></section>
   <section class="section--tight digital-band"><div class="container"><h2>Mientras tanto, el camino también es online.</h2><p class="section-intro">La Biblioteca permanece abierta para que puedas explorar prácticas y contenidos desde cualquier lugar.</p><a class="btn" href={path('/biblioteca/')}>Entrar a la Biblioteca ↗</a></div></section>
 </SiteLayout>

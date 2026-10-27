@@ -3,14 +3,17 @@ import type { Aula } from '../lib/content';
 import { path } from '../lib/paths';
 import { Icon } from 'astro-icon/components';
 import SomaAulaSymbol from './SomaAulaSymbol.astro';
+import { mediaUrl } from '../lib/media';
 const { aula, index = 0 } = Astro.props as { aula: Aula; index?: number };
+const photo = mediaUrl(aula.coverImage);
 ---
 <a class:list={['aula-card', 'aula-card--' + aula.theme, 'aula-card--symbol-' + aula.symbol]} href={path('/aulas/' + aula.slug + '/')}>
-  <div class="aula-card__art" aria-hidden="true">
-    <span class="art-circle art-circle--one"></span>
-    <span class="art-circle art-circle--two"></span>
-    <span class="aula-icon"><SomaAulaSymbol symbol={aula.symbol}/></span>
-    <span class="aula-card__number">0{index + 1}</span>
+  <div class:list={['aula-card__art', {'aula-card__art--photo':!!photo}]}>
+    {photo
+      ? <img class="aula-card__photo" src={photo} alt={aula.coverAlt || 'Imagen ilustrativa del Aula'} loading="lazy" decoding="async" width="900" height="1000"/>
+      : <><span class="art-circle art-circle--one"></span><span class="art-circle art-circle--two"></span></>}
+    <span class="aula-icon" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol}/></span>
+    <span class="aula-card__number" aria-hidden="true">0{index + 1}</span>
   </div>
   <div class="aula-card__content">
     <span class="eyebrow eyebrow--light">{aula.guide}</span>

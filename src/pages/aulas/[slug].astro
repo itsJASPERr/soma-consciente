@@ -5,6 +5,7 @@ import { loadAulas } from '../../lib/content';
 import { path } from '../../lib/paths';
 import { loadCourses, loadSections, loadLessons, courseTree } from '../../lib/learning';
 import SomaAulaSymbol from '../../components/SomaAulaSymbol.astro';
+import { mediaUrl } from '../../lib/media';
 import CourseCard from '../../components/CourseCard.astro';
 import { Icon } from 'astro-icon/components';
 export async function getStaticPaths() {
@@ -29,7 +30,12 @@ const lessons = await loadLessons();
           <div class="btn-row"><a class="btn btn--rust" href="#recorridos">Explorar el Aula <Icon name="iconoir:arrow-down" size={17}/></a><a class="btn btn--outline" href={path('/biblioteca/')}>Biblioteca abierta <Icon name="iconoir:arrow-up-right" size={17}/></a></div>
           <div class="aula-hero__host"><Icon name="iconoir:user" size={18}/><span>Un Aula creada por <strong>{aula.guide}</strong></span></div>
         </div>
-        <div class="aula-hero__visual" aria-hidden="true"><div class="aula-hero__visual-inner"><SomaAulaSymbol symbol={aula.symbol} eager/></div><span class="aula-hero__ring aula-hero__ring--one"></span><span class="aula-hero__ring aula-hero__ring--two"></span></div>
+        <div class:list={['aula-hero__visual',{'aula-hero__visual--photo':!!aula.coverImage}]}>
+          {mediaUrl(aula.coverImage) && <img class="aula-hero__photo" src={mediaUrl(aula.coverImage) || ''} alt={aula.coverAlt || 'Imagen ilustrativa de este Aula'} loading="eager" decoding="async" width="1050" height="1050"/>}
+          <div class="aula-hero__visual-inner" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} eager/></div>
+          <span class="aula-hero__ring aula-hero__ring--one"></span>
+          <span class="aula-hero__ring aula-hero__ring--two"></span>
+        </div>
       </div>
     </section>
     <section class="section" id="recorridos"><div class="container">
