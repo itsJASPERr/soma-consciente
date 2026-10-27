@@ -1,6 +1,6 @@
 {
   "name": "soma-consciente",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "astro": "^5.16.0",
-    "astro-icon": "^1.2.0"
+    "astro-icon": "^1.2.0",
+    "markdown-it": "^14.1.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "@iconify-json/iconoir": "^1.2.12"
+    "@iconify-json/iconoir": "^1.2.12",
+    "@types/markdown-it": "^14.1.2"
   }
 }
