@@ -3,22 +3,31 @@
   "name": "Cuerpo y movimiento",
   "shortName": "Aula del Cuerpo",
   "guide": "Yanina Noelia Landriel",
-  "qualification": "Lic. en Kinesiología y Fisioterapia · Osteopatía",
+  "qualification": "Lic. en Kinesiología y Fisioterapia · C.O. Osteopatía",
   "theme": "verde",
   "symbol": "body",
-  "summary": "Osteopatía, movimiento y una mirada integral del cuerpo.",
-  "description": "Un espacio para acercarnos al cuerpo desde el movimiento, la percepción y el cuidado.",
-  "approach": "Yanina integra su trayectoria en kinesiología, fisioterapia, osteopatía y terapia postural activa con una búsqueda personal de autoconocimiento y una visión amplia de la salud.",
+  "summary": "Kinesiología, osteopatía y bienestar integral desde una mirada consciente del cuerpo y sus ritmos.",
+  "description": "Un espacio para volver a habitar el cuerpo a través del movimiento, el descanso, la alimentación y la escucha de nuestras necesidades.",
+  "approach": "Mi recorrido profesional comenzó en la kinesiología y continuó con la osteopatía. Con los años, fui ampliando mi mirada hacia la relación entre el cuerpo, el sistema nervioso y las emociones, integrando también mi propio camino de introspección.",
   "practices": [
-    "Conciencia corporal",
-    "Movimiento y postura",
-    "Conocimiento del cuerpo",
-    "Mirada integral del bienestar"
+    "Movimiento consciente",
+    "Alimentación y hábitos cotidianos",
+    "Descanso y pausas activas",
+    "Gratitud, presencia y autoconocimiento"
   ],
-  "invitation": "Comprender el cuerpo puede abrir nuevas preguntas sobre cómo habitamos nuestra vida.",
+  "invitation": "Quiero contribuir a construir un espacio donde podamos compartir saberes, crecer juntos y acompañar a las personas en sus procesos de bienestar y transformación.",
   "order": 4,
   "published": true,
   "coverImage": "https://images.unsplash.com/photo-1699523229212-c25a2fadeb12?auto=format&fit=crop&w=900&q=78",
   "coverAlt": "Trabajo corporal manual realizado con cuidado y atención",
-  "coverPosition": "center"
+  "coverPosition": "center",
+  "credentials": [
+    "Lic. en Kinesiología y Fisioterapia (2011)",
+    "C.O. Osteopatía (2015)",
+    "Terapia Postural Activa (2017)",
+    "Osteopatía Deportiva Integrativa (2026)"
+  ],
+  "journeyTitle": "Mi recorrido: de la comprensión del cuerpo al descubrimiento personal",
+  "journey": "Mi recorrido profesional comenzó en la kinesiología y continuó con la osteopatía, disciplinas que me permitieron profundizar en el conocimiento del cuerpo humano, el movimiento y los procesos de salud. Con los años, mi interés fue ampliándose hacia una comprensión más integral del ser humano y de la relación entre el cuerpo, el sistema nervioso y las emociones.\n\nSin embargo, hace aproximadamente tres años comenzó también un camino de búsqueda personal que transformó mi manera de mirar y de habitar la vida.\n\nA través de distintas experiencias y espacios de introspección, fui abriéndome a nuevas preguntas, a otras formas de percibirme y a una exploración más profunda de mi mundo interior. Fue un proceso de descubrimiento, de cuestionamiento y de conexión conmigo misma, que me invitó a revisar creencias, ampliar perspectivas y reconocer aspectos de mí que quizás antes no podía ver con tanta claridad.\n\nEse recorrido personal empezó a dialogar cada vez más con mi formación profesional. Comprendí que mi interés por la salud no se limita al cuerpo físico, sino que también me moviliza la posibilidad de comprender al ser humano en su complejidad, respetando su historia, sus procesos y sus distintas dimensiones.\n\nHoy siento que ambos caminos —el profesional y el personal— se encuentran y se enriquecen mutuamente. Uno me aporta conocimientos, herramientas y experiencia; el otro me invita a mantenerme abierta, a seguir aprendiendo y a reconocer que el crecimiento también implica animarse a mirar hacia adentro.\n\nDesde ese lugar nace mi interés por integrar saberes, crear propuestas y participar en espacios donde distintas miradas puedan encontrarse.\n\nPor eso, formar parte de SOMA CONSCIENTE representa para mí la posibilidad de reunir partes de mi propio recorrido y ponerlas al servicio de una construcción colectiva: aportar desde mi profesión, desde lo que fui aprendiendo en mi camino personal y desde el deseo de seguir explorando, creando y creciendo junto a otros.",
+  "contribution": "Puedo aportar a SOMA CONSCIENTE mi formación y experiencia en kinesiología y osteopatía, mi mirada integral sobre la salud y mi interés por la conexión entre el cuerpo, las emociones y la consciencia.\n\nTambién puedo aportar creatividad, iniciativa y capacidad para integrar distintas disciplinas, desarrollar propuestas y transformar ideas en experiencias concretas.\n\nDesde mi recorrido profesional y mi propio camino de introspección y autoconocimiento, *quiero contribuir a construir un espacio donde podamos compartir saberes, crecer juntos y acompañar a las personas en sus procesos de bienestar y transformación*."
 }

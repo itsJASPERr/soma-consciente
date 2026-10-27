@@ -38,7 +38,7 @@ const lessonNum=String(section.order).padStart(2,'0')+'.'+String(lesson.order);
       <aside class="lesson-shell__sidebar"><div class="lesson-sidebar__heading"><span class="eyebrow">{aula.shortName}</span><strong>{course.title}</strong><span>{course.subtitle}</span></div><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></aside>
       <div class="lesson-shell__content">
         <details class="lesson-mobile-outline"><summary><Icon name="iconoir:menu" size={20}/> Índice del curso <Icon name="iconoir:nav-arrow-down" size={17}/></summary><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></details>
-        <div class="lesson-heading"><div class="lesson-heading__top"><span class="eyebrow">{section.title} · Lección {lessonNum}</span><span class="lesson-time"><Icon name="iconoir:clock" size={16}/> {lesson.durationMinutes} min aprox.</span></div><h1>{lesson.title}</h1><p>{lesson.summary}</p></div>
+        <div class="lesson-heading"><div class="lesson-heading__top"><span class="eyebrow">{section.title} · Lección {lessonNum}</span>{lesson.durationMinutes>0 && <span class="lesson-time"><Icon name="iconoir:clock" size={16}/> {lesson.durationMinutes} min aprox.</span>}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p></div>
         <div class="lesson-blocks">{lesson.blocks.map((block,index)=><LearningBlock block={block} index={index}/>)}</div>
         <div class="lesson-end"><span>La práctica continúa fuera de la pantalla.</span><p>Podés volver a esta lección cuando quieras. Tu ritmo es parte del camino.</p></div>
         <nav class="lesson-pager" aria-label="Lecciones anterior y siguiente">

@@ -1,0 +1,21 @@
+{
+  "key": "yanina-bienestar-integral",
+  "slug": "bienestar-integral",
+  "aula": "yanina",
+  "title": "Bienestar integral",
+  "subtitle": "Cuerpo, alimentación, descanso y conciencia",
+  "summary": "Pequeños hábitos para volver a habitar el cuerpo, reconocer nuestras necesidades y acompañar los ritmos cotidianos.",
+  "description": "El bienestar no depende de una sola acción, sino de la integración de pequeños hábitos cotidianos que favorecen el equilibrio físico, mental y emocional.\n\nDesde la osteopatía y la comprensión del cuerpo como una unidad funcional, proponemos recuperar la conexión con nuestras necesidades corporales, reconocer nuestras sensaciones y aprender a acompañar los ritmos naturales de nuestro organismo.\n\nA través del movimiento consciente, la alimentación, el descanso y las prácticas de gratitud, buscamos que cada persona pueda incorporar herramientas sencillas y sostenibles para mejorar su calidad de vida.\n\nEl objetivo no es alcanzar la perfección ni cumplir con una rutina rígida, sino desarrollar una mayor conciencia sobre cómo vivimos, cómo nos movemos, cómo nos alimentamos y cómo descansamos.",
+  "focus": [
+    "Movimiento consciente",
+    "Alimentación consciente",
+    "Organización alimentaria",
+    "Descanso reparador",
+    "Pausas activas"
+  ],
+  "featured": true,
+  "order": 1,
+  "published": true,
+  "image": "https://images.unsplash.com/photo-1699523229212-c25a2fadeb12?auto=format&fit=crop&w=900&q=78",
+  "imageAlt": "Trabajo corporal manual realizado con cuidado y atención"
+}
