@@ -1,0 +1,23 @@
+---
+import type { Aula } from '../lib/content';
+import { path } from '../lib/paths';
+
+// Each asset is a crop from the team's ORIGINAL SOMA emblem, not an SVG recreation.
+// The CMS schema retains these symbol keys for stable content references.
+const assets: Record<Aula['symbol'], string> = {
+  heart: 'nicole-psicologia.png',
+  sound: 'jasper-musica.png',
+  horse: 'nico-caballos.png',
+  body: 'yanina-cuerpo.png'
+};
+const { symbol, eager = false } = Astro.props as { symbol: Aula['symbol']; eager?: boolean };
+---
+<img
+  class="soma-aula-source"
+  src={path('/media/aulas/' + assets[symbol])}
+  alt=""
+  width="216"
+  height="216"
+  loading={eager ? 'eager' : 'lazy'}
+  decoding="async"
+/>

@@ -2,14 +2,14 @@
 import type { Aula } from '../lib/content';
 import { path } from '../lib/paths';
 import { Icon } from 'astro-icon/components';
-import SomaAulaIcon from './SomaAulaIcon.astro';
+import SomaAulaSymbol from './SomaAulaSymbol.astro';
 const { aula, index = 0 } = Astro.props as { aula: Aula; index?: number };
 ---
-<a class:list={['aula-card', 'aula-card--' + aula.theme]} href={path('/aulas/' + aula.slug + '/')}>
+<a class:list={['aula-card', 'aula-card--' + aula.theme, 'aula-card--symbol-' + aula.symbol]} href={path('/aulas/' + aula.slug + '/')}>
   <div class="aula-card__art" aria-hidden="true">
     <span class="art-circle art-circle--one"></span>
     <span class="art-circle art-circle--two"></span>
-    <span class="aula-icon"><SomaAulaIcon symbol={aula.symbol}/></span>
+    <span class="aula-icon"><SomaAulaSymbol symbol={aula.symbol}/></span>
     <span class="aula-card__number">0{index + 1}</span>
   </div>
   <div class="aula-card__content">
