@@ -1,0 +1,32 @@
+name: SOMA responsive browser audit
+
+# Opt-in audit; a slow browser test must not block publishing a CSS fix.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  viewport-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build static site
+        run: npm run build
+      - name: Verify responsive layouts in Chromium
+        timeout-minutes: 5
+        run: npm run test:responsive
+      - name: Upload mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-previews
+          path: test-results/
+          if-no-files-found: ignore

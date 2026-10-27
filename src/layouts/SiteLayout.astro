@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { path } from '../lib/paths';
 import '../styles/global.css';
+import '../styles/responsive.css';
 const { title = 'SOMA CONSCIENTE', description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---

@@ -1,0 +1,159 @@
+/*
+ * Responsive layout corrections for the public website and all four Aulas.
+ * Imported after global.css so the overrides remain intentional and auditable.
+ * The primary rule is to constrain content, rather than hiding overflow globally.
+ */
+:where(main, main > section, .container, .hero-inner, .hero-copy, .intro-grid, .nucleo-grid,
+  .digital-grid, .encounter-grid, .footer-main, .aula-hero__grid, .course-hero__grid,
+  .lesson-shell__content, .lesson-shell, .course-program__layout, .aula-about__grid,
+  .learning-course-card, .learning-course-card__copy, .resource-card, .section-head,
+  .lesson-blocks, .lesson-pager, .lesson-pager > div) {
+  min-width: 0;
+}
+
+img, svg, video, iframe { max-width: 100%; }
+h1, h2, h3, p { overflow-wrap: break-word; }
+.hero-inner {
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+}
+.hero h1 {
+  font-size: clamp(3.2rem, 5.3vw, 6.1rem);
+  max-width: 100%;
+  letter-spacing: -.052em;
+}
+.hero h1 span {
+  font-size: .80em;
+  letter-spacing: -.055em;
+}
+.hero-copy, .hero-visual, .orbit-art { min-width: 0; max-width: 100%; }
+.hero-copy .eyebrow { display: block; max-width: 100%; }
+.brand__symbol { flex: 0 0 auto; }
+.brand__type { min-width: 0; }
+.header-inner { min-width: 0; }
+.site-header .mobile-nav { z-index: 50; }
+.mobile-nav nav { max-height: min(75dvh, 600px); overflow-y: auto; }
+.lesson-pager, .section-head { min-width: 0; }
+.lesson-pager a, .lesson-pager strong { overflow-wrap: anywhere; }
+.lesson-video, .lesson-video-file, .lesson-block audio { max-width: 100%; }
+.lesson-richtext pre, .prose pre { max-width: 100%; overflow-x: auto; }
+.lesson-richtext a, .prose a { overflow-wrap: anywhere; }
+
+@media (max-width: 1150px) {
+  /* A desktop CTA rule was declared *after* the original breakpoint, overriding
+   * display:none and causing the header to exceed the phone viewport. */
+  .site-header .desktop-nav,
+  .site-header .header-cta { display: none; }
+  .site-header .mobile-nav { display: block; flex: 0 0 auto; margin-left: auto; }
+  .site-header .header-inner { gap: 16px; }
+  .site-header .brand { min-width: 0; max-width: calc(100% - 100px); }
+  .mobile-nav summary { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+}
+
+@media (max-width: 900px) {
+  .hero { padding: 46px 0 62px; }
+  .hero-inner { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .hero-copy { padding: 0; }
+  .hero h1 { font-size: clamp(3.15rem, 8vw, 5.45rem); }
+  .hero h1 span { font-size: .82em; }
+  .hero-visual { width: min(100%, 510px); margin: 34px auto 0; }
+  .intro-grid, .digital-grid, .encounter-grid, .aula-profile,
+  .course-about__grid, .aula-about__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .nucleo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nucleo-points { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aula-hero__grid, .course-hero__grid { grid-template-columns: minmax(0, 1fr); }
+  .aula-about__grid > div:last-child { border-left: 0; padding-left: 0; }
+}
+
+@media (max-width: 650px) {
+  .container { width: calc(100% - 36px); max-width: 100%; }
+  .site-header .header-inner { min-height: 74px; gap: 10px; }
+  .site-header .brand { gap: 7px; max-width: calc(100% - 64px); }
+  .site-header .brand__symbol { width: 44px; height: 44px; }
+  .site-header .brand__type strong { font-size: clamp(1.35rem, 6.2vw, 1.8rem); letter-spacing: .025em; }
+  .site-header .brand__type small { font-size: .52rem; letter-spacing: .17em; margin-top: 4px; }
+  .site-header .mobile-nav summary {
+    min-height: 44px;
+    padding: 9px 3px;
+    font-size: .9rem;
+  }
+  .site-header .mobile-nav nav {
+    right: 0;
+    top: calc(100% + 6px);
+    width: min(300px, calc(100vw - 36px));
+  }
+  .site-header .mobile-nav nav a { display: block; padding: 12px 13px; min-height: 44px; }
+  .hero { padding: 46px 0 50px; }
+  .hero .hero-inner { display: grid; grid-template-columns: minmax(0, 1fr); min-height: auto; }
+  .hero .hero-copy { min-width: 0; padding: 0; }
+  .hero h1 { font-size: clamp(2.7rem, 10vw, 4.3rem); line-height: .98; margin: 17px 0 21px; letter-spacing: -.048em; }
+  .hero h1 span { font-size: .79em; letter-spacing: -.06em; }
+  .hero-copy .eyebrow { font-size: .68rem; letter-spacing: .12em; line-height: 1.55; }
+  .hero-lead { font-size: clamp(1.38rem, 5.4vw, 1.75rem); margin: 12px 0 16px; }
+  .hero-description { max-width: 100%; font-size: 1rem; line-height: 1.65; }
+  .hero .btn-row { display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; margin-top: 26px; }
+  .hero .btn-row .btn { width: 100%; justify-content: space-between; text-align: left; padding: 15px 21px; min-height: 48px; }
+  .hero-tags { gap: 12px 17px; margin-top: 30px; }
+  .hero-tags span { font-size: .64rem; }
+  .hero-visual { margin: 22px auto 0; width: min(100%, 340px); }
+  .hero-visual-note { font-size: .92rem; right: 0; bottom: 0; }
+  .values-list { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 18px 0; gap: 11px; }
+  .values-list span { letter-spacing: .075em; font-size: .64rem; }
+  .values-list span+span { border-left: 0; }
+  .section { padding: 64px 0; }
+  .section--tight { padding: 50px 0; }
+  .intro-grid blockquote { font-size: clamp(1.65rem, 6.5vw, 2.25rem); padding: 24px; }
+  .section-head { flex-direction: column; align-items: flex-start; gap: 11px; }
+  .section-heading, .section-head h2, .section h2 { overflow-wrap: anywhere; }
+  .aula-grid, .resource-grid, .feature-grid { grid-template-columns: minmax(0,1fr); }
+  .nucleo-grid { grid-template-columns: minmax(0,1fr); }
+  .nucleo-points { grid-column: 1; grid-template-columns: minmax(0,1fr); }
+  .nucleo-grid .orbit-art { width: min(100%,330px); }
+  .digital-grid { grid-template-columns: minmax(0,1fr); }
+  .digital-visual { height: 205px; }
+  .digital-visual .digital-glyph { font-size: clamp(3.5rem, 15vw, 4.8rem); }
+  .digital-visual::before { width: min(65vw, 200px); height: auto; aspect-ratio: 1; }
+  .digital-visual::after { width: min(40vw, 140px); height: auto; aspect-ratio: 1; }
+  .modes-grid { grid-template-columns: minmax(0,1fr); }
+  .footer-main { grid-template-columns: minmax(0,1fr); gap: 22px; }
+  .footer-note { grid-column: 1; }
+  .page-hero { padding: 55px 0 50px; }
+  .page-hero h1 { font-size: clamp(2.45rem, 9vw, 3.25rem); overflow-wrap: anywhere; }
+  .page-hero p { font-size: 1.03rem; }
+  .aula-hero__grid, .course-hero__grid, .course-program__layout, .aula-about__grid,
+  .course-about__grid, .aula-profile, .article-layout { grid-template-columns: minmax(0,1fr); }
+  .aula-hero h1, .course-hero h1 { font-size: clamp(2.6rem, 10vw, 3.5rem); overflow-wrap: anywhere; }
+  .aula-hero__subtitle, .course-hero__subtitle { font-size: 1.5rem; }
+  .aula-hero__visual, .course-hero__visual { max-width: 100%; min-width: 0; }
+  .learning-course-list { grid-template-columns: minmax(0,1fr); }
+  .learning-course-card { grid-template-columns: minmax(0,1fr); }
+  .lesson-shell { display: block; }
+  .lesson-shell__content { padding: 22px 17px; min-width: 0; }
+  .lesson-heading h1 { font-size: clamp(2.15rem, 8.5vw, 3.05rem); }
+  .lesson-pager { grid-template-columns: minmax(0,1fr); }
+  .lesson-pager > div:last-child { text-align: left; border-top: 1px solid var(--line); padding-top: 16px; }
+  .lesson-mobile-outline, .lesson-mobile-outline .course-outline { max-width: 100%; }
+  .lesson-richtext { overflow-wrap: anywhere; }
+  .lesson-journal { max-width: 100%; }
+}
+
+@media (max-width: 385px) {
+  .site-header .brand__symbol { width: 38px; height: 38px; }
+  .site-header .brand__type strong { font-size: 1.33rem; }
+  .site-header .brand__type small { font-size: .46rem; letter-spacing: .135em; }
+  /* The icon remains visible with an accessible aria-label on summary. */
+  .site-header .mobile-nav summary { font-size: 0; width: 46px; justify-content: center; }
+  .site-header .mobile-nav summary svg { width: 24px; height: 24px; }
+  .hero h1 { font-size: clamp(2.58rem, 11.2vw, 2.95rem); }
+  .hero h1 span { font-size: .78em; }
+  .container { width: calc(100% - 30px); }
+  .hero-description { font-size: .97rem; }
+  .hero-tags { gap: 10px 12px; }
+}
+
+@media (hover: none) {
+  .aula-card:hover, .resource-card:hover, .learning-course-card:hover { transform: none; }
+}
