@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "content:check": "node scripts/validate-learning.mjs",
-    "test:responsive": "node scripts/check-responsive.mjs"
+    "test:responsive": "node scripts/check-responsive.mjs",
+    "test:aula-cards": "node scripts/check-aula-card-layout.mjs"
   },
   "dependencies": {
     "astro": "^5.16.0",

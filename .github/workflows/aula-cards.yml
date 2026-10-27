@@ -1,0 +1,41 @@
+name: Aula card responsive regression
+
+on:
+  pull_request:
+    paths:
+      - "src/components/AulaCard.astro"
+      - "src/styles/aula-card-layout.css"
+      - "src/content/aulas/**"
+      - "src/content.config.ts"
+      - "src/layouts/SiteLayout.astro"
+      - "scripts/check-aula-card-layout.mjs"
+      - "package.json"
+      - ".github/workflows/aula-cards.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  layout-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build static pages
+        run: npm run build
+      - name: Check card frames at mobile and breakpoint widths
+        timeout-minutes: 3
+        run: npm run test:aula-cards
+      - name: Store visual snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aula-card-snapshots
+          path: test-results/
+          if-no-files-found: ignore
