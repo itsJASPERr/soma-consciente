@@ -11,7 +11,8 @@ const ROOT='http://127.0.0.1:4321/soma-consciente';
 const WIDTHS=[320,375,430,599,600,650,680,681,767,879,880,900,1024,1149,1150,1151,1280];
 const PAGES=['/','/aulas/'];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{
+// Spawn Astro directly: terminating npm does not terminate its child Node process.
+const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{
   stdio:['ignore','pipe','pipe'],env:process.env
 });
 let serverOutput='';
@@ -29,9 +30,16 @@ try {
   if(!ready)throw new Error('Astro preview not ready: '+serverOutput);
   browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
   const page=await browser.newPage({viewport:{width:375,height:920},deviceScaleFactor:1});
-  await page.route('**/*',route=>{
+  await page.route('**/*',async route=>{
     const url=new URL(route.request().url());
-    if(url.hostname==='127.0.0.1')return route.continue();
+    if(url.hostname==='127.0.0.1'||url.hostname==='localhost')
+      return route.continue();
+    // Some Astro asset URLs resolve against the configured canonical site.
+    // Serve those asset requests from the current local PR build instead.
+    if(url.hostname==='itsjasperr.github.io' && url.pathname.startsWith('/soma-consciente/')){
+      const response=await route.fetch({url:'http://127.0.0.1:4321'+url.pathname+url.search});
+      return route.fulfill({response});
+    }
     return route.abort();
   });
   await mkdir('test-results',{recursive:true});
@@ -40,6 +48,17 @@ try {
     for(const route of PAGES){
       const resp=await page.goto(ROOT+route,{waitUntil:'domcontentloaded',timeout:10000});
       if(!resp?.ok()){failures.push(width+' '+route+' returned '+resp?.status());continue;}
+      await page.waitForLoadState('load',{timeout:4500}).catch(()=>{});
+      if(width===WIDTHS[0] && route===PAGES[0]){
+        const styles=await page.evaluate(()=>({
+          hrefs:[...document.querySelectorAll('link[rel="stylesheet"]')].map(el=>el.href),
+          stylesheets:document.styleSheets.length,
+          cardPhotoFit:getComputedStyle(document.querySelector('.aula-card__photo')).objectFit
+        }));
+        console.log('Loaded stylesheet diagnostics: '+JSON.stringify(styles));
+        if(styles.cardPhotoFit!=='cover')
+          throw new Error('Local CSS did not load: '+JSON.stringify(styles));
+      }
       const issues=await page.evaluate(()=>{
         const problems=[];
         const cards=[...document.querySelectorAll('.aula-grid .aula-card')];
@@ -56,7 +75,7 @@ try {
           if(Math.abs(f.height-a.height)>2)problems.push('card '+i+' media frame mismatch');
           if(Math.abs(im.height-a.height)>2)problems.push('card '+i+' photo escapes media height');
           if(co.top<a.bottom-2)problems.push('card '+i+' text overlaps media');
-          if(Math.abs(getComputedStyle(image).objectFit==='cover'?1:0)<.5)problems.push('card '+i+' lacks object-fit cover');
+          if(getComputedStyle(image).objectFit!=='cover')problems.push('card '+i+' lacks object-fit cover');
           if(card.scrollWidth>card.clientWidth+2)problems.push('card '+i+' horizontal overflow');
           if(a.left < -2||a.right>document.documentElement.clientWidth+2)problems.push('card '+i+' beyond viewport');
         }
@@ -79,6 +98,8 @@ try {
 } finally{
   if(browser)await browser.close().catch(()=>{});
   server.kill('SIGTERM');
+  server.stdout.destroy();
+  server.stderr.destroy();
 }
 if(failures.length){console.error(failures.join('\n'));process.exitCode=1;}
 else console.log('PASS: Aula media bounds at '+WIDTHS.length+' widths and '+PAGES.length+' page types.');
