@@ -25,3 +25,16 @@ Until this file exists in the repository, those components show typographic fall
 ## Future master artwork
 
 If the team supplies an official vector emblem, use it unchanged. For the full logo, update the typography from "CONCIENCIA" to "CONSCIENTE" while keeping the emblem untouched. Design a high-contrast version for dark backgrounds only as a separate, approved brand variant.
+
+
+## Aula symbols from the original emblem
+
+The four circular Aula symbols have been extracted pixel-for-pixel from the original high-resolution SOMA logo (not recreated with CSS, Iconoir or vector tracing). Connecting orbital lines outside each circle were masked out while preserving the original glyphs, ring strokes and attached dots.
+
+Public image assets:
+- `public/media/aulas/nicole-psicologia.png` — green psychology symbol
+- `public/media/aulas/jasper-musica.png` — terracotta/orange musical resonance symbol
+- `public/media/aulas/nico-caballos.png` — golden horse symbol
+- `public/media/aulas/yanina-cuerpo.png` — dark somatic/body symbol
+
+The reusable Astro component `src/components/SomaAulaSymbol.astro` maps the existing content `symbol` field to these assets. Use it for both the home-page Aula cards and each Aula detail page. Do not replace these with `SomaAulaIcon.astro` or a generic UI icon. The four symbols remain distinct from the whole four-Aula Núcleo emblem.

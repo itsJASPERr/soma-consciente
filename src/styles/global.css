@@ -234,3 +234,28 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .orbit-art__fallback-circle strong { font:normal clamp(1.8rem,4vw,3.3rem)/1.08 var(--font-display); }
 .nucleo-section .orbit-art__fallback-circle { background:var(--pine-dark); color:#eee9da; }
 .nucleo-section .orbit-art__fallback-circle span { color:#d4dbce; }
+
+
+/* Official Aula emblems cropped directly from the master SOMA artwork. */
+.aula-card--symbol-heart { --aula:#164a34; --aula-pale:#e5eee5; }
+.aula-card--symbol-sound { --aula:#a94c31; --aula-pale:#f8e9df; }
+.aula-card--symbol-horse { --aula:#96691f; --aula-pale:#f6ebd4; }
+.aula-card--symbol-body { --aula:#282224; --aula-pale:#eee9e5; }
+.aula-page-theme--symbol-heart { --page-accent:#164a34; --symbol-surface:#e5eee5; }
+.aula-page-theme--symbol-sound { --page-accent:#a94c31; --symbol-surface:#f8e9df; }
+.aula-page-theme--symbol-horse { --page-accent:#96691f; --symbol-surface:#f6ebd4; }
+.aula-page-theme--symbol-body { --page-accent:#282224; --symbol-surface:#eee9e5; }
+.aula-icon { width:145px; height:145px; display:block; color:initial; }
+.soma-aula-source { display:block; width:100%; height:100%; object-fit:contain; }
+.aula-feature-mark {
+  position:relative;
+  display:grid;
+  place-items:center;
+  background:var(--symbol-surface,#f1eadf);
+  border:1px solid #d9d4c8;
+  border-radius:50%;
+  width:min(100%,365px);
+  aspect-ratio:1;
+  margin-inline:auto;
+}
+.aula-feature-mark .soma-aula-source { width:85%; height:85%; filter:drop-shadow(0 10px 12px #25221b12); }
