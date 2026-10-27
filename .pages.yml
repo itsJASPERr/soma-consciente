@@ -117,6 +117,21 @@ content:
       - name: coverAlt
         label: Descripción accesible de la foto
         type: string
+      - name: coverPosition
+        label: Encuadre de la foto del Aula
+        type: select
+        options:
+          values:
+            - name: top
+              label: Muy arriba
+            - name: upper
+              label: Arriba
+            - name: center
+              label: Centro
+            - name: lower
+              label: Abajo
+            - name: bottom
+              label: Muy abajo
       - name: portraitImage
         label: Fotografía auténtica del facilitador/a
         type: image

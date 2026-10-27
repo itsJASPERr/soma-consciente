@@ -19,5 +19,6 @@
   "order": 3,
   "published": true,
   "coverImage": "https://images.unsplash.com/photo-1692700557219-ffc7615cabbc?auto=format&fit=crop&w=900&q=78",
-  "coverAlt": "Mano acariciando con suavidad la frente de un caballo bajo la luz del sol"
+  "coverAlt": "Mano acariciando con suavidad la frente de un caballo bajo la luz del sol",
+  "coverPosition": "center"
 }

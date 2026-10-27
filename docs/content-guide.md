@@ -102,3 +102,11 @@ Pages CMS ya está conectado, por lo que no hay que instalar otro editor. El cam
 Al escribir la descripción accesible (`alt`), describí lo que se ve, no hagas promesas médicas o espirituales. Cada imagen decorativa sirve para la atmósfera general y no debe presentarse como fotografía de una actividad real de SOMA hasta tener permiso y confirmación.
 
 Por rendimiento, usar preferentemente fotos WebP/JPG optimizadas de 1200–1600 px para grandes banners y 800–1000 px para tarjetas. Guardar archivos de imagen razonablemente livianos; alojar videos y audios grandes fuera de GitHub.
+
+## Encuadre y tamaño de las fotos de Aula
+
+En Pages CMS → **Las cuatro Aulas**, cada Aula tiene una **Foto de portada del Aula** y el campo **Encuadre de la foto del Aula**. Elegí entre Muy arriba, Arriba, Centro, Abajo o Muy abajo para desplazar el punto de interés sin editar el archivo. El encuadre se aplica tanto a la tarjeta del Aula como a su portada de detalle.
+
+Las tarjetas usan un contenedor visual de altura fija por rango de pantalla, con una imagen cubierta (`object-fit: cover`); por ello, no se estiran según las dimensiones originales de la fotografía. Los emblemas originales de SOMA quedan fuera del recorte, superpuestos en la unión entre imagen y contenido.
+
+Si la fotografía importante queda fuera del recorte, ajustá el encuadre en el CMS antes de recortar la foto original. Las fotos de Aula NO sustituyen a la foto auténtica del facilitador/a.

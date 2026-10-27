@@ -18,6 +18,7 @@ export const aulas = defineCollection({
     practices: z.array(z.string()),
     invitation: z.string(),
     coverImage: z.string().optional().default(''),
+    coverPosition: z.enum(['top','upper','center','lower','bottom']).optional().default('center'),
     coverAlt: z.string().optional().default(''),
     portraitImage: z.string().optional().default(''),
     portraitAlt: z.string().optional().default(''),
