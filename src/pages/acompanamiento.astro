@@ -1,0 +1,14 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { path } from '../lib/paths';
+---
+<SiteLayout title="Acompañamiento">
+  <section class="page-hero"><div class="container"><span class="eyebrow">Cada proceso tiene su ritmo</span><h1>Un camino posible, desde donde estés.</h1><p>Los espacios online son parte central de SOMA, no un complemento de los encuentros presenciales. Queremos acompañar aprendizajes y procesos que puedan integrarse en la vida real.</p></div></section>
+  <section class="section"><div class="container feature-grid">
+    <div class="feature-card"><span class="eyebrow">Disponible hoy</span><h3>Biblioteca gratuita</h3><p>Lecturas, reflexiones y ejercicios para explorar de forma autónoma, sin crear una cuenta.</p><a class="text-link" href={path('/biblioteca/')}>Explorar recursos ↗</a></div>
+    <div class="feature-card"><span class="eyebrow">En desarrollo</span><h3>Recorridos digitales</h3><p>Estamos diseñando materiales organizados por temáticas y Aulas, para acompañar prácticas sostenidas en el tiempo.</p></div>
+    <div class="feature-card"><span class="eyebrow">Próximamente</span><h3>Sesiones y acompañamientos</h3><p>Opciones individuales y grupales online, ofrecidas por integrantes según sus competencias y disponibilidad.</p></div>
+    <div class="feature-card"><span class="eyebrow">Próximamente</span><h3>Programas del Núcleo</h3><p>Propuestas de varias disciplinas, concebidas por el equipo y diseñadas para una integración cuidadosa.</p></div>
+  </div></section>
+  <section class="section--tight digital-band"><div class="container"><h2>No necesitás esperar para empezar.</h2><p class="section-intro">La Biblioteca está abierta. Las futuras modalidades de acompañamiento se publicarán con información concreta sobre alcance, responsables y condiciones de participación.</p><a class="btn" href={path('/biblioteca/pausa-de-presencia/')}>Probá una pausa de presencia ↗</a></div></section>
+</SiteLayout>

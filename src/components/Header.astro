@@ -1,0 +1,28 @@
+---
+import Brand from './Brand.astro';
+import { path } from '../lib/paths';
+const links = [
+  { label: 'Enfoque', href: '/enfoque/' },
+  { label: 'Aulas', href: '/aulas/' },
+  { label: 'El Núcleo', href: '/nucleo/' },
+  { label: 'Biblioteca', href: '/biblioteca/' },
+  { label: 'Acompañamiento', href: '/acompanamiento/' },
+  { label: 'Encuentros', href: '/encuentros/' },
+  { label: 'Equipo', href: '/equipo/' }
+];
+---
+<header class="site-header">
+  <div class="container header-inner">
+    <Brand />
+    <nav class="desktop-nav" aria-label="Navegación principal">
+      {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
+    </nav>
+    <a class="header-cta" href={path('/biblioteca/')}>Comenzá a explorar <span aria-hidden="true">↗</span></a>
+    <details class="mobile-nav">
+      <summary aria-label="Abrir menú de navegación">Menú <span aria-hidden="true">☰</span></summary>
+      <nav aria-label="Navegación móvil">
+        {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
+      </nav>
+    </details>
+  </div>
+</header>

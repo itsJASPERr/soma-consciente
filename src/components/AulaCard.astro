@@ -1,0 +1,24 @@
+---
+import type { Aula } from '../data/site';
+import { path } from '../lib/paths';
+const { aula, index = 0 } = Astro.props as { aula: Aula; index?: number };
+---
+<a class:list={['aula-card', 'aula-card--' + aula.theme]} href={path('/aulas/' + aula.slug + '/')}>
+  <div class="aula-card__art" aria-hidden="true">
+    <span class="art-circle art-circle--one"></span>
+    <span class="art-circle art-circle--two"></span>
+    <svg class="aula-icon" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      {aula.symbol === 'heart' && <><path d="M64 101C28 80 19 63 25 45c6-18 27-20 39-3 12-17 33-15 39 3 6 18-3 35-39 56Z"/><path d="M64 101V56M64 79c-10-3-17-9-20-17M64 73c9-4 15-11 18-18"/></>}
+      {aula.symbol === 'sound' && <><circle cx="64" cy="64" r="9"/><circle cx="64" cy="64" r="25" stroke-dasharray="100 25"/><circle cx="64" cy="64" r="41" stroke-dasharray="184 74"/><path d="M19 102c15-5 29-3 41 5"/></>}
+      {aula.symbol === 'horse' && <><path d="M38 101V78l-8-14 17-18 8-20 24 18 13 14-7 19-16 4-8 20M47 45l-15-9-5 18 13 9M63 62h1M41 101h32"/></>}
+      {aula.symbol === 'body' && <><circle cx="64" cy="31" r="13"/><path d="M35 107c-2-23 0-43 15-50 8-3 20-3 28 0 15 7 17 27 15 50M28 72l-12 24m84-24 12 24M45 80c12 10 26 10 38 0"/></>}
+    </svg>
+    <span class="aula-card__number">0{index + 1}</span>
+  </div>
+  <div class="aula-card__content">
+    <span class="eyebrow eyebrow--light">{aula.guide}</span>
+    <h3>{aula.name}</h3>
+    <p>{aula.summary}</p>
+    <span class="text-link text-link--light">Entrar al Aula <span aria-hidden="true">↗</span></span>
+  </div>
+</a>
