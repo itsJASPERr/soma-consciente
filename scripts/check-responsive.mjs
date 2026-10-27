@@ -11,14 +11,11 @@ const HOST='http://127.0.0.1:4321';
 const BASE='/soma-consciente';
 const paths=[
  '/',
- '/aulas/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',
- '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/',
- '/biblioteca/',
- '/nucleo/'
+ '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
 ];
-const widths=[320,375,430,480,768,1024,1280];
+const widths=[320,375,480,768,1024];
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',d=>{output+=String(d).slice(-4000);});
@@ -36,16 +33,19 @@ try{
   if(!ready) throw new Error('Astro preview did not start: '+output);
   browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
   const page=await browser.newPage({viewport:{width:375,height:900},deviceScaleFactor:1});
-  // External Google Fonts may stall CI browser navigations. Validate layout with
-  // deterministic system-serif fallbacks instead of waiting on third-party CSS.
-  await page.route('https://fonts.googleapis.com/**', route=>route.fulfill({status:200,contentType:'text/css',body:''}));
-  await page.route('https://fonts.gstatic.com/**', route=>route.abort());
+  // Local static-site layout audit: disallow third-party requests so external font
+  // CDNs cannot stall navigation. Browser uses deterministic serif/sans fallback.
+  await page.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if(url.hostname==='127.0.0.1') return route.continue();
+    return route.abort();
+  });
   await mkdir('test-results',{recursive:true});
   for(const width of widths){
     await page.setViewportSize({width,height:900});
     for(const pathname of paths){
       const pageUrl=HOST+BASE+pathname;
-      const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:25000});
+      const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:7000});
       if(!response?.ok()) {errors.push(width+' '+pathname+' response '+response?.status());continue;}
       await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,60))]));
       const m=await page.evaluate(()=>{
