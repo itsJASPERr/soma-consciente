@@ -19,6 +19,8 @@ export const aulas = defineCollection({
     invitation: z.string(),
     coverImage: z.string().optional().default(''),
     coverAlt: z.string().optional().default(''),
+    portraitImage: z.string().optional().default(''),
+    portraitAlt: z.string().optional().default(''),
     order: z.number().int().nonnegative(),
     published: z.boolean()
   })

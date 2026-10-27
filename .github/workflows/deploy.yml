@@ -21,6 +21,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Validate learning content
         run: npm run content:check
+      - name: Diagnose editorial photo links
+        continue-on-error: true
+        run: node scripts/check-media-links.mjs
       - name: Build static site
         run: npm run build
       - name: Upload Pages artifact

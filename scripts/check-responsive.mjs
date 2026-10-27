@@ -119,11 +119,17 @@ try{
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {
   if(browser) await browser.close().catch(()=>{});
-  server.kill('SIGTERM');
+  // Kill the npm wrapper AND close its inherited stdio pipes. Otherwise
+  // the CI job can remain running after Chromium has completed.
+  server.kill('SIGKILL');
+  server.stdout?.destroy();
+  server.stderr?.destroy();
 }
 if(errors.length){
   console.error('RESPONSIVE AUDIT FAILED ('+errors.length+' issues):\n'+errors.join('\n'));
   process.exitCode=1;
+  process.exit(1);
 }else{
   console.log('Responsive audit PASSED: '+(widths.length*paths.length)+' page/viewport combinations.');
+  process.exit(0);
 }
