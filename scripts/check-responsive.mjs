@@ -45,7 +45,7 @@ try{
     await page.setViewportSize({width,height:900});
     for(const pathname of paths){
       const pageUrl=HOST+BASE+pathname;
-      const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:7000});
+      const response=await page.goto(pageUrl,{waitUntil:'load',timeout:12000});
       if(!response?.ok()) {errors.push(width+' '+pathname+' response '+response?.status());continue;}
       await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,60))]));
       const m=await page.evaluate(()=>{
@@ -104,7 +104,7 @@ try{
       if(width===375 && pathname==='/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/') await page.screenshot({path:'test-results/lesson-375.png',fullPage:true});
     }
     if(width<=1150){
-      await page.goto(HOST+BASE+'/',{waitUntil:'domcontentloaded'});
+      await page.goto(HOST+BASE+'/',{waitUntil:'load'});
       await page.locator('.mobile-nav summary').click();
       const nav=page.locator('.mobile-nav nav');
       if(!await nav.isVisible()) errors.push(width+' hamburger menu does not open');
