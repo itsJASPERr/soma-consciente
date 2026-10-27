@@ -1,0 +1,18 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { path } from '../lib/paths';
+---
+<SiteLayout title="Nuestro enfoque">
+  <section class="page-hero"><div class="container"><span class="eyebrow">Nuestra mirada</span><h1>Conocer, sentir, integrar.</h1><p>Cuatro caminos que dialogan entre sí, con una misma intención: acompañar a cada persona con presencia, cuidado y respeto por su singularidad.</p></div></section>
+  <section class="section"><div class="container intro-grid">
+    <div class="prose"><h2>No hay un único camino.</h2><p>SOMA nace del encuentro entre psicología, prácticas corporales, música, integración de experiencias y vínculo con caballos y naturaleza. Cada lenguaje aporta algo distinto; ninguno pretende explicarlo todo.</p><p>Buscamos abrir espacios donde las personas puedan explorar preguntas, reconocer recursos propios y elegir con más consciencia cómo vivir y vincularse.</p></div>
+    <blockquote>“La persona permanece en el centro. Las prácticas están al servicio de su proceso.”</blockquote>
+  </div></section>
+  <section class="section--tight"><div class="container"><div class="feature-grid">
+    <div class="feature-card"><span class="eyebrow">01</span><h3>Presencia y escucha</h3><p>Detenernos, prestar atención y reconocer lo que está vivo en cada momento.</p></div>
+    <div class="feature-card"><span class="eyebrow">02</span><h3>Autonomía y cuidado</h3><p>Acompañar sin imponer interpretaciones, resultados ni tiempos ajenos.</p></div>
+    <div class="feature-card"><span class="eyebrow">03</span><h3>Integración cotidiana</h3><p>Conectar experiencias significativas con vínculos, decisiones y acciones sostenibles.</p></div>
+    <div class="feature-card"><span class="eyebrow">04</span><h3>Diálogo entre saberes</h3><p>Reconocer la procedencia y los límites de cada práctica y disciplina.</p></div>
+  </div></div></section>
+  <section class="section"><div class="container"><h2>Explorá por dónde comenzar.</h2><div class="btn-row"><a class="btn" href={path('/aulas/')}>Descubrir las Aulas ↗</a><a class="btn btn--outline" href={path('/biblioteca/')}>Ir a la Biblioteca ↗</a></div></div></section>
+</SiteLayout>

@@ -1,0 +1,17 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import type { Aula } from '../../data/site';
+import { aulas } from '../../data/site';
+import { path } from '../../lib/paths';
+import OrbitArt from '../../components/OrbitArt.astro';
+export function getStaticPaths() { return aulas.map((aula) => ({ params: { slug: aula.slug }, props: { aula } })); }
+const { aula } = Astro.props as { aula: Aula };
+---
+<SiteLayout title={aula.name} description={aula.description}>
+  <div class:list={['aula-page-theme','aula-page-theme--' + aula.theme]}>
+    <section class="page-hero"><div class="container"><div class="breadcrumbs"><a href={path('/aulas/')}>Las Aulas</a><span>/</span><span>{aula.name}</span></div><span class="eyebrow" style="margin-top:25px">Un aula con voz propia</span><h1>{aula.name}</h1><p>{aula.description}</p><div class="detail-meta">Con {aula.guide} · {aula.qualification}</div></div></section>
+    <section class="section"><div class="container aula-profile"><div><span class="eyebrow">Una mirada que acompaña</span><h2>{aula.guide}</h2><p class="section-intro">{aula.approach}</p><p class="quote-block">“{aula.invitation}”</p></div><OrbitArt/></div></section>
+    <section class="section--tight"><div class="container"><div class="section-head"><div><span class="eyebrow">Explorá este espacio</span><h2>Temas y prácticas</h2></div></div><div class="feature-grid">{aula.practices.map((practice,index)=><div class="feature-card"><span class="eyebrow">0{index+1}</span><h3>{practice}</h3><p>Una puerta de exploración que se desarrolla desde la experiencia y perspectiva de {aula.guide.split(' ')[0]}.</p></div>)}</div></div></section>
+    <section class="section"><div class="container content-panel"><span class="eyebrow">Para comenzar hoy</span><h2>Explorá también nuestra Biblioteca abierta.</h2><p class="section-intro">Mientras desarrollamos los contenidos específicos de esta Aula, podés acceder a prácticas y reflexiones gratuitas disponibles para toda la comunidad.</p><div class="btn-row"><a class="btn" href={path('/biblioteca/')}>Ir a la Biblioteca ↗</a><a class="btn btn--outline" href={path('/nucleo/')}>Conocer el Núcleo ↗</a></div></div></section>
+  </div>
+</SiteLayout>

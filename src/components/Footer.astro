@@ -1,0 +1,23 @@
+---
+import Brand from './Brand.astro';
+import { path } from '../lib/paths';
+---
+<footer class="site-footer">
+  <div class="container footer-main">
+    <div class="footer-brand">
+      <Brand compact />
+      <p>Cuatro caminos, un mismo núcleo.<br/>Un espacio para aprender, integrar y encontrarnos.</p>
+    </div>
+    <nav class="footer-links" aria-label="Enlaces del pie de página">
+      <a href={path('/aulas/')}>Las cuatro Aulas</a>
+      <a href={path('/nucleo/')}>El Núcleo</a>
+      <a href={path('/biblioteca/')}>Biblioteca gratuita</a>
+      <a href={path('/encuentros/')}>Encuentros</a>
+    </nav>
+    <div class="footer-note">
+      <span>Con presencia, respeto y curiosidad.</span>
+      <p>Los contenidos educativos y de bienestar no sustituyen atención médica o psicológica individual cuando es necesaria.</p>
+    </div>
+  </div>
+  <div class="container footer-bottom"><small>© {new Date().getFullYear()} SOMA CONSCIENTE</small><small>Un camino de integración, presencia y consciencia</small></div>
+</footer>

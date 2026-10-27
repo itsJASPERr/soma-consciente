@@ -1,0 +1,11 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import AulaCard from '../../components/AulaCard.astro';
+import { aulas } from '../../data/site';
+import { path } from '../../lib/paths';
+---
+<SiteLayout title="Las cuatro Aulas">
+  <section class="page-hero"><div class="container"><span class="eyebrow">Cuatro voces · Cuatro caminos</span><h1>Entrá por la puerta que hoy resuene con vos.</h1><p>Cada Aula contiene la mirada, las herramientas y las experiencias de una persona del equipo. Podés explorar una, varias o todas, a tu propio ritmo.</p></div></section>
+  <section class="section"><div class="container"><div class="aula-grid">{aulas.map((aula,index)=><AulaCard aula={aula} index={index}/>)}</div></div></section>
+  <section class="section--tight digital-band"><div class="container"><span class="eyebrow">Lo que nos une</span><h2>Los caminos se encuentran en el Núcleo.</h2><p class="section-intro">Las Aulas conservan su identidad; el Núcleo abre la posibilidad de crear experiencias y propuestas compartidas.</p><a class="btn" href={path('/nucleo/')}>Conocer el Núcleo ↗</a></div></section>
+</SiteLayout>
