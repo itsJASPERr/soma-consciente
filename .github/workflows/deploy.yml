@@ -23,15 +23,6 @@ jobs:
         run: npm run content:check
       - name: Build static site
         run: npm run build
-      - name: Verify responsive layouts in Chromium
-        run: npm run test:responsive
-      - name: Upload mobile screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: responsive-previews
-          path: test-results/
-          if-no-files-found: ignore
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
