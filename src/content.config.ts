@@ -17,6 +17,11 @@ export const aulas = defineCollection({
     approach: z.string().min(1),
     practices: z.array(z.string()),
     invitation: z.string(),
+    // Personal stories and qualifications are optional for the other Aulas.
+    credentials: z.array(z.string()).optional().default([]),
+    journeyTitle: z.string().optional().default(''),
+    journey: z.string().optional().default(''),
+    contribution: z.string().optional().default(''),
     coverImage: z.string().optional().default(''),
     coverPosition: z.enum(['top','upper','center','lower','bottom']).optional().default('center'),
     coverAlt: z.string().optional().default(''),

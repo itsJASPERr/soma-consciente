@@ -1,0 +1,21 @@
+.aula-biography {
+  background: linear-gradient(150deg,#f9f3e8,#efeade);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.aula-biography__heading {max-width:850px;margin-bottom:32px}
+.aula-biography__heading h2 {margin:10px 0 0;overflow-wrap:break-word}
+.aula-biography__grid {display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.9fr);gap:clamp(25px,6vw,85px);align-items:start}
+.aula-biography__narrative {min-width:0}
+.aula-biography__narrative .lesson-richtext p {margin-bottom:18px;color:#515e54}
+.aula-biography__aside {min-width:0;border-left:1px solid #d9cfc0;padding-left:clamp(20px,3vw,38px);display:grid;gap:30px}
+.aula-biography__aside h3 {font-size:1.55rem;margin:0 0 13px}
+.aula-biography__credentials ul,.team-credentials{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.aula-biography__credentials li {border-left:2px solid var(--learn-accent,var(--pine));padding-left:14px;line-height:1.5}
+.team-credentials {font-size:.85rem;color:var(--muted);margin:0 0 18px;gap:6px}
+.team-credentials li {padding-left:13px;position:relative}
+.team-credentials li::before{content:'·';position:absolute;left:0;color:var(--pine)}
+@media(max-width:800px) {
+ .aula-biography__grid {grid-template-columns:minmax(0,1fr);gap:22px}
+ .aula-biography__aside {border-left:0;border-top:1px solid #d9cfc0;padding:26px 0 0}
+}

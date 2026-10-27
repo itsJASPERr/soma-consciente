@@ -111,6 +111,19 @@ content:
       - name: invitation
         label: Frase central
         type: text
+      - name: credentials
+        label: Formación y especializaciones (con año)
+        type: string
+        list: true
+      - name: journeyTitle
+        label: Título del recorrido personal
+        type: string
+      - name: journey
+        label: Mi recorrido — historia personal y profesional
+        type: rich-text
+      - name: contribution
+        label: Mi aporte a SOMA CONSCIENTE
+        type: rich-text
       - name: coverImage
         label: Foto de portada del Aula
         type: image

@@ -9,6 +9,7 @@ import { mediaUrl } from '../../lib/media';
 import { coverObjectPosition } from '../../lib/cover-position';
 import CourseCard from '../../components/CourseCard.astro';
 import { Icon } from 'astro-icon/components';
+import { renderLearningMarkdown } from '../../lib/markdown';
 export async function getStaticPaths() {
   const aulas = await loadAulas();
   return aulas.map(aula => ({params:{slug:aula.slug},props:{aula}}));
@@ -48,6 +49,29 @@ const lessons = await loadLessons();
       <div>{mediaUrl(aula.portraitImage) && <figure class="aula-authentic-portrait"><img src={mediaUrl(aula.portraitImage) || ''} alt={aula.portraitAlt || 'Retrato de '+aula.guide} loading="lazy" width="840" height="1050" decoding="async"/></figure>}<span class="eyebrow">La persona detrás del Aula</span><h2>{aula.guide}</h2><p class="detail-meta">{aula.qualification}</p><p class="section-intro">{aula.approach}</p><blockquote class="aula-about__quote">“{aula.invitation}”</blockquote></div>
       <div><h3>Lo que exploramos</h3><ul class="aula-focus-list">{aula.practices.map(p=><li><Icon name="iconoir:check-circle" size={18}/>{p}</li>)}</ul><a class="text-link" href={path('/nucleo/')}>Cómo se integra en el Núcleo <Icon name="iconoir:arrow-up-right" size={18}/></a></div>
     </div></section>
+    {(aula.journey || aula.contribution || aula.credentials.length>0) && <section class="section--tight aula-biography" id="mi-recorrido">
+      <div class="container">
+        <div class="aula-biography__heading">
+          <span class="eyebrow">La historia detrás de la práctica</span>
+          <h2>{aula.journeyTitle || 'Mi recorrido'}</h2>
+        </div>
+        <div class="aula-biography__grid">
+          <div class="aula-biography__narrative">
+            {aula.journey && <div class="lesson-richtext" set:html={renderLearningMarkdown(aula.journey)} />}
+          </div>
+          <aside class="aula-biography__aside">
+            {aula.credentials.length>0 && <div class="aula-biography__credentials">
+              <h3>Formación y especializaciones</h3>
+              <ul>{aula.credentials.map(credential=><li>{credential}</li>)}</ul>
+            </div>}
+            {aula.contribution && <div>
+              <h3>Mi aporte a SOMA</h3>
+              <div class="lesson-richtext" set:html={renderLearningMarkdown(aula.contribution)} />
+            </div>}
+          </aside>
+        </div>
+      </div>
+    </section>}
     <section class="section"><div class="container learning-final-cta"><span class="eyebrow">Sin registro · Contenido abierto</span><h2>Un primer paso también puede ser pequeño.</h2><p>Encontrá meditaciones, ejercicios y textos disponibles gratuitamente en la Biblioteca de SOMA.</p><a class="btn" href={path('/biblioteca/')}>Explorar recursos <Icon name="iconoir:arrow-up-right" size={18}/></a></div></section>
   </div>
 </SiteLayout>

@@ -110,3 +110,16 @@ En Pages CMS → **Las cuatro Aulas**, cada Aula tiene una **Foto de portada del
 Las tarjetas usan un contenedor visual de altura fija por rango de pantalla, con una imagen cubierta (`object-fit: cover`); por ello, no se estiran según las dimensiones originales de la fotografía. Los emblemas originales de SOMA quedan fuera del recorte, superpuestos en la unión entre imagen y contenido.
 
 Si la fotografía importante queda fuera del recorte, ajustá el encuadre en el CMS antes de recortar la foto original. Las fotos de Aula NO sustituyen a la foto auténtica del facilitador/a.
+
+## Aula de Yanina · 27/10/2026
+
+La información de Yanina se integró a `src/content/aulas/yanina.json` con sus credenciales, recorrido personal completo y su aporte a SOMA. Los tres campos se editan desde Pages CMS → **Las cuatro Aulas** → Yanina: `Formación y especializaciones`, `Mi recorrido`, `Mi aporte a SOMA`.
+
+Los contenidos de aprendizaje están en las colecciones CMS existentes:
+
+- **Curso 1 — Bienestar integral: cuerpo, alimentación, descanso y conciencia.** Introducción publicada y cinco módulos descritos por Yanina, todavía en estado `planned` porque aún no se han aportado lecciones desarrolladas para ellos.
+- **Curso 2 — El proceso creativo: crear desde el amor.** Texto íntegro de Yanina organizado en ocho exploraciones abiertas: fuente, gratitud, estado interno, cuerpo, acción, caballos, práctica y síntesis. Los títulos de etapa son editoriales y pueden modificarse desde Pages CMS.
+
+La publicación de los textos es educativa, no una promesa de resultados sanitarios, psicológicos o espirituales. La descripción del vínculo con caballos es una reflexión aportada por Yanina y no sustituye el enfoque propio del Aula de Nico Pacha.
+
+Se normalizó únicamente el nombre público del proyecto a SOMA CONSCIENTE. Para añadir nuevas lecciones en cualquiera de los módulos del Curso 1, usar **Lecciones y contenido** y vincularlas a la sección correspondiente.
