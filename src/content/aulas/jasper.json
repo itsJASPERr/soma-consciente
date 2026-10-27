@@ -19,5 +19,7 @@
   "order": 2,
   "published": true,
   "coverImage": "https://images.unsplash.com/photo-1783255334111-b437fdc95bd2?auto=format&fit=crop&w=900&q=78",
-  "coverAlt": "Músico tocando un tambor de mano durante una interpretación"
+  "coverAlt": "Músico tocando un tambor de mano durante una interpretación",
+  "portraitImage": "",
+  "portraitAlt": "Retrato de Jasper Meyer"
 }

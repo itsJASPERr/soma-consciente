@@ -45,7 +45,7 @@ try{
     await page.setViewportSize({width,height:900});
     for(const pathname of paths){
       const pageUrl=HOST+BASE+pathname;
-      const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:7000});
+      const response=await page.goto(pageUrl,{waitUntil:'load',timeout:12000});
       if(!response?.ok()) {errors.push(width+' '+pathname+' response '+response?.status());continue;}
       await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,60))]));
       const m=await page.evaluate(()=>{
@@ -104,7 +104,7 @@ try{
       if(width===375 && pathname==='/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/') await page.screenshot({path:'test-results/lesson-375.png',fullPage:true});
     }
     if(width<=1150){
-      await page.goto(HOST+BASE+'/',{waitUntil:'domcontentloaded'});
+      await page.goto(HOST+BASE+'/',{waitUntil:'load'});
       await page.locator('.mobile-nav summary').click();
       const nav=page.locator('.mobile-nav nav');
       if(!await nav.isVisible()) errors.push(width+' hamburger menu does not open');
@@ -119,11 +119,17 @@ try{
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {
   if(browser) await browser.close().catch(()=>{});
-  server.kill('SIGTERM');
+  // Kill the npm wrapper AND close its inherited stdio pipes. Otherwise
+  // the CI job can remain running after Chromium has completed.
+  server.kill('SIGKILL');
+  server.stdout?.destroy();
+  server.stderr?.destroy();
 }
 if(errors.length){
   console.error('RESPONSIVE AUDIT FAILED ('+errors.length+' issues):\n'+errors.join('\n'));
   process.exitCode=1;
+  process.exit(1);
 }else{
   console.log('Responsive audit PASSED: '+(widths.length*paths.length)+' page/viewport combinations.');
+  process.exit(0);
 }

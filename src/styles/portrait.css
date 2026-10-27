@@ -1,0 +1,9 @@
+
+/* A facilitator portrait is documentary content, distinct from illustrative card photos. */
+.aula-authentic-portrait {float:right;width:min(38%,225px);margin:0 0 17px 26px;}
+.aula-authentic-portrait img {display:block;max-width:100%;width:100%;height:auto;max-height:260px;object-fit:contain;object-position:center top;border-radius:15px;background:#e9ded2;}
+.team-authentic-portrait {display:block;width:100%;height:auto;max-height:290px;object-fit:contain;object-position:center top;border-radius:13px;background:#e9ded2;margin-bottom:18px;}
+@media(max-width:650px) {
+  .aula-authentic-portrait {float:none;width:min(100%,260px);margin:0 auto 25px;}
+  .aula-authentic-portrait img{max-height:330px;}
+}

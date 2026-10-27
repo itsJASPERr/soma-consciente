@@ -157,3 +157,9 @@ h1, h2, h3, p { overflow-wrap: break-word; }
 @media (hover: none) {
   .aula-card:hover, .resource-card:hover, .learning-course-card:hover { transform: none; }
 }
+
+/* The media layout is constrained per section, never by hiding horizontal overflow on the whole document. */
+@media(max-width:1150px){
+  .site-header .header-inner {justify-content:space-between;}
+  .site-header .mobile-nav {margin-left:auto;}
+}
