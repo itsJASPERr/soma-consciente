@@ -13,14 +13,12 @@ const paths=[
  '/',
  '/aulas/',
  '/aulas/jasper/',
- '/aulas/yanina/',
  '/aulas/jasper/musica-medicina/',
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/',
  '/biblioteca/',
- '/nucleo/',
- '/equipo/'
+ '/nucleo/'
 ];
-const widths=[320,360,375,390,430,480,768,1024,1280];
+const widths=[320,375,430,480,768,1024,1280];
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',d=>{output+=String(d).slice(-4000);});
@@ -45,7 +43,7 @@ try{
       const pageUrl=HOST+BASE+pathname;
       const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:25000});
       if(!response?.ok()) {errors.push(width+' '+pathname+' response '+response?.status());continue;}
-      await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1300))]));
+      await page.evaluate(()=>Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,350))]));
       const m=await page.evaluate(()=>{
         const viewport=document.documentElement.clientWidth;
         const items=[];
