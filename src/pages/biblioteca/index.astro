@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { resources } from '../../data/site';
+import { loadResources } from '../../lib/content';
+const resources = await loadResources();
 import { path } from '../../lib/paths';
 const symbols=['◎','✎','✧'];
 ---

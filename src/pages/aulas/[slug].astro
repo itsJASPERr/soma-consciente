@@ -1,10 +1,10 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import type { Aula } from '../../data/site';
-import { aulas } from '../../data/site';
+import type { Aula } from '../../lib/content';
+import { loadAulas } from '../../lib/content';
 import { path } from '../../lib/paths';
 import OrbitArt from '../../components/OrbitArt.astro';
-export function getStaticPaths() { return aulas.map((aula) => ({ params: { slug: aula.slug }, props: { aula } })); }
+export async function getStaticPaths() { const aulas = await loadAulas(); return aulas.map((aula) => ({ params: { slug: aula.slug }, props: { aula } })); }
 const { aula } = Astro.props as { aula: Aula };
 ---
 <SiteLayout title={aula.name} description={aula.description}>

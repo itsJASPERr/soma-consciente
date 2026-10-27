@@ -2,7 +2,9 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
 import AulaCard from '../components/AulaCard.astro';
-import { aulas, resources } from '../data/site';
+import { loadAulas, loadResources } from '../lib/content';
+const aulas = await loadAulas();
+const resources = await loadResources();
 import { path } from '../lib/paths';
 const symbols = ['◎', '✎', '✧'];
 ---

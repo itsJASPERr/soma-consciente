@@ -1,7 +1,8 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import AulaCard from '../../components/AulaCard.astro';
-import { aulas } from '../../data/site';
+import { loadAulas } from '../../lib/content';
+const aulas = await loadAulas();
 import { path } from '../../lib/paths';
 ---
 <SiteLayout title="Las cuatro Aulas">

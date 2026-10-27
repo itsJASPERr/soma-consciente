@@ -195,3 +195,20 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 @media(max-width:880px){.container{width:min(100% - 38px,1190px)}.desktop-nav{display:none}.mobile-nav{display:block}.hero{padding-top:38px}.hero-inner{grid-template-columns:1fr}.hero-copy{padding:0}.hero-visual{width:min(100%,570px);margin:auto}.hero-tags{margin-top:30px}.intro-grid,.digital-grid,.encounter-grid,.aula-profile{grid-template-columns:1fr;gap:30px}.intro-grid blockquote{padding:24px}.aula-grid{grid-template-columns:repeat(2,1fr)}.nucleo-grid{grid-template-columns:1fr 1fr}.resource-grid{grid-template-columns:1fr 1fr}.modes-grid{grid-template-columns:repeat(2,1fr)}.mode:nth-child(2){border-right:0}.mode:nth-child(-n+2){border-bottom:1px solid var(--line)}.footer-main{grid-template-columns:1fr 1fr}.footer-note{grid-column:1/-1}.article-layout{grid-template-columns:1fr}.article-aside{position:static}}
 @media(max-width:600px){.container{width:calc(100% - 32px)}.section{padding:65px 0}.header-inner{min-height:78px}.brand__symbol{width:48px;height:48px}.brand__type strong{font-size:1.6rem}.brand__type small{font-size:.53rem}.hero h1{font-size:clamp(3.4rem,13.5vw,5.3rem)}.hero-visual-note{right:10px}.hero-tags{gap:12px}.values-list{grid-template-columns:repeat(3,1fr);row-gap:18px}.values-list span+span{border-left:0}.values-list span:nth-child(4),.values-list span:nth-child(5){grid-column:span 1}.section-head{align-items:start;flex-direction:column}.aula-grid,.resource-grid,.feature-grid,.nucleo-grid{grid-template-columns:1fr}.aula-card__art{height:160px}.aula-card__content{min-height:210px}.nucleo-points{grid-template-columns:1fr}.footer-main{grid-template-columns:1fr;gap:30px}.footer-note{grid-column:auto}.footer-bottom{flex-direction:column}.page-hero{padding:58px 0}.page-hero h1{font-size:clamp(3rem,13vw,4.6rem)}.article-section h2{font-size:1.8rem}.content-panel{padding:22px}.modes-grid{grid-template-columns:1fr}.mode{border-right:0;border-bottom:1px solid var(--line)}.mode:last-child{border-bottom:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+
+/* SOMA's four emblem symbols are custom brand artwork; Iconoir handles UI affordances. */
+.brand__symbol { width:64px; height:60px; }
+.brand--compact .brand__symbol { width:58px; height:54px; }
+.aula-icon { display:block; width:110px; height:110px; color:var(--aula); }
+.aula-icon svg { display:block; width:100%; height:100%; }
+.orbit-art .soma-mark { max-width:100%; }
+.text-link svg,.btn svg,.header-cta svg { display:inline-block; flex:0 0 auto; vertical-align:middle; }
+.header-cta { display:inline-flex; align-items:center; gap:8px; }
+.mobile-nav summary { display:flex; align-items:center; gap:10px; }
+.mobile-nav summary svg { stroke-width:1.7; }
+@media (max-width:600px) {
+  .brand__symbol { width:54px; height:50px; }
+  .brand--compact .brand__symbol { width:54px; height:50px; }
+  .hero-visual .orbit-art { width:100%; }
+}
