@@ -1,0 +1,25 @@
+---
+import type { Aula } from '../lib/content';
+import type { Curso } from '../lib/learning';
+import { courseHref } from '../lib/learning';
+import { Icon } from 'astro-icon/components';
+import SomaAulaSymbol from './SomaAulaSymbol.astro';
+const { aula, course, available, planned } = Astro.props as { aula: Aula; course: Curso; available: number; planned: number };
+---
+<a class:list={['learning-course-card', 'learning-course-card--'+aula.theme]} href={courseHref(aula.slug, course)}>
+  <div class="learning-course-card__art" aria-hidden="true">
+    <span class="learning-course-card__halo"></span>
+    <span class="learning-course-card__symbol"><SomaAulaSymbol symbol={aula.symbol}/></span>
+  </div>
+  <div class="learning-course-card__copy">
+    <span class="eyebrow">Recorrido del Aula</span>
+    <h3>{course.title}</h3>
+    <div class="learning-course-card__subtitle">{course.subtitle}</div>
+    <p>{course.summary}</p>
+    <div class="learning-course-card__metadata">
+      <span><Icon name="iconoir:book" size={17}/> {available} {available===1 ? 'lección disponible' : 'lecciones disponibles'}</span>
+      {planned>0 && <span><Icon name="iconoir:clock" size={17}/> Más contenido en preparación</span>}
+    </div>
+    <span class="learning-course-card__link">Entrar al recorrido <Icon name="iconoir:arrow-up-right" size={19}/></span>
+  </div>
+</a>

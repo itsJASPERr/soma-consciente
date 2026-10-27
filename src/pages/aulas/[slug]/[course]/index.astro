@@ -1,0 +1,53 @@
+---
+import SiteLayout from '../../../../layouts/SiteLayout.astro';
+import type { Aula } from '../../../../lib/content';
+import { loadAulas } from '../../../../lib/content';
+import type { Curso } from '../../../../lib/learning';
+import { loadCourses, loadSections, loadLessons, courseTree, lessonHref } from '../../../../lib/learning';
+import { path } from '../../../../lib/paths';
+import { renderLearningMarkdown } from '../../../../lib/markdown';
+import SomaAulaSymbol from '../../../../components/SomaAulaSymbol.astro';
+import CourseOutline from '../../../../components/CourseOutline.astro';
+import { Icon } from 'astro-icon/components';
+export async function getStaticPaths() {
+  const [aulas,courses]=await Promise.all([loadAulas(),loadCourses()]);
+  return courses.flatMap(course=>{
+    const aula=aulas.find(a=>a.slug===course.aula);
+    return aula ? [{params:{slug:aula.slug,course:course.slug},props:{aula,course}}] : [];
+  });
+}
+const {aula,course}=Astro.props as {aula:Aula;course:Curso};
+const tree=courseTree(course,await loadSections(),await loadLessons());
+const first=tree.sections.flatMap(group=>group.lessons.filter(l=>l.status==='published').map(l=>({section:group.section,lesson:l})))[0];
+---
+<SiteLayout title={course.title+' · '+aula.shortName} description={course.summary}>
+<div class:list={['aula-page-theme','aula-page-theme--symbol-'+aula.symbol]}>
+  <section class="course-hero"><div class="container course-hero__grid">
+    <div class="course-hero__copy">
+      <div class="breadcrumbs"><a href={path('/aulas/')}>Las Aulas</a><span>/</span><a href={path('/aulas/'+aula.slug+'/')}>{aula.shortName}</a><span>/</span><span>{course.title}</span></div>
+      <div class="eyebrow">Un recorrido con {aula.guide}</div>
+      <h1>{course.title}</h1><p class="course-hero__subtitle">{course.subtitle}</p>
+      <p>{course.summary}</p>
+      <div class="course-hero__steps">{course.focus.map(f=><span>{f}</span>)}</div>
+      <div class="btn-row">
+        {first ? <a class="btn btn--rust" href={lessonHref(aula.slug,course,first.section,first.lesson)}>Comenzar el recorrido <Icon name="iconoir:arrow-right" size={18}/></a>
+        : <a class="btn btn--outline" href="#etapas">Conocer las etapas <Icon name="iconoir:arrow-down" size={18}/></a>}
+        <a class="btn btn--outline" href="#etapas">Ver el contenido</a>
+      </div>
+      <p class="course-hero__availability"><Icon name="iconoir:open-book" size={18}/> {tree.available.length} {tree.available.length===1?'lección abierta':'lecciones abiertas'} · {tree.sections.length} etapas · a tu ritmo</p>
+    </div>
+    <div class="course-hero__visual" aria-hidden="true"><div class="course-hero__visual-mark"><SomaAulaSymbol symbol={aula.symbol} eager/></div><span class="course-hero__visual-script">Escuchar. Sentir. Habitar.</span></div>
+  </div></section>
+  <section class="section--tight course-about"><div class="container course-about__grid">
+    <div><span class="eyebrow">Una invitación a explorar</span><h2>El sentido de este recorrido</h2><div class="lesson-richtext" set:html={renderLearningMarkdown(course.description)}/></div>
+    <div class="course-about__aside"><span class="eyebrow">Tu experiencia, a tu ritmo</span><h3>No hace falta hacerlo perfecto.</h3><p>Podés avanzar por las lecciones disponibles, detenerte o volver cuando quieras. Algunas etapas todavía se están preparando.</p><span class="course-about__badge"><Icon name="iconoir:check-circle" size={17}/> Sin registro para el contenido abierto</span></div>
+  </div></section>
+  <section class="section" id="etapas"><div class="container course-program">
+    <div class="section-head"><div><span class="eyebrow">Un mapa, no una obligación</span><h2>Las etapas del recorrido</h2><p>Las lecciones abiertas se pueden explorar ahora. Las próximas están identificadas como contenido en preparación.</p></div></div>
+    <div class="course-program__layout">
+      <div class="course-program__main"><CourseOutline tree={tree} course={course} aulaSlug={aula.slug}/></div>
+      <aside class="course-program__aside"><div class="content-panel"><SomaAulaSymbol symbol={aula.symbol}/><h3>Desde tu propia experiencia.</h3><p>Este espacio no se trata de dominar una técnica. Es una invitación a escuchar, expresar y cultivar una relación más consciente con la música.</p><a class="text-link" href={path('/aulas/'+aula.slug+'/')}>Volver al Aula <Icon name="iconoir:arrow-up-right" size={18}/></a></div></aside>
+    </div>
+  </div></section>
+</div>
+</SiteLayout>

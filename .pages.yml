@@ -141,3 +141,258 @@ content:
       - name: published
         label: Publicado
         type: boolean
+
+
+  - name: cursos
+    label: Cursos / Recorridos
+    type: collection
+    path: src/content/cursos
+    format: json
+    filename: "{fields.key}.json"
+    operations:
+      rename: false
+    view:
+      fields: [title, aula, published, order]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: key
+        label: ID estable (único)
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+        description: "No cambiar después de publicar; lo usan las secciones."
+      - name: slug
+        label: URL / slug
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: aula
+        label: Aula
+        type: reference
+        required: true
+        options:
+          collection: aulas
+          value: "{fields.slug}"
+          label: "{fields.name}"
+      - name: title
+        label: Título del curso
+        type: string
+        required: true
+      - name: subtitle
+        label: Subtítulo
+        type: string
+      - name: summary
+        label: Resumen breve
+        type: text
+      - name: description
+        label: Presentación completa
+        type: rich-text
+      - name: focus
+        label: Ideas clave
+        type: string
+        list: true
+      - name: featured
+        label: Destacado
+        type: boolean
+      - name: order
+        label: Orden
+        type: number
+      - name: published
+        label: Curso visible
+        type: boolean
+
+  - name: secciones
+    label: Secciones / Etapas
+    type: collection
+    path: src/content/secciones
+    format: json
+    filename: "{fields.key}.json"
+    operations:
+      rename: false
+    view:
+      fields: [title, course, order, published]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: key
+        label: ID estable (único)
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: slug
+        label: URL / slug
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: course
+        label: Curso
+        type: reference
+        required: true
+        options:
+          collection: cursos
+          value: "{fields.key}"
+          label: "{fields.title}"
+      - name: title
+        label: Nombre de la sección
+        type: string
+        required: true
+      - name: subtitle
+        label: Subtítulo
+        type: string
+      - name: summary
+        label: Presentación
+        type: text
+      - name: order
+        label: Orden dentro del curso
+        type: number
+      - name: published
+        label: Sección visible
+        type: boolean
+
+  - name: lecciones
+    label: Lecciones y contenido
+    type: collection
+    path: src/content/lecciones
+    format: json
+    filename: "{fields.key}.json"
+    operations:
+      rename: false
+    view:
+      fields: [title, section, status, order]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: key
+        label: ID estable (único)
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: slug
+        label: URL / slug
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: section
+        label: Sección
+        type: reference
+        required: true
+        options:
+          collection: secciones
+          value: "{fields.key}"
+          label: "{fields.title}"
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: summary
+        label: Resumen
+        type: text
+      - name: order
+        label: Orden dentro de la sección
+        type: number
+      - name: durationMinutes
+        label: Duración orientativa en minutos
+        type: number
+      - name: status
+        label: Estado público
+        type: select
+        required: true
+        options:
+          values:
+            - name: draft
+              label: Borrador (oculto)
+            - name: planned
+              label: Próximamente (solo título)
+            - name: published
+              label: Publicado y accesible
+      - name: blocks
+        label: Bloques de contenido
+        type: block
+        blockKey: type
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{type}"
+        blocks:
+          - name: text
+            label: Texto / lectura
+            fields:
+              - name: title
+                label: Subtítulo
+                type: string
+              - name: body
+                label: Texto
+                type: rich-text
+          - name: audio
+            label: Audio
+            fields:
+              - name: title
+                label: Título
+                type: string
+              - name: url
+                label: URL de audio (HTTPS)
+                type: string
+                required: true
+              - name: body
+                label: Transcripción o notas
+                type: rich-text
+          - name: video
+            label: Video
+            fields:
+              - name: title
+                type: string
+              - name: url
+                label: URL de video (MP4, YouTube o Vimeo)
+                type: string
+                required: true
+              - name: body
+                label: Transcripción o notas
+                type: rich-text
+          - name: image
+            label: Imagen
+            fields:
+              - name: url
+                label: Imagen
+                type: image
+              - name: alt
+                label: Descripción accesible
+                type: string
+              - name: body
+                label: Pie de foto
+                type: text
+          - name: practice
+            label: Práctica guiada
+            fields:
+              - name: title
+                type: string
+                required: true
+              - name: minutes
+                label: Minutos orientativos
+                type: number
+              - name: body
+                label: Instrucciones
+                type: rich-text
+          - name: reflection
+            label: Preguntas de reflexión
+            fields:
+              - name: title
+                type: string
+              - name: prompts
+                label: Preguntas
+                type: string
+                list: true
+          - name: quote
+            label: Cita
+            fields:
+              - name: body
+                type: text

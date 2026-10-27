@@ -1,0 +1,31 @@
+{
+  "key": "jasper-musica-medicina-sentir-cuerpo-que-resuena",
+  "slug": "cuerpo-que-resuena",
+  "section": "jasper-musica-medicina-sentir",
+  "title": "El cuerpo que resuena",
+  "summary": "Una exploración de sensación, vibración y ritmo.",
+  "order": 1,
+  "durationMinutes": 7,
+  "status": "published",
+  "blocks": [
+    {
+      "type": "text",
+      "title": "Volver al cuerpo",
+      "body": "Escuchar implica también percibir. El sonido es una vibración física, pero cada persona puede vivirla de manera distinta: con movimiento, emoción, memoria, agrado o incomodidad.\n\nEn esta Aula trabajamos con la expresión «el cuerpo como instrumento» como una metáfora de presencia: la respiración, la voz y el ritmo corporal son parte de nuestra experiencia cotidiana."
+    },
+    {
+      "type": "practice",
+      "title": "Ritmo suave",
+      "minutes": 5,
+      "body": "Apoyá una mano sobre el pecho o el abdomen si te resulta cómodo. Notá algunos ciclos de tu respiración natural.\n\nDespués, marcá con las manos un pulso suave sobre tus piernas. Alterná sonido y pausa. Detenete si lo necesitás. Registrá cómo cambia tu atención, sin buscar ningún resultado."
+    },
+    {
+      "type": "reflection",
+      "title": "Una observación personal",
+      "prompts": [
+        "¿Qué ritmos te resultan naturales hoy?",
+        "¿En qué momentos tu cuerpo te pide pausa o movimiento?"
+      ]
+    }
+  ]
+}

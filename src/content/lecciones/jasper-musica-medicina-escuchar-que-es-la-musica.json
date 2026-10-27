@@ -1,0 +1,40 @@
+{
+  "key": "jasper-musica-medicina-escuchar-que-es-la-musica",
+  "slug": "que-es-la-musica",
+  "section": "jasper-musica-medicina-escuchar",
+  "title": "¿Qué es realmente la música?",
+  "summary": "Más allá de canciones e instrumentos.",
+  "order": 1,
+  "durationMinutes": 8,
+  "status": "published",
+  "blocks": [
+    {
+      "type": "text",
+      "title": "Escuchar más allá de las canciones",
+      "body": "A menudo llamamos música a una melodía, una canción o el sonido de un instrumento. Pero también hay ritmo en nuestros pasos, pausas en una conversación y cambios de intensidad en la respiración.\n\nEn este recorrido usamos «música medicina» como una invitación a explorar cómo la escucha, la expresión y la presencia pueden acompañarnos. No hablamos de una fórmula universal ni de efectos terapéuticos garantizados."
+    },
+    {
+      "type": "quote",
+      "body": "La música no tiene que conducirnos a algún lugar. También puede ayudarnos a reconocer dónde estamos."
+    },
+    {
+      "type": "text",
+      "title": "¿Qué llamamos medicina?",
+      "body": "Podemos entender la palabra medicina en un sentido poético y experiencial: aquello que nos ayuda a cuidar la relación con nosotros mismos, a expresar lo que sentimos y a dar espacio a nuestra experiencia.\n\nDesde esa mirada, no hay un género musical que sea siempre «medicina» para todas las personas. Una canción, un silencio, una voz o un ritmo pueden vivirse de maneras distintas según quien escucha, su momento y su contexto."
+    },
+    {
+      "type": "practice",
+      "title": "Escuchá tu entorno",
+      "minutes": 5,
+      "body": "Detenete un momento donde estés. Reconocé tres sonidos diferentes, cercanos o lejanos. Escuchá también las pausas entre ellos.\n\n¿Hay un ritmo que se repite? ¿Un sonido que cambia? Volvé a notar tu respiración y cómo estás. No hace falta modificar nada."
+    },
+    {
+      "type": "reflection",
+      "title": "Una pregunta para llevarte",
+      "prompts": [
+        "¿Qué sonidos forman parte de tu día sin que normalmente los escuches?",
+        "¿Cuándo una canción te permitió expresar o reconocer algo importante?"
+      ]
+    }
+  ]
+}

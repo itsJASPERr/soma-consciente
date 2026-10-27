@@ -1,0 +1,19 @@
+{
+  "key": "jasper-musica-medicina",
+  "slug": "musica-medicina",
+  "aula": "jasper",
+  "title": "Música Medicina",
+  "subtitle": "La música que nos habita",
+  "summary": "Un recorrido para redescubrir la música como expresión, escucha, presencia y parte de nuestra vida.",
+  "description": "No es un curso para aprender un instrumento ni memorizar canciones. Es una invitación a caminar la música como parte de nuestro ser: escuchar, sentir, expresar, resonar e integrar, a nuestro propio ritmo.",
+  "focus": [
+    "Escuchar",
+    "Sentir",
+    "Expresar",
+    "Resonar",
+    "Integrar"
+  ],
+  "featured": true,
+  "order": 1,
+  "published": true
+}
