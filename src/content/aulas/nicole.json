@@ -19,5 +19,6 @@
   "order": 1,
   "published": true,
   "coverImage": "https://images.unsplash.com/photo-1772267692484-5e54d9645e12?auto=format&fit=crop&w=900&q=78",
-  "coverAlt": "Mujer meditando al aire libre, rodeada de vegetación y luz natural"
+  "coverAlt": "Mujer meditando al aire libre, rodeada de vegetación y luz natural",
+  "coverPosition": "upper"
 }

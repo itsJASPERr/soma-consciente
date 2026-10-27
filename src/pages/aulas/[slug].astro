@@ -6,6 +6,7 @@ import { path } from '../../lib/paths';
 import { loadCourses, loadSections, loadLessons, courseTree } from '../../lib/learning';
 import SomaAulaSymbol from '../../components/SomaAulaSymbol.astro';
 import { mediaUrl } from '../../lib/media';
+import { coverObjectPosition } from '../../lib/cover-position';
 import CourseCard from '../../components/CourseCard.astro';
 import { Icon } from 'astro-icon/components';
 export async function getStaticPaths() {
@@ -31,7 +32,7 @@ const lessons = await loadLessons();
           <div class="aula-hero__host"><Icon name="iconoir:user" size={18}/><span>Un Aula creada por <strong>{aula.guide}</strong></span></div>
         </div>
         <div class:list={['aula-hero__visual',{'aula-hero__visual--photo':!!aula.coverImage}]}>
-          {mediaUrl(aula.coverImage) && <img class="aula-hero__photo" src={mediaUrl(aula.coverImage) || ''} alt={aula.coverAlt || 'Imagen ilustrativa de este Aula'} loading="eager" decoding="async" width="1050" height="1050"/>}
+          {mediaUrl(aula.coverImage) && <img class="aula-hero__photo" src={mediaUrl(aula.coverImage) || ''} alt={aula.coverAlt || 'Imagen ilustrativa de este Aula'} style={{objectPosition:coverObjectPosition(aula.coverPosition)}} loading="eager" decoding="async" width="1050" height="1050"/>}
           <div class="aula-hero__visual-inner" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} eager/></div>
           <span class="aula-hero__ring aula-hero__ring--one"></span>
           <span class="aula-hero__ring aula-hero__ring--two"></span>

@@ -1,0 +1,160 @@
+/*
+ * Aula card sizing is deliberately independent of intrinsic image dimensions.
+ * The media frame owns cropping; the emblem is positioned on the card itself.
+ * Loaded last after global/editorial/responsive styles to prevent breakpoint races.
+ */
+.aula-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+.aula-grid > .aula-card {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+}
+.aula-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.aula-card .aula-card__art,
+.aula-card .aula-card__art--photo {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 220px;
+  min-height: 0;
+  max-height: 220px;
+  flex: 0 0 220px;
+  overflow: visible; /* Keep SOMA emblem visible across the text boundary. */
+  isolation: isolate;
+}
+.aula-card .aula-card__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: var(--aula-pale);
+}
+.aula-card .aula-card__photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+  filter: saturate(.84) sepia(.04);
+  transform: none;
+  transform-origin: center;
+}
+.aula-card:hover .aula-card__photo {
+  /* No zoom: even a short animation must not mask an important subject. */
+  transform: none;
+  filter: saturate(.92);
+}
+.aula-card .aula-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, #18271c0a 0%, transparent 48%, #17271b32 100%);
+  pointer-events: none;
+}
+.aula-card .aula-card__art--photo::after {
+  display: none; /* This gradient belongs inside the clipped media frame. */
+}
+.aula-card .aula-card__media .art-circle {
+  position: absolute;
+}
+.aula-card .aula-icon {
+  position: absolute;
+  z-index: 4;
+  inset-inline-start: 50%;
+  inset-block-end: -40px;
+  width: 80px;
+  height: 80px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  box-shadow: 0 6px 21px #272d202b;
+}
+.aula-card .aula-card__number {
+  position: absolute;
+  z-index: 3;
+  top: 13px;
+  left: 13px;
+}
+.aula-card .aula-card__content {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 222px;
+  padding: 50px 19px 24px;
+  overflow-wrap: break-word;
+}
+.aula-card .aula-card__content h3 {
+  margin-top: 9px;
+  font-size: clamp(1.32rem, 1.55vw, 1.85rem);
+  line-height: 1.15;
+}
+.aula-card .aula-card__content p {
+  margin-bottom: 20px;
+}
+.aula-card .aula-card__content .text-link {
+  margin-top: auto;
+}
+/* Switch early enough that four cards never become unnaturally narrow. */
+@media (max-width: 1150px) {
+  .aula-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+  .aula-card .aula-card__art,
+  .aula-card .aula-card__art--photo {
+    height: 245px;
+    max-height: 245px;
+    flex-basis: 245px;
+  }
+  .aula-card .aula-card__content h3 {
+    font-size: clamp(1.65rem, 2.5vw, 2rem);
+  }
+}
+@media (max-width: 680px) {
+  .aula-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .aula-card .aula-card__art,
+  .aula-card .aula-card__art--photo {
+    height: clamp(200px, 55vw, 270px);
+    max-height: 270px;
+    flex-basis: clamp(200px, 55vw, 270px);
+  }
+  .aula-card .aula-card__content {
+    min-height: 0;
+    padding: 47px 20px 26px;
+  }
+  .aula-card .aula-card__content h3 {
+    font-size: 1.82rem;
+  }
+  .aula-card .aula-icon {
+    width: 78px;
+    height: 78px;
+    inset-block-end: -39px;
+  }
+}

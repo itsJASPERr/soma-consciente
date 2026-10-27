@@ -19,5 +19,6 @@
   "order": 4,
   "published": true,
   "coverImage": "https://images.unsplash.com/photo-1699523229212-c25a2fadeb12?auto=format&fit=crop&w=900&q=78",
-  "coverAlt": "Trabajo corporal manual realizado con cuidado y atención"
+  "coverAlt": "Trabajo corporal manual realizado con cuidado y atención",
+  "coverPosition": "center"
 }
