@@ -212,3 +212,25 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   .brand--compact .brand__symbol { width:54px; height:50px; }
   .hero-visual .orbit-art { width:100%; }
 }
+
+
+/* The original SOMA emblem is an image asset, never a hand-traced approximation. */
+.brand__original-emblem,
+.orbit-art__original { display:block; width:100%; height:100%; object-fit:contain; border:0; }
+.brand__fallback-emblem {
+  display:grid; place-items:center; width:100%; height:100%;
+  font:italic 2rem var(--font-display); color:var(--pine);
+  border:1px solid #8caa98; border-radius:50%;
+}
+.orbit-art__fallback { display:grid; place-items:center; height:100%; width:100%; padding:12px; }
+.orbit-art__fallback-circle {
+  border:1px solid #9caa94; border-radius:50%; outline:1px solid #bfa785;
+  outline-offset:17px; aspect-ratio:1; width:76%; max-width:360px;
+  display:flex; flex-direction:column; justify-content:center; text-align:center;
+  gap:15px; background:radial-gradient(circle,#e8e6d8,#f7f1e8 75%);
+  color:var(--pine);
+}
+.orbit-art__fallback-circle span { letter-spacing:.12em; font-size:.7rem; text-transform:uppercase; }
+.orbit-art__fallback-circle strong { font:normal clamp(1.8rem,4vw,3.3rem)/1.08 var(--font-display); }
+.nucleo-section .orbit-art__fallback-circle { background:var(--pine-dark); color:#eee9da; }
+.nucleo-section .orbit-art__fallback-circle span { color:#d4dbce; }

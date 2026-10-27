@@ -1,9 +1,13 @@
 ---
 import { path } from '../lib/paths';
-import SomaMark from './SomaMark.astro';
 const { compact = false } = Astro.props;
+const originalEmblem = path('/media/soma-original-emblem.png');
 ---
 <a href={path('/')} class:list={['brand', { 'brand--compact': compact }]} aria-label="SOMA CONSCIENTE · Inicio">
-  <span class="brand__symbol"><SomaMark id={compact ? 'soma-footer' : 'soma-header'} decorative /></span>
+  <span class="brand__symbol" aria-hidden="true">
+    <object class="brand__original-emblem" data={originalEmblem} type="image/png" tabindex="-1">
+      <span class="brand__fallback-emblem">S</span>
+    </object>
+  </span>
   <span class="brand__type"><strong>SOMA</strong><small>CONSCIENTE</small></span>
 </a>

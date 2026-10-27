@@ -1,6 +1,20 @@
 ---
-import SomaMark from './SomaMark.astro';
+import { path } from '../lib/paths';
 ---
-<div class="orbit-art" role="img" aria-label="Las cuatro Aulas conectadas por un Núcleo orgánico">
-  <SomaMark id="soma-orbit" decorative />
+<div class="orbit-art" role="img" aria-label="El emblema original de SOMA: cuatro caminos conectados por un núcleo vivo">
+  <object
+    class="orbit-art__original"
+    data={path('/media/soma-original-emblem.png')}
+    type="image/png"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="orbit-art__fallback" aria-hidden="true">
+      <div class="orbit-art__fallback-circle">
+        <span>cuatro caminos</span>
+        <strong>Un mismo<br/>núcleo.</strong>
+        <span>presencia · integración</span>
+      </div>
+    </div>
+  </object>
 </div>
