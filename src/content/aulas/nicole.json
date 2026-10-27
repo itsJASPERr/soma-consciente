@@ -1,0 +1,21 @@
+{
+  "slug": "nicole",
+  "name": "Psicología y presencia",
+  "shortName": "Aula de Psicología",
+  "guide": "Nicole Rosignoli Miranda",
+  "qualification": "Licenciada en Psicología",
+  "theme": "terra",
+  "symbol": "heart",
+  "summary": "Emoción, escucha corporal y procesos de integración.",
+  "description": "Una invitación a escuchar el cuerpo, reconocer las emociones y encontrar maneras más conscientes de habitar la experiencia.",
+  "approach": "Nicole reúne una perspectiva psicológica integral, con influencias de la Gestalt, la salud cíclica, la meditación y la escucha corporal. El cuidado y el respeto por el ritmo de cada persona son centrales.",
+  "practices": [
+    "Escucha emocional y corporal",
+    "Respiración y meditación",
+    "Herramientas de autoconocimiento",
+    "Preparación e integración responsable de experiencias"
+  ],
+  "invitation": "La integración comienza cuando podemos reconocer lo vivido y darle un lugar en nuestra vida cotidiana.",
+  "order": 1,
+  "published": true
+}

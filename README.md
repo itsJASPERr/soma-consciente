@@ -1,42 +1,53 @@
 # SOMA CONSCIENTE
 
-Website v0.1 · Cuatro caminos, un mismo núcleo.
-
-An independent frontend for the SOMA CONSCIENTE collective. Four Aulas (Nicole, Jasper, Nico Pacha and Yanina), a shared Núcleo, a free learning library, online accompaniment and in-person encounters.
+**Cuatro caminos, un mismo núcleo.** Sitio web público de SOMA CONSCIENTE — v0.2.
 
 ## Stack
 
-- Astro 5 + TypeScript, static output
-- Responsive custom CSS, no UI framework dependency
-- GitHub Pages deployment via GitHub Actions
-- Planned independent Mágico OS backend integration via versioned APIs
+- Astro 5 + TypeScript, HTML estático para GitHub Pages
+- Astro Content Collections (JSON validado con Zod)
+- Pages CMS, ya conectado a GitHub; el archivo `.pages.yml` configura los editores
+- Iconoir (a través de `astro-icon`) para iconos de interfaz
+- Arte vectorial propio para las cuatro Aulas y El Núcleo
+- Integración futura con la instalación independiente de Mágico OS para SOMA
 
-## Local development
+## Desarrollo local
 
-Requires Node 22 or newer.
+Node.js 22+.
 
-1. npm install
-2. npm run dev
-3. npm run build
+```sh
+npm install
+npm run dev
+npm run build
+```
 
-## Initial deployment
+## Despliegue
 
-In GitHub repository Settings > Pages, choose GitHub Actions as the build/deployment source. Merge the website pull request to main. The workflow builds and publishes the site at:
+En GitHub: **Settings → Pages → Source: GitHub Actions**. El workflow `.github/workflows/deploy.yml` valida PRs y despliega automáticamente los cambios de `main`.
 
-https://itsjasperr.github.io/soma-consciente/
+Dirección prevista: https://itsjasperr.github.io/soma-consciente/
 
-The above is the expected URL; publishing is not confirmed until Pages is enabled and the workflow succeeds.
+Si Pages aún no está habilitado, el build puede finalizar correctamente pero la publicación fallará. Habilitá GitHub Actions como fuente y volvé a ejecutar el workflow.
 
-## Content
+## Edición de contenido
 
-Editorial content is in src/data/site.ts. Pages are statically generated (including each Aula and each Biblioteca resource). The approved public name is SOMA CONSCIENTE.
+Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
 
-There are no invented event dates, prices, booking availabilities, team photographs, testimonials, or live member features.
+- Cuatro Aulas: `src/content/aulas/*.json`
+- Biblioteca: `src/content/recursos/*.json`
+- Campos del editor: `.pages.yml`
+- Validación tipada: `src/content.config.ts`
+- Lectura ordenada y filtrada por `published`: `src/lib/content.ts`
+- Guía: `docs/content-guide.md`
 
-## Mágico OS integration
+Cada archivo es la fuente de verdad; evitamos duplicar textos en código TypeScript. Se generan páginas estáticas automáticamente al publicar cambios en `main`.
 
-The website is a self-contained client, not a Mágico OS module. A separately deployed SOMA installation of Mágico OS can provide published programs, event availability, booking and member functionality via APIs. Read docs/architecture.md before connecting the backend. No secrets belong in PUBLIC_ environment variables.
+## Identidad visual
 
-## Next steps
+La marca pública es **SOMA CONSCIENTE**, no SOMA CONCIENCIA. Los cuatro símbolos del logo aportado guían los emblemas SVG implementados. La marca en el sitio es una **adaptación vectorial**: el PNG original no fue incorporado como archivo de imagen al repositorio. Para fidelidad perfecta, reemplazar el SVG por el original vectorizado o subir el PNG al directorio `public/media/brand/` desde Pages CMS y referenciarlo.
 
-Confirm the actual brand asset files and team portraits; configure Pages; verify the build; align API contracts with Mágico OS; add SOMA-specific library resources and upcoming event information; then add member journeys and reserved content when backend contracts are ready.
+## Backend Mágico OS
+
+El sitio sigue independiente. En v0.2 todo el contenido público está en Git; no hay login, disponibilidad de reservas o eventos inventados. Mágico OS podrá ofrecer APIs para agenda, reservas, suscripciones, acceso de miembros y progreso cuando sus contratos estén aprobados.
+
+Arquitectura: `docs/architecture.md`.

@@ -41,3 +41,9 @@ Do not assume endpoint paths until the Mágico OS API has been reconciled with t
 3. Connect event reservation entry points after integration tests and verified availability.
 4. For login/member progress, introduce server adapter (Cloudflare/Node/Vercel) and explicit auth contract; React islands can be added selectively.
 5. Introduce private content and paid programs only with authorization, consent, privacy and editorial review.
+
+## Content publishing v0.2
+
+Pages CMS is already connected to the GitHub account. The repository now includes a `.pages.yml` editor definition for Astro Content Collections. Four Aula JSON records and the free-resource library are validated by `src/content.config.ts`; editorial edits to `main` trigger the same Pages deployment. This is an intentionally temporary public-content solution, not a store for sensitive member data.
+
+The official logo uploaded in chat is not yet available as a repository asset. A faithful-enough vector interpretation of its four symbols and central shape is currently used in the UI, with the corrected SOMA CONSCIENTE wordmark. When the original art is added through Pages CMS, it can replace the SVG without restructuring the pages.

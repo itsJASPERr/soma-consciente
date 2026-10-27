@@ -1,0 +1,25 @@
+{
+  "slug": "pausa-de-presencia",
+  "category": "Ejercicio cotidiano",
+  "title": "Una pausa de presencia",
+  "summary": "Tres preguntas sencillas para volver a escucharte en medio del día.",
+  "duration": "3 minutos",
+  "introduction": "Una pausa breve puede crear espacio entre el estímulo y nuestra respuesta. Esta propuesta no busca producir un estado especial.",
+  "sections": [
+    {
+      "heading": "Detenerse",
+      "body": "Si podés, dejá a un lado lo que estás haciendo durante unos instantes. Registrá el contacto de tus pies con el suelo y tu entorno inmediato."
+    },
+    {
+      "heading": "Escucharse",
+      "body": "Preguntate con sencillez: ¿qué percibo en mi cuerpo?, ¿qué emoción reconozco?, ¿qué necesito ahora? No hace falta encontrar respuestas completas."
+    },
+    {
+      "heading": "Elegir",
+      "body": "Identificá una acción pequeña, realista y cuidadosa que pueda responder a lo que registraste. A veces esa acción es descansar, conversar o seguir con más claridad."
+    }
+  ],
+  "reflection": "La presencia también se cultiva en los momentos ordinarios.",
+  "order": 2,
+  "published": true
+}

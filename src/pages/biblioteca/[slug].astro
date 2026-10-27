@@ -1,9 +1,9 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { resources } from '../../data/site';
-import type { Resource } from '../../data/site';
+import { loadResources } from '../../lib/content';
+import type { Resource } from '../../lib/content';
 import { path } from '../../lib/paths';
-export function getStaticPaths() { return resources.map((resource) => ({ params: { slug: resource.slug }, props: { resource } })); }
+export async function getStaticPaths() { const resources = await loadResources(); return resources.map((resource) => ({ params: { slug: resource.slug }, props: { resource } })); }
 const { resource } = Astro.props as { resource: Resource };
 ---
 <SiteLayout title={resource.title} description={resource.summary}>

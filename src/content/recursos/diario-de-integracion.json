@@ -1,0 +1,29 @@
+{
+  "slug": "diario-de-integracion",
+  "category": "Reflexión",
+  "title": "Diario de integración",
+  "summary": "Una forma sencilla de conectar experiencias significativas con decisiones cotidianas.",
+  "duration": "10 minutos",
+  "introduction": "Integrar no es encontrar una interpretación definitiva. Es acercarnos a lo que vivimos, reconocer su contexto y explorar qué lugar tiene en la vida diaria.",
+  "sections": [
+    {
+      "heading": "Describir",
+      "body": "Escribí lo que recordás de la experiencia sin apresurarte a explicar su significado. ¿Qué sucedió? ¿Qué sensaciones o emociones estuvieron presentes?"
+    },
+    {
+      "heading": "Distinguir",
+      "body": "Separá aquello que sentiste de las conclusiones que construís sobre ello. Podés sostener una pregunta abierta sin convertirla inmediatamente en una certeza."
+    },
+    {
+      "heading": "Relacionar",
+      "body": "¿Cómo dialoga esta experiencia con tus vínculos, límites, deseos y responsabilidades actuales? ¿Con quién sería útil conversar sobre lo vivido?"
+    },
+    {
+      "heading": "Dar continuidad",
+      "body": "Elegí una acción pequeña que puedas revisar con el tiempo. Las transformaciones sostenibles suelen necesitar contexto, paciencia y apoyo."
+    }
+  ],
+  "reflection": "Una experiencia significativa puede acompañarnos sin determinar por completo quiénes somos.",
+  "order": 3,
+  "published": true
+}

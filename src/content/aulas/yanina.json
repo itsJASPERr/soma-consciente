@@ -1,0 +1,21 @@
+{
+  "slug": "yanina",
+  "name": "Cuerpo y movimiento",
+  "shortName": "Aula del Cuerpo",
+  "guide": "Yanina Noelia Landriel",
+  "qualification": "Lic. en Kinesiología y Fisioterapia · Osteopatía",
+  "theme": "verde",
+  "symbol": "body",
+  "summary": "Osteopatía, movimiento y una mirada integral del cuerpo.",
+  "description": "Un espacio para acercarnos al cuerpo desde el movimiento, la percepción y el cuidado.",
+  "approach": "Yanina integra su trayectoria en kinesiología, fisioterapia, osteopatía y terapia postural activa con una búsqueda personal de autoconocimiento y una visión amplia de la salud.",
+  "practices": [
+    "Conciencia corporal",
+    "Movimiento y postura",
+    "Conocimiento del cuerpo",
+    "Mirada integral del bienestar"
+  ],
+  "invitation": "Comprender el cuerpo puede abrir nuevas preguntas sobre cómo habitamos nuestra vida.",
+  "order": 4,
+  "published": true
+}

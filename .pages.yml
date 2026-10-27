@@ -1,0 +1,143 @@
+media:
+  input: public/media
+  output: /soma-consciente/media
+  rename: safe
+
+content:
+  - name: aulas
+    label: Las cuatro Aulas
+    type: collection
+    path: src/content/aulas
+    format: json
+    filename: "{fields.slug}.json"
+    operations:
+      create: false
+      rename: false
+      delete: false
+    view:
+      fields: [name, guide, published, order]
+      primary: name
+      sort: [order, name]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: slug
+        label: Identificador URL (no cambiar)
+        type: string
+        required: true
+        readonly: true
+      - name: name
+        label: Título del Aula
+        type: string
+        required: true
+      - name: shortName
+        label: Nombre corto
+        type: string
+        required: true
+      - name: guide
+        label: Facilitador/a
+        type: string
+        required: true
+      - name: qualification
+        label: Trayectoria
+        type: text
+      - name: theme
+        label: Paleta (terra, azul, oro, verde)
+        type: string
+        readonly: true
+      - name: symbol
+        label: Símbolo de marca (heart, sound, horse, body)
+        type: string
+        readonly: true
+      - name: summary
+        label: Resumen
+        type: text
+        required: true
+      - name: description
+        label: Introducción
+        type: text
+        required: true
+      - name: approach
+        label: Enfoque
+        type: text
+        required: true
+      - name: practices
+        label: Temáticas
+        type: string
+        list: true
+      - name: invitation
+        label: Frase central
+        type: text
+      - name: order
+        label: Orden de navegación
+        type: number
+        readonly: true
+      - name: published
+        label: Publicado
+        type: boolean
+
+  - name: recursos
+    label: Biblioteca de recursos
+    type: collection
+    path: src/content/recursos
+    format: json
+    filename: "{fields.slug}.json"
+    operations:
+      rename: false
+    view:
+      fields: [title, category, duration, published]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: slug
+        label: URL / slug
+        type: string
+        required: true
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: category
+        label: Tipo de recurso
+        type: string
+        required: true
+      - name: summary
+        label: Resumen
+        type: text
+        required: true
+      - name: duration
+        label: Duración orientativa
+        type: string
+      - name: introduction
+        label: Introducción
+        type: text
+        required: true
+      - name: sections
+        label: Pasos o secciones
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{heading}"
+        fields:
+          - name: heading
+            label: Encabezado
+            type: string
+            required: true
+          - name: body
+            label: Contenido
+            type: text
+            required: true
+      - name: reflection
+        label: Reflexión final
+        type: text
+      - name: order
+        label: Orden
+        type: number
+      - name: published
+        label: Publicado
+        type: boolean

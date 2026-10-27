@@ -1,0 +1,29 @@
+{
+  "slug": "primeros-pasos-meditacion",
+  "category": "Práctica guiada",
+  "title": "Meditación: primeros pasos",
+  "summary": "Una práctica breve para volver al momento presente, sin exigencias ni resultados esperados.",
+  "duration": "5 minutos",
+  "introduction": "Meditar no requiere dejar la mente en blanco. Podemos comenzar aprendiendo a observar lo que ocurre, con curiosidad y sin juicio.",
+  "sections": [
+    {
+      "heading": "Prepará tu espacio",
+      "body": "Buscá un lugar donde puedas estar unos minutos sin interrupciones. Sentate de forma cómoda y estable. Podés dejar los ojos abiertos con una mirada suave o cerrarlos si te resulta agradable."
+    },
+    {
+      "heading": "Percibí tu respiración",
+      "body": "Notá el aire al entrar y salir. No hace falta cambiar su ritmo. Sentí los puntos de contacto de tu cuerpo con la silla o el suelo."
+    },
+    {
+      "heading": "Volvé con amabilidad",
+      "body": "Cuando aparezcan pensamientos, sonidos o sensaciones, reconocelos. No hay nada que corregir. Podés regresar suavemente a la respiración cuantas veces necesites."
+    },
+    {
+      "heading": "Cerrá la práctica",
+      "body": "Antes de moverte, observá cómo estás. ¿Qué cambió, si es que cambió algo? Llevá esa observación a una acción pequeña de tu día."
+    }
+  ],
+  "reflection": "No hay una experiencia correcta. La práctica es volver a prestar atención.",
+  "order": 1,
+  "published": true
+}

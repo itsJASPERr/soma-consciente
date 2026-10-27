@@ -1,5 +1,6 @@
 ---
 import Brand from './Brand.astro';
+import { Icon } from 'astro-icon/components';
 import { path } from '../lib/paths';
 const links = [
   { label: 'Enfoque', href: '/enfoque/' },
@@ -17,9 +18,9 @@ const links = [
     <nav class="desktop-nav" aria-label="Navegación principal">
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
-    <a class="header-cta" href={path('/biblioteca/')}>Comenzá a explorar <span aria-hidden="true">↗</span></a>
+    <a class="header-cta" href={path('/biblioteca/')}>Comenzá a explorar <Icon name="iconoir:arrow-up-right" size={16} aria-hidden="true"/></a>
     <details class="mobile-nav">
-      <summary aria-label="Abrir menú de navegación">Menú <span aria-hidden="true">☰</span></summary>
+      <summary aria-label="Abrir menú de navegación">Menú <Icon name="iconoir:menu" size={20} aria-hidden="true"/></summary>
       <nav aria-label="Navegación móvil">
         {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
       </nav>
