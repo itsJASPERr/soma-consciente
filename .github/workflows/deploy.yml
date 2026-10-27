@@ -26,6 +26,16 @@ jobs:
         run: node scripts/check-media-links.mjs
       - name: Build static site
         run: npm run build
+      - name: Responsive browser verification
+        timeout-minutes: 3
+        run: npm run test:responsive
+      - name: Save mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-layout-screenshots
+          path: test-results/
+          if-no-files-found: ignore
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
