@@ -81,6 +81,9 @@ try {
           const emblem=card.querySelector('.aula-icon');
           if(!emblem) problems.push('card '+i+' missing emblem');
           else {
+            // elementFromPoint only hit-tests the current viewport. Scroll
+            // offscreen cards into view before sampling the overlap area.
+            emblem.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
             const e=emblem.getBoundingClientRect();
             const x=e.left+e.width/2;
             const y=e.top+e.height*0.78;
