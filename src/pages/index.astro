@@ -3,10 +3,13 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
 import AulaCard from '../components/AulaCard.astro';
 import { loadAulas, loadResources } from '../lib/content';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
+import ResourceCard from '../components/ResourceCard.astro';
 const aulas = await loadAulas();
 const resources = await loadResources();
+const homeImages = await loadHomepage();
 import { path } from '../lib/paths';
-const symbols = ['◎', '✎', '✧'];
 ---
 <SiteLayout>
   <section class="hero">
@@ -22,7 +25,14 @@ const symbols = ['◎', '✎', '✧'];
         </div>
         <div class="hero-tags"><span><i></i>Cuerpo</span><span><i></i>Emoción</span><span><i></i>Consciencia</span><span><i></i>Naturaleza</span></div>
       </div>
-      <div class="hero-visual"><OrbitArt/><span class="hero-visual-note">Aprender · Integrar · Encontrarse</span></div>
+      <div class="hero-visual hero-visual--photographic">
+        <div class="hero-visual__photo-frame">
+          <img class="hero-visual__photo" src={mediaUrl(homeImages.heroImage) || ''} alt={homeImages.heroAlt} fetchpriority="high" decoding="async" width="1500" height="1200" style={'object-position:'+homeImages.heroPosition}/>
+        </div>
+        <span class="hero-visual__orbit hero-visual__orbit--one" aria-hidden="true"></span>
+        <span class="hero-visual__orbit hero-visual__orbit--two" aria-hidden="true"></span>
+        <span class="hero-visual-note">Aprender · Practicar · Integrar</span>
+      </div>
     </div>
   </section>
   <div class="values-strip"><div class="container values-list"><span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span></div></div>
@@ -55,7 +65,10 @@ const symbols = ['◎', '✎', '✧'];
         <p>Donde las cuatro miradas se encuentran. Un espacio para cocrear propuestas que conectan cuerpo, emoción, consciencia y naturaleza sin perder la singularidad de cada disciplina.</p>
         <a class="btn btn--light" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
       </div>
-      <OrbitArt/>
+      <div class="nucleo-editorial-art">
+        <img src={mediaUrl(homeImages.nucleoImage) || ''} alt={homeImages.nucleoAlt} loading="lazy" decoding="async" width="1100" height="1100"/>
+        <div class="nucleo-editorial-art__emblem" aria-label="Emblema original de SOMA"><OrbitArt/></div>
+      </div>
       <div class="nucleo-points">
         <div class="nucleo-point"><span>01</span>Prácticas y herramientas compartidas</div>
         <div class="nucleo-point"><span>02</span>Programas interdisciplinarios</div>
@@ -71,19 +84,14 @@ const symbols = ['◎', '✎', '✧'];
         <a class="text-link" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
       </div>
       <div class="resource-grid">
-        {resources.map((resource,index) => <a class="resource-card" href={path('/biblioteca/' + resource.slug + '/')}>
-          <div class="resource-art"><span class="resource-glyph">{symbols[index]}</span></div>
-          <div class="resource-body">
-            <span class="eyebrow">{resource.category}</span><h3>{resource.title}</h3><p>{resource.summary}</p><span class="text-link">Explorar recurso <span aria-hidden="true">↗</span></span><span class="duration">Lectura y práctica · {resource.duration}</span>
-          </div>
-        </a>)}
+        {resources.map((resource)=><ResourceCard resource={resource} />)}
       </div>
     </div>
   </section>
   <section class="section--tight digital-band">
     <div class="container digital-grid">
       <div><span class="eyebrow">SOMA desde donde estés</span><h2>Un espacio que te acompaña también online.</h2><p class="section-intro">No hace falta participar de un retiro para comenzar. Nuestra propuesta digital nace para que puedas explorar contenidos gratuitos, acercarte a cada Aula y conocer futuras opciones de acompañamiento.</p><a class="btn" href={path('/acompanamiento/')}>Formas de acompañarte <span aria-hidden="true">↗</span></a></div>
-      <div class="digital-visual" aria-hidden="true"><span class="digital-glyph">soma</span></div>
+      <div class="digital-visual digital-visual--editorial"><img src={mediaUrl(homeImages.onlineImage) || ''} alt={homeImages.onlineAlt} loading="lazy" decoding="async" width="1050" height="800"/><span class="digital-visual__detail" aria-hidden="true">Tu tiempo · Tu camino</span></div>
     </div>
   </section>
   <section class="section">
@@ -97,10 +105,11 @@ const symbols = ['◎', '✎', '✧'];
       </div>
     </div>
   </section>
-  <section class="section encounter-section">
+  <section class="section encounter-section encounter-section--editorial">
+    <div class="encounter-section__backdrop"><img src={mediaUrl(homeImages.encountersImage) || ''} alt={homeImages.encountersAlt} loading="lazy" decoding="async" width="1600" height="900"/></div>
     <div class="container encounter-grid">
       <div><span class="eyebrow" style="color:#ebc097">Experiencias que nutren</span><h2>Del espacio digital al encuentro humano.</h2><p>SOMA también vive en encuentros y experiencias presenciales, donde las prácticas se encuentran con las personas, el territorio y la comunidad.</p><a class="btn btn--light" href={path('/encuentros/')}>Conocer los encuentros <span aria-hidden="true">↗</span></a></div>
-      <div class="encounter-art" role="img" aria-label="Ilustración abstracta de un atardecer sobre montañas"></div>
+      <div class="encounter-section__wordmark" aria-hidden="true">Encuentro<br/>y presencia</div>
     </div>
   </section>
 </SiteLayout>

@@ -1,14 +1,28 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { loadResources } from '../../lib/content';
+import ResourceCard from '../../components/ResourceCard.astro';
 const resources = await loadResources();
-import { path } from '../../lib/paths';
-const symbols=['◎','✎','✧'];
 ---
 <SiteLayout title="Biblioteca abierta">
-  <section class="page-hero"><div class="container"><span class="eyebrow">Compartir para crecer</span><h1>Una Biblioteca para tu camino.</h1><p>Prácticas sencillas, lecturas y preguntas para explorar por tu cuenta. Contenido gratuito, sin registro ni obligación de participar en encuentros presenciales.</p></div></section>
-  <section class="section"><div class="container"><div class="resource-grid">
-    {resources.map((resource,index)=><a class="resource-card" href={path('/biblioteca/' + resource.slug + '/')}><div class="resource-art"><span class="resource-glyph">{symbols[index]}</span></div><div class="resource-body"><span class="eyebrow">{resource.category}</span><h3>{resource.title}</h3><p>{resource.summary}</p><span class="text-link">Abrir recurso ↗</span><span class="duration">{resource.duration}</span></div></a>)}
-  </div></div></section>
-  <section class="section--tight digital-band"><div class="container"><h2>Un primer paso es suficiente.</h2><p class="section-intro">Estos recursos son invitaciones, no instrucciones universales. Adaptá cada práctica a tu situación, escuchá tus límites y buscá acompañamiento profesional cuando sea necesario.</p></div></section>
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Compartir para crecer</span>
+      <h1>Una Biblioteca para tu camino.</h1>
+      <p>Prácticas sencillas, lecturas y preguntas para explorar por tu cuenta. Contenido gratuito, sin registro ni obligación de participar en encuentros presenciales.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="resource-grid">
+        {resources.map(resource => <ResourceCard resource={resource}/>)}
+      </div>
+    </div>
+  </section>
+  <section class="section--tight digital-band">
+    <div class="container">
+      <h2>Un primer paso es suficiente.</h2>
+      <p class="section-intro">Estos recursos son invitaciones, no instrucciones universales. Adaptá cada práctica a tu situación, escuchá tus límites y buscá acompañamiento profesional cuando sea necesario.</p>
+    </div>
+  </section>
 </SiteLayout>

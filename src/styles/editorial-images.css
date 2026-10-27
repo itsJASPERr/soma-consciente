@@ -1,0 +1,274 @@
+/* SOMA editorial photography — images and copy are editable in Pages CMS.
+ * Site images may be external editorial photos or uploaded local /media images.
+ * All compositions remain responsive without lateral overflow.
+ */
+.hero-visual--photographic {
+  position:relative;
+  height: min(43vw, 530px);
+  max-height:530px;
+  min-height:400px;
+  display:grid;
+  place-items:center;
+  isolation:isolate;
+}
+.hero-visual__photo-frame {
+  width:97%;
+  height:100%;
+  overflow:hidden;
+  border-radius: 49% 51% 42% 58% / 38% 42% 58% 62%;
+  background:#e6d6c1;
+  border:5px solid #f4ecdf;
+  box-shadow:0 19px 52px #4b48391e;
+  transform:rotate(-2deg);
+}
+.hero-visual__photo {
+  width:100%;
+  height:100%;
+  max-width:none;
+  display:block;
+  object-fit:cover;
+  transform:scale(1.045) rotate(2deg);
+  filter:saturate(.87) sepia(.06);
+}
+.hero-visual__orbit {
+  position:absolute;
+  width:82%;
+  aspect-ratio:1;
+  border:1.5px solid #bb8f6a9c;
+  border-radius:49% 51% 47% 53%;
+  pointer-events:none;
+  z-index:2;
+}
+.hero-visual__orbit--one {top:0;right:-5%;transform:rotate(-28deg);}
+.hero-visual__orbit--two {bottom:-7%;left:-3%;width:72%;border-color:#9a9d7c9e;transform:rotate(38deg);}
+.hero-visual--photographic .hero-visual-note {
+  z-index:3;
+  right:1%;
+  bottom:4%;
+  color:#fef9ee;
+  transform:rotate(-6deg);
+  text-shadow:0 2px 12px #1d2d2466;
+  font-size:1.2rem;
+}
+.hero-visual--photographic::after {display:none;}
+
+/* Four photographic Aula cards; authentic original emblems stay distinct. */
+.aula-card__art--photo { height:240px;overflow:visible;background:var(--aula-pale);}
+.aula-card__photo {
+  display:block;
+  width:100%;height:100%;object-fit:cover;
+  border-radius:19px 19px 0 0;
+  filter:saturate(.80) sepia(.075);
+  transition:transform .45s ease, filter .35s;
+}
+.aula-card:hover .aula-card__photo {filter:saturate(.97);transform:scale(1.025);}
+.aula-card__art--photo::after {
+  content:'';position:absolute;inset:0 0 0;
+  background:linear-gradient(180deg,transparent 40%,#1e1e1938 100%);
+  pointer-events:none;
+}
+.aula-card .aula-icon {
+  position:absolute;
+  z-index:3;
+  width:82px;height:82px;
+  left:50%;bottom:-41px;transform:translateX(-50%);
+  background:#f8f3e9ed;
+  border:1px solid #eadfcd;
+  border-radius:50%;
+  box-shadow:0 7px 22px #352d202c;
+  padding:8px;
+  filter:none;
+  display:grid;place-items:center;
+}
+.aula-card .aula-icon img {width:100%;height:100%;object-fit:contain;}
+.aula-card .aula-card__number {
+  z-index:2;top:15px;left:16px;
+  width:36px;height:36px;
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:#f9f4ea;
+  background:#263d34ad;
+  font-size:1.1rem;
+}
+.aula-card .aula-card__content {padding-top:52px;min-height:245px;text-align:center;align-items:center;}
+.aula-card__content h3 {font-size:1.74rem;}
+.aula-card__content p {font-size:.83rem;}
+.aula-card__content .text-link {margin-inline:auto;}
+
+/* Núcleo: lighter editorial illustration with emblem over nature image. */
+.nucleo-section {
+  background:radial-gradient(circle at 40% 80%,#eee3d3,transparent 49%),linear-gradient(110deg,#f6eee2,#f9f3e9);
+  color:var(--ink);
+  border-block:1px solid var(--line);
+}
+.nucleo-section::before {border-color:#c79d7790;}
+.nucleo-section .eyebrow {color:#a86f52!important;}
+.nucleo-section h2 {color:#2b302a;}
+.nucleo-section p {color:#5e665e;}
+.nucleo-section .btn--light {background:var(--pine);color:#fff;}
+.nucleo-section .btn--light:hover {background:#1b382e;}
+.nucleo-grid {grid-template-columns:minmax(0,.88fr) minmax(0,1.1fr) minmax(0,.8fr);gap:28px;}
+.nucleo-point {color:#4f5d53;}
+.nucleo-point span:first-child {color:#b4774d;}
+.nucleo-editorial-art {
+  position:relative;min-width:0;
+  aspect-ratio:1;max-width:490px;
+  border-radius:49% 51% 57% 43% / 43% 44% 56% 57%;
+  margin:auto;
+  background:#d9caba;
+  border:7px solid #f8f0e4;
+  box-shadow:0 20px 45px #574d3824;
+}
+.nucleo-editorial-art::before {
+  content:'';position:absolute;inset:-26px;border:1px solid #c5a17a91;border-radius:51% 49% 48% 52%;transform:rotate(30deg);pointer-events:none;
+}
+.nucleo-editorial-art > img {
+  width:100%;height:100%;display:block;object-fit:cover;
+  border-radius:inherit;filter:saturate(.80) contrast(.96);
+}
+.nucleo-editorial-art__emblem {
+  position:absolute;z-index:3;right:-18px;bottom:-21px;
+  display:grid;place-items:center;
+  width:36%;aspect-ratio:1;
+  border-radius:50%;
+  background:#f6efdfed;
+  box-shadow:0 9px 30px #262b2154;
+  padding:11px;
+  border:2px solid #f8eee0;
+}
+.nucleo-editorial-art__emblem .orbit-art {width:100%;height:100%;}
+
+/* Biblioteca cards display CMS-uploadable cover photos. */
+.resource-card--editorial .resource-art {height:175px;background:#e8e0d3;overflow:hidden;}
+.resource-art__photo {width:100%;height:100%;display:block;object-fit:cover;transition:transform .4s ease;filter:saturate(.82);}
+.resource-card:hover .resource-art__photo {transform:scale(1.04);}
+.resource-card--editorial .resource-art::before,
+.resource-card--editorial .resource-art::after {display:none;}
+.resource-art__category {
+  position:absolute;z-index:1;bottom:10px;left:13px;
+  background:#fbf4e7f2;border:1px solid #fff8ebac;
+  font-size:.65rem;font-weight:700;color:#775344;
+  text-transform:uppercase;letter-spacing:.08em;
+  padding:4px 12px;border-radius:24px;
+}
+.resource-body h3 {margin-top:2px;}
+.resource-card--editorial .resource-body {padding:23px 25px 27px;}
+.resource-card--editorial {border-radius:18px;}
+
+/* Online visual: a photo of an accessible, everyday practice. */
+.digital-visual--editorial {
+  max-width:100%;width:100%;min-width:0;height:350px;
+  position:relative;
+}
+.digital-visual--editorial img {
+  display:block;width:89%;height:100%;
+  object-fit:cover;object-position:center;
+  border-radius:43% 57% 48% 52% / 53% 41% 59% 47%;
+  box-shadow:0 17px 38px #4b3e2e30;
+  filter:saturate(.78);
+}
+.digital-visual--editorial::before {
+  width:min(92%,400px);height:auto;aspect-ratio:1;
+  border-color:#b8845f9c;right:1%;left:auto;z-index:2;pointer-events:none;
+}
+.digital-visual--editorial::after {display:none;}
+.digital-visual__detail {
+  position:absolute;z-index:2;bottom:-1%;right:0;
+  font:italic 1.4rem var(--font-display);color:var(--pine);
+  background:#f8f0e7e8;padding:8px 15px;border-radius:18px;
+}
+
+/* Closing community banner: photographic background with contrast gradient. */
+.encounter-section--editorial {
+  min-height:370px;position:relative;isolation:isolate;
+  background:#203d33;overflow:hidden;
+}
+.encounter-section__backdrop {position:absolute;inset:0;z-index:-2;}
+.encounter-section__backdrop img {width:100%;height:100%;display:block;object-fit:cover;object-position:center 53%;filter:saturate(.85);}
+.encounter-section--editorial::before {
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(90deg,#12392fee 0%,#1b3d34e8 37%,#1f3c2f8c 67%,#17382d4a 100%);
+}
+.encounter-section--editorial .encounter-grid {grid-template-columns:minmax(0,1.25fr) minmax(0,.65fr);align-items:center;min-height:260px;}
+.encounter-section--editorial .encounter-grid h2 {max-width:660px;color:#fff;}
+.encounter-section--editorial .encounter-grid p {color:#f9f3e1e6;}
+.encounter-section__wordmark {font:italic clamp(2rem,4.1vw,4.2rem)/1.15 var(--font-display);color:#fdf0df;text-align:center;text-shadow:0 2px 16px #061b1466;}
+
+/* Aula individual hero: category photography + the real Aula emblem. */
+.aula-hero__visual--photo {isolation:isolate;}
+.aula-hero__photo {
+  position:absolute;inset:4% 0 4% 3%;width:93%;height:92%;
+  object-fit:cover;object-position:center;
+  border-radius:48% 52% 46% 54% / 42% 48% 52% 58%;
+  filter:saturate(.84);border:6px solid #fff5e5;
+  box-shadow:0 14px 35px #44392b25;
+  z-index:0;
+}
+.aula-hero__visual--photo .aula-hero__visual-inner {
+  position:absolute;z-index:5;bottom:-9%;right:0;top:auto;left:auto;
+  width:32%;max-width:130px;aspect-ratio:1;
+  border-radius:50%;background:#fcf5ea;
+  padding:12px;border:2px solid #f1e2d2;
+  box-shadow:0 8px 28px #352c2039;
+}
+.aula-hero__visual--photo .aula-hero__visual-inner img{width:100%;height:100%;object-fit:contain;}
+.aula-hero__visual--photo .aula-hero__ring{z-index:4;pointer-events:none;}
+/* Course cover on learning pages. */
+.learning-course-card__art--photo {overflow:hidden;}
+.learning-course-card__photo {width:100%;height:100%;position:absolute;inset:0;object-fit:cover;filter:saturate(.84);}
+.learning-course-card__art--photo::after {content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 27%,#0b281942);z-index:0;}
+.learning-course-card__art--photo .learning-course-card__symbol {position:absolute;z-index:2;bottom:15px;right:14px;width:95px;max-width:46%;aspect-ratio:1;background:#fbf1e4ed;padding:9px;border-radius:50%;box-shadow:0 4px 18px #0004;}
+.learning-course-card__art--photo .learning-course-card__halo {display:none;}
+.course-hero__visual--photo .course-hero__photo {
+  width:100%;height:100%;position:absolute;inset:0;object-fit:cover;
+  border-radius:48% 52% 49% 51% / 48% 47% 53% 52%;
+  filter:saturate(.86);border:5px solid #fdf3e7;
+  box-shadow:0 15px 40px #4a362e27;
+}
+.course-hero__visual--photo .course-hero__visual-mark {
+  position:absolute;right:0;bottom:-5%;width:120px;
+  background:#fcf6ed;border-radius:50%;padding:12px;
+  box-shadow:0 6px 20px #3d322a48;
+}
+.course-hero__visual--photo .course-hero__visual-script {right:30px;bottom:9%;z-index:3;color:#fff;text-shadow:0 2px 9px #14221b;}
+/* Honor reduced motion and keep all sources editable through CMS. */
+@media (prefers-reduced-motion:reduce) {
+  .aula-card__photo,.resource-art__photo {transition:none;}
+}
+@media (max-width:1050px) {
+  .nucleo-grid {grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);}
+  .nucleo-points {grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+  .hero-visual--photographic {min-height:330px;height:43vw;}
+}
+@media (max-width:900px) {
+  .hero-visual--photographic {min-height:0;height:min(85vw,485px);max-width:520px;margin:30px auto 0;}
+  .nucleo-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .nucleo-editorial-art{width:90%;margin:auto;}
+  .nucleo-points {grid-column:1/-1;}
+  .digital-visual--editorial {height:320px;max-width:550px;margin:18px auto 0;}
+  .encounter-section--editorial .encounter-grid{grid-template-columns:minmax(0,1fr) minmax(0,.5fr);}
+}
+@media (max-width:650px) {
+  .hero-visual--photographic {height:min(91vw,365px);max-width:100%;min-height:0;margin:34px auto 0;}
+  .hero-visual__photo-frame {width:98%;border-width:4px;}
+  .hero-visual--photographic .hero-visual-note {right:4%;bottom:1%;font-size:.91rem;}
+  .aula-card__art--photo {height:205px;}
+  .aula-card .aula-card__content {padding:50px 23px 23px;min-height:auto;}
+  .aula-card .aula-icon {width:76px;height:76px;bottom:-37px;}
+  .aula-card__content h3 {font-size:1.8rem;}
+  .nucleo-grid {grid-template-columns:minmax(0,1fr);gap:20px;}
+  .nucleo-editorial-art {width:79%;max-width:360px;margin:12px auto 22px;}
+  .nucleo-points {grid-column:1;grid-template-columns:minmax(0,1fr);}
+  .nucleo-editorial-art__emblem {right:-9px;bottom:-10px;}
+  .resource-card--editorial .resource-art {height:195px;}
+  .digital-visual--editorial{height:260px;width:100%;margin:10px auto 0;}
+  .digital-visual--editorial img{width:90%;}
+  .digital-visual__detail {right:0;font-size:1.06rem;}
+  .encounter-section--editorial {padding:57px 0;}
+  .encounter-section--editorial .encounter-grid {grid-template-columns:minmax(0,1fr);gap:10px;min-height:auto;}
+  .encounter-section--editorial::before {background:linear-gradient(90deg,#13392fef 0%,#1b3d34cf 78%,#1a382eaf);}
+  .encounter-section__wordmark {display:none;}
+  .aula-hero__visual--photo .aula-hero__visual-inner {right:2%;bottom:-3%;width:107px;}
+  .learning-course-card__art--photo {height:205px;}
+  .course-hero__visual--photo .course-hero__visual-mark{width:88px;bottom:0;}
+}

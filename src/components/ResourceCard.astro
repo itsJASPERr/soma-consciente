@@ -1,0 +1,22 @@
+---
+import type { Resource } from '../lib/content';
+import { mediaUrl } from '../lib/media';
+import { path } from '../lib/paths';
+import { Icon } from 'astro-icon/components';
+const {resource, featured = false} = Astro.props as {resource: Resource; featured?: boolean};
+const photo = mediaUrl(resource.image);
+---
+<a class:list={['resource-card', {'resource-card--editorial': !!photo, 'resource-card--featured': featured}]} href={path('/biblioteca/'+resource.slug+'/')}>
+  <div class="resource-art">
+    {photo
+      ? <img class="resource-art__photo" src={photo} alt={resource.imageAlt || resource.title} loading="lazy" decoding="async" width="900" height="550"/>
+      : <span class="resource-glyph" aria-hidden="true">✧</span>}
+    <span class="resource-art__category">{resource.category}</span>
+  </div>
+  <div class="resource-body">
+    <h3>{resource.title}</h3>
+    <p>{resource.summary}</p>
+    <span class="text-link">Explorar recurso <Icon name="iconoir:arrow-up-right" size={17} aria-hidden="true"/></span>
+    <span class="duration">Lectura y práctica · {resource.duration}</span>
+  </div>
+</a>

@@ -4,6 +4,48 @@ media:
   rename: safe
 
 content:
+  - name: home-images
+    label: Imágenes de la página de inicio
+    type: file
+    path: src/content/home/home.json
+    format: json
+    fields:
+      - name: heroImage
+        label: Foto principal del inicio
+        type: image
+        required: true
+      - name: heroAlt
+        label: Descripción accesible de la foto principal
+        type: string
+        required: true
+      - name: heroPosition
+        label: Encuadre de la foto principal (CSS object-position)
+        type: string
+      - name: nucleoImage
+        label: Imagen del Núcleo
+        type: image
+        required: true
+      - name: nucleoAlt
+        label: Descripción de la imagen del Núcleo
+        type: string
+        required: true
+      - name: onlineImage
+        label: Imagen del acompañamiento online
+        type: image
+        required: true
+      - name: onlineAlt
+        label: Descripción de la imagen online
+        type: string
+        required: true
+      - name: encountersImage
+        label: Imagen de Encuentros
+        type: image
+        required: true
+      - name: encountersAlt
+        label: Descripción de la imagen de Encuentros
+        type: string
+        required: true
+
   - name: aulas
     label: Las cuatro Aulas
     type: collection
@@ -69,6 +111,12 @@ content:
       - name: invitation
         label: Frase central
         type: text
+      - name: coverImage
+        label: Foto de portada del Aula
+        type: image
+      - name: coverAlt
+        label: Descripción accesible de la foto
+        type: string
       - name: order
         label: Orden de navegación
         type: number
@@ -111,6 +159,12 @@ content:
         required: true
       - name: duration
         label: Duración orientativa
+        type: string
+      - name: image
+        label: Imagen del recurso (Biblioteca)
+        type: image
+      - name: imageAlt
+        label: Descripción accesible de la imagen
         type: string
       - name: introduction
         label: Introducción
@@ -198,6 +252,12 @@ content:
       - name: featured
         label: Destacado
         type: boolean
+      - name: image
+        label: Imagen de portada del curso
+        type: image
+      - name: imageAlt
+        label: Descripción accesible de la portada
+        type: string
       - name: order
         label: Orden
         type: number

@@ -17,6 +17,8 @@ export const aulas = defineCollection({
     approach: z.string().min(1),
     practices: z.array(z.string()),
     invitation: z.string(),
+    coverImage: z.string().optional().default(''),
+    coverAlt: z.string().optional().default(''),
     order: z.number().int().nonnegative(),
     published: z.boolean()
   })
@@ -36,6 +38,8 @@ export const recursos = defineCollection({
       body: z.string().min(1)
     })),
     reflection: z.string(),
+    image: z.string().optional().default(''),
+    imageAlt: z.string().optional().default(''),
     order: z.number().int().nonnegative(),
     published: z.boolean()
   })
@@ -53,6 +57,8 @@ export const cursos = defineCollection({
     description: z.string(),
     focus: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
+    image: z.string().optional().default(''),
+    imageAlt: z.string().optional().default(''),
     order: z.number().int().nonnegative(),
     published: z.boolean()
   })
@@ -93,4 +99,18 @@ export const lecciones = defineCollection({
     })).default([])
   })
 });
-export const collections = { aulas, recursos, cursos, secciones, lecciones };
+export const homepage = defineCollection({
+  loader: glob({pattern: '**/*.json', base: './src/content/home'}),
+  schema: z.object({
+    heroImage: z.string().min(1),
+    heroAlt: z.string().min(1),
+    heroPosition: z.string().default('center'),
+    nucleoImage: z.string().min(1),
+    nucleoAlt: z.string().min(1),
+    onlineImage: z.string().min(1),
+    onlineAlt: z.string().min(1),
+    encountersImage: z.string().min(1),
+    encountersAlt: z.string().min(1)
+  })
+});
+export const collections = { aulas, recursos, cursos, secciones, lecciones, homepage };

@@ -3,13 +3,18 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import { loadResources } from '../../lib/content';
 import type { Resource } from '../../lib/content';
 import { path } from '../../lib/paths';
+import { mediaUrl } from '../../lib/media';
 export async function getStaticPaths() { const resources = await loadResources(); return resources.map((resource) => ({ params: { slug: resource.slug }, props: { resource } })); }
 const { resource } = Astro.props as { resource: Resource };
 ---
 <SiteLayout title={resource.title} description={resource.summary}>
   <section class="page-hero"><div class="container"><div class="breadcrumbs"><a href={path('/biblioteca/')}>Biblioteca</a><span>/</span><span>{resource.category}</span></div><span class="eyebrow" style="margin-top:25px">Recurso gratuito · {resource.duration}</span><h1>{resource.title}</h1><p>{resource.summary}</p></div></section>
   <section class="section"><div class="container article-layout">
-    <article class="prose"><p style="font-size:1.15rem">{resource.introduction}</p>
+    <article class="prose">
+      {mediaUrl(resource.image) && <figure class="resource-detail-photo">
+        <img src={mediaUrl(resource.image) || ''} alt={resource.imageAlt || resource.title} loading="eager" decoding="async" width="1100" height="680"/>
+      </figure>}
+      <p style="font-size:1.15rem">{resource.introduction}</p>
       {resource.sections.map((section,index)=><section class="article-section"><span class="eyebrow">Paso 0{index+1}</span><h2>{section.heading}</h2><p>{section.body}</p></section>)}
       <blockquote class="quote-block">“{resource.reflection}”</blockquote>
       <div class="notice">Esta práctica es una invitación educativa y no sustituye atención de salud mental o médica. Si alguna sensación resulta incómoda, podés detenerte, orientarte en tu entorno o pedir apoyo.</div>

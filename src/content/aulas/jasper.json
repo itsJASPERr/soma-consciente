@@ -17,5 +17,7 @@
   ],
   "invitation": "Un puente entre lo que experimentamos y la manera en que elegimos vivir.",
   "order": 2,
-  "published": true
+  "published": true,
+  "coverImage": "https://images.unsplash.com/photo-1783255334111-b437fdc95bd2?auto=format&fit=crop&w=900&q=78",
+  "coverAlt": "Músico tocando un tambor de mano durante una interpretación"
 }

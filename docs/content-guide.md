@@ -84,3 +84,21 @@ Este contenido inicial es un piloto editorial de diseño, no un programa académ
 ### Futuro Mágico OS
 
 La jerarquía de entidades, sus claves y relaciones deben poder migrar a la instalación independiente de Mágico OS. El avance personal, las inscripciones, la membresía y los permisos requerirán backend autenticado; no se guardan hoy en Git ni en un formulario público.
+
+
+## Gestión de imágenes del sitio (homepage y Aulas)
+
+La imagen de referencia de diseño era una composición conceptual, no una biblioteca de fotografías ni retratos auténticos del equipo. Las fotografías cargadas ahora son **imágenes editoriales ilustrativas** con licencia Unsplash; NO muestran necesariamente a Nicole, Jasper, Yanina ni Nico Pacha. Reemplazarlas con fotografías reales aprobadas del equipo cuando estén disponibles.
+
+En Pages CMS:
+1. Abrí la colección **Imágenes de la página de inicio**. Ahí están las cuatro áreas: portada hero, Núcleo, acompañamiento online y Encuentros, cada una con URL de imagen y descripción.
+2. Abrí **Las cuatro Aulas** → seleccioná el Aula → editá **Foto de portada del Aula** y su descripción. La misma foto se muestra en las tarjetas y la portada del Aula.
+3. En **Cursos / Recorridos** encontrás la **Imagen de portada del curso**.
+4. En **Biblioteca de recursos** podés reemplazar la **Imagen del recurso**.
+5. Guardá el cambio en GitHub y esperá al despliegue automático de GitHub Pages.
+
+Pages CMS ya está conectado, por lo que no hay que instalar otro editor. El campo **Imagen** permite seleccionar/subir archivos a `public/media`. Las imágenes también pueden tener un enlace HTTPS de origen; el frontend soporta URLs externas o imágenes nuevas con rutas de Pages CMS como `/soma-consciente/media/archivo.webp`.
+
+Al escribir la descripción accesible (`alt`), describí lo que se ve, no hagas promesas médicas o espirituales. Cada imagen decorativa sirve para la atmósfera general y no debe presentarse como fotografía de una actividad real de SOMA hasta tener permiso y confirmación.
+
+Por rendimiento, usar preferentemente fotos WebP/JPG optimizadas de 1200–1600 px para grandes banners y 800–1000 px para tarjetas. Guardar archivos de imagen razonablemente livianos; alojar videos y audios grandes fuera de GitHub.

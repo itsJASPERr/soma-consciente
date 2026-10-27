@@ -4,12 +4,14 @@ import type { Curso } from '../lib/learning';
 import { courseHref } from '../lib/learning';
 import { Icon } from 'astro-icon/components';
 import SomaAulaSymbol from './SomaAulaSymbol.astro';
+import { mediaUrl } from '../lib/media';
 const { aula, course, available, planned } = Astro.props as { aula: Aula; course: Curso; available: number; planned: number };
 ---
 <a class:list={['learning-course-card', 'learning-course-card--'+aula.theme]} href={courseHref(aula.slug, course)}>
-  <div class="learning-course-card__art" aria-hidden="true">
-    <span class="learning-course-card__halo"></span>
-    <span class="learning-course-card__symbol"><SomaAulaSymbol symbol={aula.symbol}/></span>
+  <div class:list={['learning-course-card__art',{'learning-course-card__art--photo':!!course.image}]}>
+    {mediaUrl(course.image) && <img class="learning-course-card__photo" src={mediaUrl(course.image) || ''} alt={course.imageAlt || 'Imagen ilustrativa del recorrido'} loading="lazy" decoding="async" width="1100" height="700"/>}
+    <span class="learning-course-card__halo" aria-hidden="true"></span>
+    <span class="learning-course-card__symbol" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol}/></span>
   </div>
   <div class="learning-course-card__copy">
     <span class="eyebrow">Recorrido del Aula</span>

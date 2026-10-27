@@ -21,5 +21,7 @@
   ],
   "reflection": "La presencia también se cultiva en los momentos ordinarios.",
   "order": 2,
-  "published": true
+  "published": true,
+  "image": "https://images.unsplash.com/photo-1596259582350-2fc48a1bb2c4?auto=format&fit=crop&w=1050&q=78",
+  "imageAlt": "Hojas verdes atravesadas por los rayos de sol"
 }
