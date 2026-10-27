@@ -76,6 +76,19 @@ try {
           if(Math.abs(im.height-a.height)>2)problems.push('card '+i+' photo escapes media height');
           if(co.top<a.bottom-2)problems.push('card '+i+' text overlaps media');
           if(getComputedStyle(image).objectFit!=='cover')problems.push('card '+i+' lacks object-fit cover');
+          // The emblem straddles the image/copy boundary. Test its lower half,
+          // which previously disappeared behind the copy stacking context.
+          const emblem=card.querySelector('.aula-icon');
+          if(!emblem) problems.push('card '+i+' missing emblem');
+          else {
+            const e=emblem.getBoundingClientRect();
+            const x=e.left+e.width/2;
+            const y=e.top+e.height*0.78;
+            const top=document.elementFromPoint(x,y);
+            if(!top || !emblem.contains(top)) {
+              problems.push('card '+i+' emblem lower half occluded by '+(top?.className||top?.tagName||'nothing'));
+            }
+          }
           if(card.scrollWidth>card.clientWidth+2)problems.push('card '+i+' horizontal overflow');
           if(a.left < -2||a.right>document.documentElement.clientWidth+2)problems.push('card '+i+' beyond viewport');
         }

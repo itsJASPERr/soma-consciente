@@ -24,6 +24,9 @@
 .aula-card .aula-card__art,
 .aula-card .aula-card__art--photo {
   position: relative;
+  /* Art and copy form sibling stacking contexts. The emblem belongs to art,
+   * so art must paint ABOVE copy for the emblem's bottom half to stay visible. */
+  z-index: 2;
   display: block;
   box-sizing: border-box;
   width: 100%;
