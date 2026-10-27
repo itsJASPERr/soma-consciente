@@ -1,0 +1,26 @@
+---
+import type { Curso, CourseTree, Leccion, Seccion } from '../lib/learning';
+import { lessonHref, courseHref } from '../lib/learning';
+import { Icon } from 'astro-icon/components';
+const { tree, course, aulaSlug, currentKey } = Astro.props as { tree: CourseTree; course: Curso; aulaSlug: string; currentKey?: string };
+const order = (n: number) => String(n).padStart(2,'0');
+---
+<nav class="course-outline" aria-label="Índice del recorrido">
+  <a class="course-outline__home" href={courseHref(aulaSlug,course)}><Icon name="iconoir:arrow-left" size={17}/> Vista general del curso</a>
+  {tree.sections.map(({section,lessons}) => <details class="course-outline__group" open={!!currentKey && lessons.some(x=>x.key===currentKey) || section.order===1}>
+    <summary class="course-outline__heading">
+      <span class="course-outline__num">{order(section.order)}</span>
+      <span class="course-outline__heading-copy"><strong>{section.title}</strong><small>{section.subtitle}</small></span>
+      <Icon name="iconoir:nav-arrow-down" size={17} class="outline-chevron"/>
+    </summary>
+    <div class="course-outline__lessons">
+      {lessons.map((lesson) => lesson.status === 'published'
+        ? <a class:list={['course-outline__lesson',{'is-current':lesson.key===currentKey}]} aria-current={lesson.key===currentKey?'page':undefined} href={lessonHref(aulaSlug,course,section,lesson)}>
+            <Icon name="iconoir:play-outline" size={15}/><span>{lesson.title}</span>
+          </a>
+        : <span class="course-outline__lesson is-planned"><Icon name="iconoir:lock" size={15}/><span>{lesson.title}</span></span>
+      )}
+      {lessons.length===0 && <span class="course-outline__empty">En preparación</span>}
+    </div>
+  </details>)}
+</nav>

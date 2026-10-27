@@ -41,4 +41,56 @@ export const recursos = defineCollection({
   })
 });
 
-export const collections = { aulas, recursos };
+export const cursos = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/cursos' }),
+  schema: z.object({
+    key: z.string().regex(/^[a-z0-9-]+$/),
+    slug: z.string().regex(/^[a-z0-9-]+$/),
+    aula: z.string().min(1),
+    title: z.string().min(1),
+    subtitle: z.string(),
+    summary: z.string(),
+    description: z.string(),
+    focus: z.array(z.string()).default([]),
+    featured: z.boolean().default(false),
+    order: z.number().int().nonnegative(),
+    published: z.boolean()
+  })
+});
+export const secciones = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/secciones' }),
+  schema: z.object({
+    key: z.string().regex(/^[a-z0-9-]+$/),
+    slug: z.string().regex(/^[a-z0-9-]+$/),
+    course: z.string().min(1),
+    title: z.string().min(1),
+    subtitle: z.string(),
+    summary: z.string(),
+    order: z.number().int().nonnegative(),
+    published: z.boolean()
+  })
+});
+export const lecciones = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/lecciones' }),
+  schema: z.object({
+    key: z.string().regex(/^[a-z0-9-]+$/),
+    slug: z.string().regex(/^[a-z0-9-]+$/),
+    section: z.string().min(1),
+    title: z.string().min(1),
+    summary: z.string(),
+    order: z.number().int().nonnegative(),
+    durationMinutes: z.number().nonnegative().default(0),
+    status: z.enum(['published', 'planned', 'draft']),
+    blocks: z.array(z.object({
+      type: z.enum(['text', 'audio', 'video', 'image', 'practice', 'reflection', 'quote']),
+      title: z.string().optional(),
+      body: z.string().optional(),
+      url: z.string().optional(),
+      poster: z.string().optional(),
+      alt: z.string().optional(),
+      minutes: z.number().optional(),
+      prompts: z.array(z.string()).optional()
+    })).default([])
+  })
+});
+export const collections = { aulas, recursos, cursos, secciones, lecciones };

@@ -1,0 +1,74 @@
+---
+import type { Leccion } from '../lib/learning';
+import { renderLearningMarkdown } from '../lib/markdown';
+import { path } from '../lib/paths';
+import { Icon } from 'astro-icon/components';
+type Block = Leccion['blocks'][number];
+const { block, index } = Astro.props as { block: Block; index: number };
+function safeMediaURL(input: string | undefined): string | null {
+  if (!input) return null;
+  if (/^\/(?!\/)/.test(input)) {
+    if (input.startsWith('/soma-consciente/')) return input;
+    return path(input);
+  }
+  try {
+    const u = new URL(input);
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
+  } catch { return null; }
+}
+function videoSource(input: string | undefined): {kind:'iframe'|'file'; url:string} | null {
+  const url = safeMediaURL(input);
+  if (!url) return null;
+  try {
+    const u = new URL(url, 'https://soma.invalid');
+    if (['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(u.hostname)) {
+      const id = u.hostname === 'youtu.be' ? u.pathname.slice(1).split('/')[0] :
+       u.pathname.startsWith('/shorts/') || u.pathname.startsWith('/embed/') ? u.pathname.split('/')[2] : u.searchParams.get('v');
+      if (id && /^[a-zA-Z0-9_-]{11}$/.test(id)) return {kind:'iframe',url:'https://www.youtube-nocookie.com/embed/'+id};
+    }
+    if (['vimeo.com','www.vimeo.com','player.vimeo.com'].includes(u.hostname)) {
+      const id=u.pathname.split('/').filter(Boolean).pop();
+      if (id && /^\d+$/.test(id)) return {kind:'iframe',url:'https://player.vimeo.com/video/'+id};
+    }
+    if (/\.(mp4|webm|ogv)(\?|$)/i.test(u.pathname+u.search)) return {kind:'file',url};
+  } catch {}
+  return null;
+}
+const audioUrl = block.type==='audio' ? safeMediaURL(block.url) : null;
+const video=block.type==='video' ? videoSource(block.url) : null;
+const imageUrl=block.type==='image' ? safeMediaURL(block.url) : null;
+---
+{block.type==='text' && <section class="lesson-block lesson-block--text">
+  {block.title && <h2>{block.title}</h2>}
+  <div class="lesson-richtext" set:html={renderLearningMarkdown(block.body)}/>
+</section>}
+{block.type==='quote' && <blockquote class="lesson-quote">{block.body}</blockquote>}
+{block.type==='practice' && <section class="lesson-block lesson-block--practice">
+  <div class="lesson-block__eyebrow"><Icon name="iconoir:leaf" size={18}/> Práctica guiada {block.minutes ? '· '+block.minutes+' min' : ''}</div>
+  <h2>{block.title || 'Una práctica para explorar'}</h2>
+  <div class="lesson-richtext" set:html={renderLearningMarkdown(block.body)}/>
+  <p class="lesson-soft-note">Hacé una pausa o detené la práctica cuando lo necesites. No hay un resultado obligatorio.</p>
+</section>}
+{block.type==='audio' && <section class="lesson-block lesson-block--media">
+  <div class="lesson-block__eyebrow"><Icon name="iconoir:headset" size={18}/> Escucha</div>
+  <h2>{block.title || 'Audio de la lección'}</h2>
+  {audioUrl ? <audio controls preload="none" src={audioUrl}>Tu navegador no puede reproducir este audio.</audio> : <p class="lesson-soft-note">Este audio está en preparación.</p>}
+  {block.body && <div class="lesson-richtext" set:html={renderLearningMarkdown(block.body)}/>}
+</section>}
+{block.type==='video' && <section class="lesson-block lesson-block--media">
+  <div class="lesson-block__eyebrow"><Icon name="iconoir:video-camera" size={18}/> Video</div>
+  <h2>{block.title || 'Video de la lección'}</h2>
+  {video?.kind==='iframe' ? <div class="lesson-video"><iframe src={video.url} title={block.title || 'Video de SOMA'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+  : video?.kind==='file' ? <video class="lesson-video-file" src={video.url} controls preload="metadata" poster={safeMediaURL(block.poster)||undefined}>Tu navegador no puede reproducir este video.</video>
+  : <p class="lesson-soft-note">Este video está en preparación.</p>}
+  {block.body && <div class="lesson-richtext" set:html={renderLearningMarkdown(block.body)}/>}
+</section>}
+{block.type==='image' && imageUrl && <figure class="lesson-figure"><img src={imageUrl} alt={block.alt||''} loading="lazy"/>{block.body && <figcaption>{block.body}</figcaption>}</figure>}
+{block.type==='reflection' && <section class="lesson-block lesson-block--reflection">
+  <div class="lesson-block__eyebrow"><Icon name="iconoir:edit-pencil" size={18}/> Reflexión personal</div>
+  <h2>{block.title || 'Un momento para integrar'}</h2>
+  {block.prompts && <ul class="lesson-prompts">{block.prompts.map(p=><li>{p}</li>)}</ul>}
+  <label class="lesson-journal-label" for={'lesson-notes-'+index}>Tu espacio para escribir (opcional)</label>
+  <textarea id={'lesson-notes-'+index} class="lesson-journal" rows="5" placeholder="Podés escribir algunas palabras para vos…"></textarea>
+  <p class="lesson-soft-note">Este espacio no guarda ni envía tus notas. Si querés conservarlas, copialas antes de salir.</p>
+</section>}

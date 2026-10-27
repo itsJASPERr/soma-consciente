@@ -1,0 +1,11 @@
+{
+  "key": "jasper-musica-medicina-escuchar-silencio-y-sonido",
+  "slug": "silencio-y-sonido",
+  "section": "jasper-musica-medicina-escuchar",
+  "title": "El sonido y el silencio",
+  "summary": "Reconocer los espacios entre sonidos.",
+  "order": 3,
+  "durationMinutes": 0,
+  "status": "planned",
+  "blocks": []
+}

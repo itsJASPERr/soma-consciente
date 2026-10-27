@@ -47,3 +47,9 @@ Do not assume endpoint paths until the Mágico OS API has been reconciled with t
 Pages CMS is already connected to the GitHub account. The repository now includes a `.pages.yml` editor definition for Astro Content Collections. Four Aula JSON records and the free-resource library are validated by `src/content.config.ts`; editorial edits to `main` trigger the same Pages deployment. This is an intentionally temporary public-content solution, not a store for sensitive member data.
 
 The official logo uploaded in chat is not yet available as a repository asset. A faithful-enough vector interpretation of its four symbols and central shape is currently used in the UI, with the corrected SOMA CONSCIENTE wordmark. When the original art is added through Pages CMS, it can replace the SVG without restructuring the pages.
+
+## Learning content v0.3
+
+The reusable Aula learning UI introduces Git-managed courses, sections and lessons. Pages CMS edits the content directly. Static builds expose only **published** lesson pages; **planned** lesson titles are listed without links and **draft** lessons are omitted. Every public lesson may combine text, practice, audio, video, images and reflections. The course outline supports mobile and desktop layouts without requiring React or authentication.
+
+All content is currently public. Future enrollment, access control, payment, personal notes and progress MUST live in Mágico OS APIs with server-side authorization; do not treat hidden links in GitHub Pages as secure content.

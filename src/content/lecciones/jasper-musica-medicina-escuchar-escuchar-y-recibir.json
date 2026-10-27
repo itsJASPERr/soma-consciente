@@ -1,0 +1,31 @@
+{
+  "key": "jasper-musica-medicina-escuchar-escuchar-y-recibir",
+  "slug": "escuchar-y-recibir",
+  "section": "jasper-musica-medicina-escuchar",
+  "title": "Escuchar y recibir",
+  "summary": "La escucha como canal activo de nuestra experiencia.",
+  "order": 2,
+  "durationMinutes": 6,
+  "status": "published",
+  "blocks": [
+    {
+      "type": "text",
+      "title": "Escuchar también es participar",
+      "body": "Cuando hacemos música solemos pensar en quien canta, toca o expresa. Sin embargo, la escucha es igualmente activa: recibimos sonidos, registramos sensaciones y decidimos cómo responder.\n\nPodemos escuchar sin intentar interpretar de inmediato. No necesitamos nombrar ni clasificar cada sensación. El silencio, la atención y el respeto por nuestros límites son también formas de participación."
+    },
+    {
+      "type": "practice",
+      "title": "Dos minutos de atención",
+      "minutes": 4,
+      "body": "Sentate cómodamente o permanecé de pie. Escuchá un sonido presente en el ambiente.\n\nLlevá la atención al cuerpo: ¿dónde notás alguna respuesta? ¿Qué sucede si dejás de buscar una explicación y simplemente observás?\n\nSi la práctica se vuelve incómoda, abrí los ojos, movete o volvé a prestar atención a tu entorno."
+    },
+    {
+      "type": "reflection",
+      "title": "Para integrar",
+      "prompts": [
+        "¿Qué diferencia percibís entre oír algo y escucharlo con atención?",
+        "¿Qué condiciones te ayudan a sentirte escuchado?"
+      ]
+    }
+  ]
+}

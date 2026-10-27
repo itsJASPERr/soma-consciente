@@ -29,3 +29,58 @@ Los campos `published: false` ocultan la entrada del sitio en la próxima compil
 ## Futura integración
 
 Cuando la instalación SOMA de Mágico OS esté lista, incorporar una fuente remota de datos respetando el mismo modelo de dominio: Aula, Resource, Program, Encounter y Facilitator. Reservas, cuentas y permisos van en APIs protegidas, no en el repositorio público.
+
+
+## Recorridos, secciones y lecciones (v0.3)
+
+El sitio ahora contiene un sistema de aprendizaje responsive, común a las cuatro Aulas. Todas las Aulas pueden tener múltiples cursos; cada curso contiene etapas/secciones y cada sección contiene lecciones ordenadas.
+
+**Colecciones en Pages CMS**:
+- `Cursos / Recorridos` → `src/content/cursos/*.json`.
+- `Secciones / Etapas` → `src/content/secciones/*.json`.
+- `Lecciones y contenido` → `src/content/lecciones/*.json`.
+
+### Identificadores y relaciones
+
+Cada curso/sección/lección tiene un campo `key` estable y único, usado por las referencias. El archivo JSON se denomina `<key>.json`. No cambiar una clave publicada sin actualizar sus referencias.
+
+- `curso.aula` referencia `aulas.slug`.
+- `seccion.course` referencia `curso.key`.
+- `leccion.section` referencia `seccion.key`.
+- `order` determina el orden dentro del nivel correspondiente.
+- `slug` determina el segmento URL de ese contenido.
+
+La web construye las rutas como `/aulas/{aula}/{curso}/{seccion}/{leccion}/` y las valida antes de publicar con `npm run content:check`.
+
+### Estados editoriales de las lecciones
+
+- `draft`: completamente oculto, no aparece en la web.
+- `planned`: solo título de la lección en el índice, sin enlace.
+- `published`: página pública con bloques y navegación a lecciones disponibles.
+
+La publicación de un curso o sección depende además del campo `published` en su archivo JSON. **Todas las lecciones publicadas son abiertas en esta etapa**. No usar GitHub Pages para contenido privado, pagos, notas de participantes ni datos clínicos.
+
+### Contenidos mixtos por lección
+
+En Pages CMS, editar la lista `blocks` y elegir el tipo:
+- **Texto:** título y cuerpo con editor Markdown.
+- **Audio:** URL HTTPS de un audio y notas/transcripción.
+- **Video:** URL YouTube, Vimeo o archivo MP4/WebM y notas.
+- **Imagen:** subida en la biblioteca de medios, descripción y pie.
+- **Práctica:** instrucciones y duración orientativa.
+- **Reflexión:** preguntas que invitan a escribir; las notas del visitante no se guardan.
+- **Cita:** fragmento destacado.
+
+Los bloques aparecen en el orden definido en el CMS. Markdown acepta texto, títulos, listas y enlaces; HTML directo se deshabilita para seguridad.
+
+Para archivos multimedia grandes, usar un proveedor de alojamiento apropiado en vez de incluir los videos en Git. No indicar audio o video disponible antes de subirlo: las lecciones iniciales de Música Medicina contienen solo lecturas y prácticas reales.
+
+### Ejemplo piloto: Jasper
+
+`Música Medicina — La música que nos habita` tiene las etapas Escuchar, Sentir, Expresar, Resonar e Integrar. Tres lecciones introductorias están abiertas con contenido original; otras doce son **planned**. El equipo puede editar o reorganizar todo este contenido desde Pages CMS sin cambios de código.
+
+Este contenido inicial es un piloto editorial de diseño, no un programa académico definitivo ni una promesa clínica. Los cursos de las otras Aulas todavía no fueron definidos.
+
+### Futuro Mágico OS
+
+La jerarquía de entidades, sus claves y relaciones deben poder migrar a la instalación independiente de Mágico OS. El avance personal, las inscripciones, la membresía y los permisos requerirán backend autenticado; no se guardan hoy en Git ni en un formulario público.

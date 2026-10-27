@@ -1,6 +1,6 @@
 # SOMA CONSCIENTE
 
-**Cuatro caminos, un mismo núcleo.** Sitio web público de SOMA CONSCIENTE — v0.2.
+**Cuatro caminos, un mismo núcleo.** Sitio web público de SOMA CONSCIENTE — v0.3.
 
 ## Stack
 
@@ -18,7 +18,7 @@ Node.js 22+.
 ```sh
 npm install
 npm run dev
-npm run build
+npm run content:check\nnpm run build
 ```
 
 ## Despliegue
@@ -33,7 +33,7 @@ Si Pages aún no está habilitado, el build puede finalizar correctamente pero l
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
 
-- Cuatro Aulas: `src/content/aulas/*.json`
+- Cuatro Aulas: `src/content/aulas/*.json`\n- Cursos, secciones y lecciones: `src/content/cursos/*.json`, `src/content/secciones/*.json`, `src/content/lecciones/*.json`
 - Biblioteca: `src/content/recursos/*.json`
 - Campos del editor: `.pages.yml`
 - Validación tipada: `src/content.config.ts`
@@ -51,3 +51,9 @@ La marca pública es **SOMA CONSCIENTE**, no SOMA CONCIENCIA. Los cuatro símbol
 El sitio sigue independiente. En v0.2 todo el contenido público está en Git; no hay login, disponibilidad de reservas o eventos inventados. Mágico OS podrá ofrecer APIs para agenda, reservas, suscripciones, acceso de miembros y progreso cuando sus contratos estén aprobados.
 
 Arquitectura: `docs/architecture.md`.
+
+## Curso piloto y diseño responsive
+
+La estructura de Aula → Curso → Sección → Lección está implementada en Astro. El Aula de Jasper incluye un recorrido piloto Música Medicina con cinco etapas, tres lecciones abiertas y doce en preparación. El diseño tiene índice lateral en escritorio y panel desplegable en móviles. Los bloques de lección admiten Markdown, audio, video, imágenes, prácticas y reflexiones.
+
+La guía completa para editar: `docs/content-guide.md`. No hay aún historial personal, cuentas ni contenido protegido.

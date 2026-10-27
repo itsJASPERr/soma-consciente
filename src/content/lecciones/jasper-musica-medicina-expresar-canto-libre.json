@@ -1,0 +1,11 @@
+{
+  "key": "jasper-musica-medicina-expresar-canto-libre",
+  "slug": "canto-libre",
+  "section": "jasper-musica-medicina-expresar",
+  "title": "Canto libre",
+  "summary": "Explorar la posibilidad de cantar sin exigencias.",
+  "order": 4,
+  "durationMinutes": 0,
+  "status": "planned",
+  "blocks": []
+}

@@ -1,0 +1,51 @@
+---
+import SiteLayout from '../../../../../layouts/SiteLayout.astro';
+import type { Aula } from '../../../../../lib/content';
+import { loadAulas } from '../../../../../lib/content';
+import type { Curso, Seccion, Leccion } from '../../../../../lib/learning';
+import { loadCourses, loadSections, loadLessons, courseTree, lessonHref, courseHref } from '../../../../../lib/learning';
+import { path } from '../../../../../lib/paths';
+import CourseOutline from '../../../../../components/CourseOutline.astro';
+import LearningBlock from '../../../../../components/LearningBlock.astro';
+import { Icon } from 'astro-icon/components';
+export async function getStaticPaths() {
+  const [aulas,courses,sections,lessons]=await Promise.all([loadAulas(),loadCourses(),loadSections(),loadLessons()]);
+  return courses.flatMap(course=>{
+    const aula=aulas.find(a=>a.slug===course.aula);
+    if (!aula) return [];
+    return courseTree(course,sections,lessons).sections.flatMap(group=>
+      group.lessons.filter(l=>l.status==='published').map(lesson=>({
+        params:{slug:aula.slug,course:course.slug,section:group.section.slug,lesson:lesson.slug},
+        props:{aula,course,section:group.section,lesson}
+      }))
+    );
+  });
+}
+const {aula,course,section,lesson}=Astro.props as {aula:Aula;course:Curso;section:Seccion;lesson:Leccion};
+const tree=courseTree(course,await loadSections(),await loadLessons());
+const currentIndex=tree.available.findIndex(x=>x.key===lesson.key);
+const previous=tree.available[currentIndex-1];
+const next=tree.available[currentIndex+1];
+const lookup=(target:Leccion|undefined)=>target?tree.sections.find(x=>x.lessons.some(l=>l.key===target.key))?.section:undefined;
+const previousSection=lookup(previous);
+const nextSection=lookup(next);
+const lessonNum=String(section.order).padStart(2,'0')+'.'+String(lesson.order);
+---
+<SiteLayout title={lesson.title+' · '+course.title} description={lesson.summary}>
+  <div class:list={['learning-view','aula-page-theme','aula-page-theme--symbol-'+aula.symbol]}>
+    <div class="container learning-breadcrumbs breadcrumbs"><a href={path('/aulas/')}>Aulas</a><span>/</span><a href={path('/aulas/'+aula.slug+'/')}>{aula.shortName}</a><span>/</span><a href={courseHref(aula.slug,course)}>{course.title}</a><span>/</span><span>{section.title}</span></div>
+    <div class="container lesson-shell">
+      <aside class="lesson-shell__sidebar"><div class="lesson-sidebar__heading"><span class="eyebrow">{aula.shortName}</span><strong>{course.title}</strong><span>{course.subtitle}</span></div><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></aside>
+      <div class="lesson-shell__content">
+        <details class="lesson-mobile-outline"><summary><Icon name="iconoir:menu" size={20}/> Índice del curso <Icon name="iconoir:nav-arrow-down" size={17}/></summary><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></details>
+        <div class="lesson-heading"><div class="lesson-heading__top"><span class="eyebrow">{section.title} · Lección {lessonNum}</span><span class="lesson-time"><Icon name="iconoir:clock" size={16}/> {lesson.durationMinutes} min aprox.</span></div><h1>{lesson.title}</h1><p>{lesson.summary}</p></div>
+        <div class="lesson-blocks">{lesson.blocks.map((block,index)=><LearningBlock block={block} index={index}/>)}</div>
+        <div class="lesson-end"><span>La práctica continúa fuera de la pantalla.</span><p>Podés volver a esta lección cuando quieras. Tu ritmo es parte del camino.</p></div>
+        <nav class="lesson-pager" aria-label="Lecciones anterior y siguiente">
+          <div>{previous && previousSection ? <a href={lessonHref(aula.slug,course,previousSection,previous)}><Icon name="iconoir:arrow-left" size={18}/><span><small>Anterior</small><strong>{previous.title}</strong></span></a> : <a href={courseHref(aula.slug,course)}><Icon name="iconoir:arrow-left" size={18}/><span><small>Curso</small><strong>Volver al recorrido</strong></span></a>}</div>
+          <div>{next && nextSection ? <a href={lessonHref(aula.slug,course,nextSection,next)}><span><small>Siguiente lección</small><strong>{next.title}</strong></span><Icon name="iconoir:arrow-right" size={18}/></a> : <a href={courseHref(aula.slug,course)}><span><small>Recorrido</small><strong>Ver todas las etapas</strong></span><Icon name="iconoir:arrow-right" size={18}/></a>}</div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</SiteLayout>
