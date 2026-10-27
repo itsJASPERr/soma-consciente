@@ -18,7 +18,6 @@ const links = [
     <nav class="desktop-nav" aria-label="Navegación principal">
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
-    <a class="header-cta" href={path('/biblioteca/')}>Comenzá a explorar <Icon name="iconoir:arrow-up-right" size={16} aria-hidden="true"/></a>
     <details class="mobile-nav">
       <summary aria-label="Abrir menú de navegación">Menú <Icon name="iconoir:menu" size={20} aria-hidden="true"/></summary>
       <nav aria-label="Navegación móvil">

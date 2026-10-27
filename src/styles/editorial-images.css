@@ -272,3 +272,7 @@
   .learning-course-card__art--photo {height:205px;}
   .course-hero__visual--photo .course-hero__visual-mark{width:88px;bottom:0;}
 }
+
+/* The orbit is decorative; keep its rotation inside this section's layout box. */
+.digital-band {overflow:hidden;}
+.digital-visual--editorial {isolation:isolate;}
