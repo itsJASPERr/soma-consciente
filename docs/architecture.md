@@ -8,7 +8,7 @@ SOMA CONSCIENTE is an independently deployed website, not a shared Mágico OS te
 
 Astro generates HTML for homepage, four Aulas, El Núcleo, Biblioteca resources, approach, accompaniment, team and events. There is no backend or authentication. Content lives in src/data/site.ts and the domain base path is managed through src/lib/paths.ts.
 
-Current deployment: https://itsjasperr.github.io/soma-consciente/
+Current canonical deployment: https://www.soma-consciente.com/
 
 GitHub Pages requires repo Settings > Pages > GitHub Actions. This repository includes a workflow on pull requests (build validation) and main (build + publish).
 
@@ -53,3 +53,13 @@ The official logo uploaded in chat is not yet available as a repository asset. A
 The reusable Aula learning UI introduces Git-managed courses, sections and lessons. Pages CMS edits the content directly. Static builds expose only **published** lesson pages; **planned** lesson titles are listed without links and **draft** lessons are omitted. Every public lesson may combine text, practice, audio, video, images and reflections. The course outline supports mobile and desktop layouts without requiring React or authentication.
 
 All content is currently public. Future enrollment, access control, payment, personal notes and progress MUST live in Mágico OS APIs with server-side authorization; do not treat hidden links in GitHub Pages as secure content.
+
+## Custom domain and GitHub Pages (Oct 2026)
+
+- Canonical origin: `https://www.soma-consciente.com/` (the `www` host configured in GitHub **Settings → Pages**).
+- The bare domain `soma-consciente.com` can redirect to the canonical `www` host once GitHub validates both DNS names.
+- Astro `site` points at the canonical origin and intentionally has **no** `base: '/soma-consciente'`: routes, assets, and canonical URLs now begin at `/`.
+- Media lives in `public/media`, and Pages CMS saves URLs as `/media/…`. `src/lib/media.ts` normalizes older CMS paths that start with `/soma-consciente/media/`.
+- The previous repository-root `CNAME` contained the bare apex domain. It was removed; `public/CNAME` now contains `www.soma-consciente.com` so the build artifact is consistent. GitHub Pages configured via **GitHub Actions** ignores CNAME files for domain assignment; GitHub Pages settings remain the authority.
+- DNS is owned by Porkbun. Keep the `www` CNAME pointing at `itsjasperr.github.io` and apex A/AAAA records at GitHub Pages IPs. **Deploying these code changes cannot itself cure a GitHub InvalidCNAMEError if authoritative DNS is not resolving or if GitHub Pages settings are inconsistent.**
+- `npm run test:domain` checks generated canonical URLs, root-relative links, assets, CMS media config and the published `dist/CNAME`.

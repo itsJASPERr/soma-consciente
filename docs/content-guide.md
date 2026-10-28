@@ -24,7 +24,7 @@ Los campos `published: false` ocultan la entrada del sitio en la próxima compil
 - No publicar datos privados de personas acompañadas ni historiales de salud.
 - No introducir fechas, cupos ni precios de encuentros que no estén verificados.
 - Respetar la autoría de cada Aula. El Núcleo es el espacio cocreado; las cuatro disciplinas mantienen sus límites.
-- Las imágenes subidas a Pages CMS se guardarán en `public/media` y usarán rutas de GitHub Pages con el prefijo `/soma-consciente/media`. Ajustar esas rutas al migrar a un dominio propio.
+- Las imágenes subidas a Pages CMS se guardan en `public/media` y sus URLs públicas usan el prefijo `/media` en el dominio `https://www.soma-consciente.com`.
 
 ## Futura integración
 
@@ -97,7 +97,7 @@ En Pages CMS:
 4. En **Biblioteca de recursos** podés reemplazar la **Imagen del recurso**.
 5. Guardá el cambio en GitHub y esperá al despliegue automático de GitHub Pages.
 
-Pages CMS ya está conectado, por lo que no hay que instalar otro editor. El campo **Imagen** permite seleccionar/subir archivos a `public/media`. Las imágenes también pueden tener un enlace HTTPS de origen; el frontend soporta URLs externas o imágenes nuevas con rutas de Pages CMS como `/soma-consciente/media/archivo.webp`.
+Pages CMS ya está conectado, por lo que no hay que instalar otro editor. El campo **Imagen** permite seleccionar/subir archivos a `public/media`. Las imágenes también pueden tener un enlace HTTPS de origen; el frontend soporta URLs externas o imágenes nuevas con rutas de Pages CMS como `/media/archivo.webp`.
 
 Al escribir la descripción accesible (`alt`), describí lo que se ve, no hagas promesas médicas o espirituales. Cada imagen decorativa sirve para la atmósfera general y no debe presentarse como fotografía de una actividad real de SOMA hasta tener permiso y confirmación.
 
@@ -146,3 +146,7 @@ Para ofrecer contenido pago real necesitamos Mágico OS (o un backend equivalent
 Abrí **Lecciones y contenido → lección**. Elegí primero el `Estado público` y después `Acceso a la lección`. Para material exclusivo, eliminá todos los `Bloques de contenido`, completá opcionalmente `Texto de presentación pública` y guardá. Para publicar el contenido completo, marcá **Publicado + Gratis**. La regla se valida en CI antes del despliegue a GitHub Pages.
 
 No cambiamos las ofertas existentes a modalidad de pago sin una decisión editorial. Todas las lecciones actuales permanecen `free` por defecto.
+
+## Dominio definitivo
+
+El frontend y el editor CMS ya usan el dominio `https://www.soma-consciente.com/` y rutas de imagen `/media/`. Si ves URLs antiguas `/soma-consciente/media/` guardadas en registros anteriores, el frontend las normaliza para evitar errores; para registros nuevos usá el selector de medios de Pages CMS con salida `/media`. No guardar contenido privado en los medios públicos.

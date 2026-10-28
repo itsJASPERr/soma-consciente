@@ -10,7 +10,8 @@
     "content:check": "node scripts/validate-learning.mjs",
     "test:responsive": "node scripts/check-responsive.mjs",
     "test:aula-cards": "node scripts/check-aula-card-layout.mjs",
-    "test:access": "node scripts/test-learning-access.mjs"
+    "test:access": "node scripts/test-learning-access.mjs",
+    "test:domain": "node scripts/check-custom-domain.mjs"
   },
   "dependencies": {
     "astro": "^5.16.0",

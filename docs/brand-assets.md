@@ -17,7 +17,7 @@ The CMS is already connected; **do not set up another CMS**.
 1. Download the supplied `soma-original-emblem.png` exact crop from the chat attachment.
 2. In the Pages CMS media library, upload the PNG to the repository media root, `public/media/soma-original-emblem.png`. Preserve its name.
 3. Make sure the change is committed to `main`, or merge its editorial branch.
-4. The deployed site automatically uses `/soma-consciente/media/soma-original-emblem.png`, via Astro's URL base helper.
+4. The deployed site automatically uses `/media/soma-original-emblem.png`, via Astro's URL base helper.
 5. Header and Núcleo use the *same source asset*; no duplicate hand-traced version is maintained.
 
 Until this file exists in the repository, those components show typographic fallbacks rather than the rejected reconstruction.
@@ -38,3 +38,7 @@ Public image assets:
 - `public/media/aulas/yanina-cuerpo.png` — dark somatic/body symbol
 
 The reusable Astro component `src/components/SomaAulaSymbol.astro` maps the existing content `symbol` field to these assets. Use it for both the home-page Aula cards and each Aula detail page. Do not replace these with `SomaAulaIcon.astro` or a generic UI icon. The four symbols remain distinct from the whole four-Aula Núcleo emblem.
+
+## New public domain
+
+The original emblem is served at `https://www.soma-consciente.com/media/soma-original-emblem.png`. The actual PNG remains unchanged; only the website's base path and public URL changed.
