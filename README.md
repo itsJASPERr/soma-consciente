@@ -62,3 +62,24 @@ Arquitectura: `docs/architecture.md`.
 La estructura de Aula → Curso → Sección → Lección está implementada en Astro. El Aula de Jasper incluye un recorrido piloto Música Medicina con cinco etapas, tres lecciones abiertas y doce en preparación. El diseño tiene índice lateral en escritorio y panel desplegable en móviles. Los bloques de lección admiten Markdown, audio, video, imágenes, prácticas y reflexiones.
 
 La guía completa para editar: `docs/content-guide.md`. No hay aún historial personal, cuentas ni contenido protegido.
+
+## Open Graph / social previews
+
+Every public route generates Open Graph and Twitter Card tags (title, description,
+canonical URL, `og:image`, dimensions, Spanish locale and alt text) in
+`src/layouts/SiteLayout.astro`. The default first-party PNG is generated from
+the **original SOMA emblem** at build time:
+
+- Source: `public/media/soma-original-emblem.png` (unchanged).
+- Generator: `scripts/generate-social-image.mjs`, run automatically by npm's
+  `prebuild` and `predev` hooks.
+- Output: `https://www.soma-consciente.com/og/soma-consciente.png` (1200 × 630).
+- Verification: `npm run test:og` after `npm run build`.
+
+The common image can later be overridden in `SiteLayout` with `ogImage` and
+`ogImageAlt`, but only supply absolute HTTPS or domain-root image URLs that
+social crawlers can fetch. Do not use SVG as `og:image`.
+
+Social platforms cache previews. After a deployment, ensure the image URL is
+publicly accessible over HTTPS and use a platform share debugger or a cache
+refresh before assuming the metadata is still missing.

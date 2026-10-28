@@ -10,8 +10,21 @@ import '../styles/portrait.css';
 import '../styles/aula-card-layout.css';
 import '../styles/aula-biography.css';
 import '../styles/learning-access.css';
-const { title = 'SOMA CONSCIENTE', description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.' } = Astro.props;
+const {
+  title = 'SOMA CONSCIENTE',
+  description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.',
+  ogImage = '/og/soma-consciente.png',
+  ogImageAlt = 'SOMA CONSCIENTE — cuatro caminos, un mismo núcleo, con el emblema original de las cuatro Aulas.'
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Both URLs are absolute HTTPS URLs. Social crawlers cannot resolve relative assets.
+const socialImage = new URL(ogImage.startsWith('https://') ? ogImage : path(ogImage), Astro.site);
+const pageTitle = title === 'SOMA CONSCIENTE'
+  ? title + ' · Cuatro caminos, un mismo núcleo'
+  : title + ' · SOMA CONSCIENTE';
+const socialDescription = description.trim().length >= 60
+  ? description.trim()
+  : description.trim() + ' Descubrí prácticas, recorridos y reflexiones para aprender e integrar desde SOMA CONSCIENTE.';
 ---
 <!doctype html>
 <html lang="es">
@@ -23,10 +36,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical.toString()}/>
     <link rel="icon" type="image/svg+xml" href={path('/favicon.svg')}/>
     <meta property="og:type" content="website"/>
+    <meta property="og:locale" content="es_AR"/>
     <meta property="og:site_name" content="SOMA CONSCIENTE"/>
-    <meta property="og:title" content={title}/>
-    <meta property="og:description" content={description}/>
-    <title>{title === 'SOMA CONSCIENTE' ? title + ' · Cuatro caminos, un mismo núcleo' : title + ' · SOMA CONSCIENTE'}</title>
+    <meta property="og:url" content={canonical.toString()}/>
+    <meta property="og:title" content={pageTitle}/>
+    <meta property="og:description" content={socialDescription}/>
+    <meta property="og:image" content={socialImage.toString()}/>
+    <meta property="og:image:secure_url" content={socialImage.toString()}/>
+    <meta property="og:image:type" content="image/png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content={ogImageAlt}/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content={pageTitle}/>
+    <meta name="twitter:description" content={socialDescription}/>
+    <meta name="twitter:image" content={socialImage.toString()}/>
+    <meta name="twitter:image:alt" content={ogImageAlt}/>
+    <title>{pageTitle}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
