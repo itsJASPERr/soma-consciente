@@ -19,5 +19,26 @@ import { path } from '../lib/paths';
       <p>Los contenidos educativos y de bienestar no sustituyen atención médica o psicológica individual cuando es necesaria.</p>
     </div>
   </div>
-  <div class="container footer-bottom"><small>© {new Date().getFullYear()} SOMA CONSCIENTE</small><small>Un camino de integración, presencia y consciencia</small></div>
+  <div class="container footer-bottom">
+    <small>© {new Date().getFullYear()} SOMA CONSCIENTE</small>
+    <small>Un camino de integración, presencia y consciencia</small>
+    <a
+      class="footer-admin-link"
+      href="https://app.pagescms.org/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Administrar contenido en Pages CMS (abre en una pestaña nueva)"
+    >Administrar contenido ↗</a>
+  </div>
 </footer>
+<style>
+  .footer-bottom { flex-wrap: wrap; align-items: center; }
+  .footer-admin-link {
+    color: inherit;
+    font-size: .74rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+  .footer-admin-link:hover { color: var(--pine); }
+</style>
