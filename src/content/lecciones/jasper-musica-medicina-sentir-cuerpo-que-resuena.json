@@ -7,7 +7,7 @@
   "order": 1,
   "durationMinutes": 7,
   "status": "published",
-  "accessLevel": "members",
+  "accessLevel": "free",
   "blocks": [
     {
       "type": "text",
