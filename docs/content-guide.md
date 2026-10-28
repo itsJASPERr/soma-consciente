@@ -123,3 +123,26 @@ Los contenidos de aprendizaje están en las colecciones CMS existentes:
 La publicación de los textos es educativa, no una promesa de resultados sanitarios, psicológicos o espirituales. La descripción del vínculo con caballos es una reflexión aportada por Yanina y no sustituye el enfoque propio del Aula de Nico Pacha.
 
 Se normalizó únicamente el nombre público del proyecto a SOMA CONSCIENTE. Para añadir nuevas lecciones en cualquiera de los módulos del Curso 1, usar **Lecciones y contenido** y vincularlas a la sección correspondiente.
+
+## Publicación y acceso gratuito / exclusivo (v0.5)
+
+Los estados editoriales y los niveles de acceso son campos **separados**:
+
+- `status` = `draft` (no aparece), `planned` (título en preparación), `published` (visible).
+- `accessLevel` = `free` (lección completa abierta), `preview` (solo presentación pública), `members` (candado de membresía), `paid` (candado de compra).
+- `publicPreview` = párrafos promocionales **aptos para publicación pública**. Se muestran en la página de vista previa si `accessLevel=preview`.
+- `blocks` = material completo **solo cuando accessLevel=free y status=published**. Las pruebas de compilación rechazan bloques de contenido en cualquier otra combinación.
+
+En el catálogo, los títulos de los elementos bloqueados aparecen con el tipo de acceso, pero **sin un enlace a contenido privado ni un botón de pago funcional**. Los elementos `preview` tienen una página pública que contiene exclusivamente `title`, `summary` y `publicPreview`, nunca bloques.
+
+### Advertencia crítica de seguridad
+
+**Este repositorio GitHub y GitHub Pages son públicos.** Ni `status=draft` ni `accessLevel=paid` protegen información confidencial que ya esté guardada en archivos JSON. Nunca agregar audios, videos, textos, notas personales, respuestas de alumnos ni enlaces privados de acceso aquí. El verificador `npm run content:check` falla si detecta `blocks` en lecciones que no están publicadas gratis, pero la revisión editorial también debe evitar secretos en textos del resumen, `publicPreview` o metadatos.
+
+Para ofrecer contenido pago real necesitamos Mágico OS (o un backend equivalente) con identidad, pago verificado y autorización del lado del servidor. El checkout y el desbloqueo permanecen deshabilitados hasta entonces. Los futuros productos y precios no se inventan aquí. Esta versión prepara exclusivamente la interfaz de catálogo.
+
+### Uso en Pages CMS
+
+Abrí **Lecciones y contenido → lección**. Elegí primero el `Estado público` y después `Acceso a la lección`. Para material exclusivo, eliminá todos los `Bloques de contenido`, completá opcionalmente `Texto de presentación pública` y guardá. Para publicar el contenido completo, marcá **Publicado + Gratis**. La regla se valida en CI antes del despliegue a GitHub Pages.
+
+No cambiamos las ofertas existentes a modalidad de pago sin una decisión editorial. Todas las lecciones actuales permanecen `free` por defecto.

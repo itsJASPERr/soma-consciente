@@ -409,8 +409,28 @@ content:
               label: Próximamente (solo título)
             - name: published
               label: Publicado y accesible
+      - name: accessLevel
+        label: Acceso a la lección
+        type: select
+        required: true
+        description: "Gratis abre el contenido completo. Vista previa solo publica el texto público. Miembros y Pago muestran un candado, sin página. NUNCA guardar contenido privado en GitHub ni archivos públicos."
+        options:
+          values:
+            - name: free
+              label: Gratis · lección abierta
+            - name: preview
+              label: Vista previa pública · sin contenido completo
+            - name: members
+              label: Exclusivo para miembros · bloqueado
+            - name: paid
+              label: De pago · bloqueado
+      - name: publicPreview
+        label: Texto de presentación pública
+        type: rich-text
+        description: "Visible para todos en una vista previa. NO escribir aquí material exclusivo."
       - name: blocks
-        label: Bloques de contenido
+        label: Bloques de contenido (solo lecciones gratuitas)
+        description: "Estos datos están en un repositorio público. No se permiten bloques en lecciones Preview, Miembros o Pago; el build los rechazará."
         type: block
         blockKey: type
         list:

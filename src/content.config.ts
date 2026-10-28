@@ -95,6 +95,11 @@ export const lecciones = defineCollection({
     order: z.number().int().nonnegative(),
     durationMinutes: z.number().nonnegative().default(0),
     status: z.enum(['published', 'planned', 'draft']),
+    // Publication controls whether catalog metadata exists. Access controls
+    // whether an actual lesson page can be opened on static GitHub Pages.
+    accessLevel: z.enum(['free', 'preview', 'members', 'paid']).default('free'),
+    // Only a deliberately public teaser, never protected course material.
+    publicPreview: z.string().optional().default(''),
     blocks: z.array(z.object({
       type: z.enum(['text', 'audio', 'video', 'image', 'practice', 'reflection', 'quote']),
       title: z.string().optional(),

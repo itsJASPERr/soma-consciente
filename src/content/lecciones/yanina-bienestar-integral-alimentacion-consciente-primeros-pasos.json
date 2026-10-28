@@ -7,5 +7,7 @@
   "order": 1,
   "durationMinutes": 0,
   "status": "planned",
-  "blocks": []
+  "blocks": [],
+  "accessLevel": "free",
+  "publicPreview": ""
 }
