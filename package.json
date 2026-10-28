@@ -11,7 +11,10 @@
     "test:responsive": "node scripts/check-responsive.mjs",
     "test:aula-cards": "node scripts/check-aula-card-layout.mjs",
     "test:access": "node scripts/test-learning-access.mjs",
-    "test:domain": "node scripts/check-custom-domain.mjs"
+    "test:domain": "node scripts/check-custom-domain.mjs",
+    "prebuild": "node scripts/generate-social-image.mjs",
+    "predev": "node scripts/generate-social-image.mjs",
+    "test:og": "node scripts/check-og-metadata.mjs"
   },
   "dependencies": {
     "astro": "^5.16.0",
@@ -22,6 +25,7 @@
     "typescript": "^5.9.3",
     "@iconify-json/iconoir": "^1.2.12",
     "@types/markdown-it": "^14.1.2",
-    "playwright-core": "^1.57.0"
+    "playwright-core": "^1.57.0",
+    "sharp": "^0.34.4"
   }
 }

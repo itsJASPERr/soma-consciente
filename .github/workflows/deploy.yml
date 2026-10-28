@@ -30,6 +30,8 @@ jobs:
         run: npm run build
       - name: Verify www domain and root-relative URLs
         run: npm run test:domain
+      - name: Verify social link previews
+        run: npm run test:og
       - name: Responsive browser verification
         timeout-minutes: 3
         run: npm run test:responsive
