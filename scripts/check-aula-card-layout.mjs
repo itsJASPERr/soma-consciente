@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 
-const ROOT='http://127.0.0.1:4321/soma-consciente';
+const ROOT='http://127.0.0.1:4321';
 const WIDTHS=[320,375,430,599,600,650,680,681,767,879,880,900,1024,1149,1150,1151,1280];
 const PAGES=['/','/aulas/'];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -36,7 +36,7 @@ try {
       return route.continue();
     // Some Astro asset URLs resolve against the configured canonical site.
     // Serve those asset requests from the current local PR build instead.
-    if(url.hostname==='itsjasperr.github.io' && url.pathname.startsWith('/soma-consciente/')){
+    if(url.hostname==='www.soma-consciente.com'){
       const response=await route.fetch({url:'http://127.0.0.1:4321'+url.pathname+url.search});
       return route.fulfill({response});
     }

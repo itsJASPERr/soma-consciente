@@ -1,21 +1,13 @@
 ---
 import type { Leccion } from '../lib/learning';
 import { renderLearningMarkdown } from '../lib/markdown';
-import { path } from '../lib/paths';
+import { mediaUrl } from '../lib/media';
 import { Icon } from 'astro-icon/components';
 type Block = Leccion['blocks'][number];
 const { block, index } = Astro.props as { block: Block; index: number };
-function safeMediaURL(input: string | undefined): string | null {
-  if (!input) return null;
-  if (/^\/(?!\/)/.test(input)) {
-    if (input.startsWith('/soma-consciente/')) return input;
-    return path(input);
-  }
-  try {
-    const u = new URL(input);
-    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
-  } catch { return null; }
-}
+// Use the same media resolver for lesson audio, video, images and posters.
+const safeMediaURL = mediaUrl;
+
 function videoSource(input: string | undefined): {kind:'iframe'|'file'; url:string} | null {
   const url = safeMediaURL(input);
   if (!url) return null;

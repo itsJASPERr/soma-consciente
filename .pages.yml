@@ -1,6 +1,6 @@
 media:
   input: public/media
-  output: /soma-consciente/media
+  output: /media
   rename: safe
 
 content:

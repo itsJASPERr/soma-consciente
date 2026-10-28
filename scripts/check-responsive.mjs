@@ -8,7 +8,7 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 
 const HOST='http://127.0.0.1:4321';
-const BASE='/soma-consciente';
+const BASE='';
 const paths=[
  '/',
  '/aulas/jasper/',
