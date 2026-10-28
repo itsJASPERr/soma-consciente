@@ -1,6 +1,6 @@
 ---
-import type { Curso, CourseTree, Leccion, Seccion } from '../lib/learning';
-import { lessonHref, courseHref } from '../lib/learning';
+import type { Curso, CourseTree } from '../lib/learning';
+import { lessonHref, courseHref, isFreeLesson, isPublicPreview, accessLabel } from '../lib/learning';
 import { Icon } from 'astro-icon/components';
 const { tree, course, aulaSlug, currentKey } = Astro.props as { tree: CourseTree; course: Curso; aulaSlug: string; currentKey?: string };
 const order = (n: number) => String(n).padStart(2,'0');
@@ -14,11 +14,19 @@ const order = (n: number) => String(n).padStart(2,'0');
       <Icon name="iconoir:nav-arrow-down" size={17} class="outline-chevron"/>
     </summary>
     <div class="course-outline__lessons">
-      {lessons.map((lesson) => lesson.status === 'published'
+      {lessons.map(lesson => isFreeLesson(lesson)
         ? <a class:list={['course-outline__lesson',{'is-current':lesson.key===currentKey}]} aria-current={lesson.key===currentKey?'page':undefined} href={lessonHref(aulaSlug,course,section,lesson)}>
-            <Icon name="iconoir:play-outline" size={15}/><span>{lesson.title}</span>
+            <Icon name="iconoir:play-outline" size={15}/><span>{lesson.title}</span><span class="course-outline__access course-outline__access--free">Gratis</span>
           </a>
-        : <span class="course-outline__lesson is-planned"><Icon name="iconoir:lock" size={15}/><span>{lesson.title}</span></span>
+        : isPublicPreview(lesson)
+        ? <a class:list={['course-outline__lesson','is-preview',{'is-current':lesson.key===currentKey}]} aria-current={lesson.key===currentKey?'page':undefined} href={lessonHref(aulaSlug,course,section,lesson)}>
+            <Icon name="iconoir:eye" size={15}/><span>{lesson.title}</span><span class="course-outline__access">Vista previa</span>
+          </a>
+        : lesson.status==='published'
+        ? <span class="course-outline__lesson is-locked" aria-label={lesson.title+' — acceso '+accessLabel(lesson.accessLevel)+', aún no disponible'}>
+            <Icon name="iconoir:lock" size={15}/><span>{lesson.title}</span><span class="course-outline__access">{accessLabel(lesson.accessLevel)}</span>
+          </span>
+        : <span class="course-outline__lesson is-planned"><Icon name="iconoir:clock" size={15}/><span>{lesson.title}</span><span class="course-outline__access">Próximamente</span></span>
       )}
       {lessons.length===0 && <span class="course-outline__empty">En preparación</span>}
     </div>

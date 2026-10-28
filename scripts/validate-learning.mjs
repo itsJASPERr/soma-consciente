@@ -28,8 +28,15 @@ for(const s of seccion){ if(!exists(curso,s.course))errors.push('Missing course 
 for(const l of leccion){
  if(!exists(seccion,l.section))errors.push('Missing section for lesson '+l.key);
  if(!['published','planned','draft'].includes(l.status))errors.push('Bad lesson status: '+l.key);
- if(l.status==='published' && (!Array.isArray(l.blocks) || l.blocks.length===0))errors.push('Published lesson has no content: '+l.key);
- if(l.status!=='published' && Array.isArray(l.blocks) && l.blocks.length>0)errors.push('Unpublished lesson has blocks in public source: '+l.key);
+ if(!['free','preview','members','paid'].includes(l.accessLevel ?? 'free'))errors.push('Invalid access level: '+l.key);
+ const blockCount=Array.isArray(l.blocks) ? l.blocks.length : 0;
+ if((l.accessLevel ?? 'free')!=='free' && blockCount>0)
+   errors.push('SECURITY: restricted or preview lesson includes public blocks: '+l.key);
+ if(l.status==='published' && (l.accessLevel ?? 'free')==='free' && blockCount===0)
+   errors.push('Published free lesson has no content: '+l.key);
+ if(l.status!=='published' && blockCount>0)errors.push('Unpublished lesson includes public blocks: '+l.key);
+ if(l.status==='published' && l.accessLevel==='preview' && !(l.publicPreview||'').trim())
+   errors.push('Published preview requires public teaser: '+l.key);
 }
 for(const c of curso.filter(c=>c.published)){
  const related=seccion.filter(s=>s.course===c.key&&s.published);

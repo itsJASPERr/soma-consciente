@@ -42,7 +42,7 @@ const lessons = await loadLessons();
     </section>
     <section class="section" id="recorridos"><div class="container">
       <div class="section-head"><div><span class="eyebrow">Aprender · Practicar · Integrar</span><h2>Recorridos de este Aula</h2><p>Los cursos se organizan en etapas y lecciones que podés explorar a tu ritmo, desde cualquier lugar.</p></div></div>
-      {courses.length ? <div class="learning-course-list">{courses.map(course=><CourseCard aula={aula} course={course} available={courseTree(course,sections,lessons).available.length} planned={courseTree(course,sections,lessons).plannedCount}/>)}</div>
+      {courses.length ? <div class="learning-course-list">{courses.map(course=><CourseCard aula={aula} course={course} available={courseTree(course,sections,lessons).available.length} previews={courseTree(course,sections,lessons).previews.length} locked={courseTree(course,sections,lessons).lockedCount} planned={courseTree(course,sections,lessons).plannedCount}/>)}</div>
       : <div class="learning-empty"><Icon name="iconoir:book-stack" size={30}/><h3>Un espacio en construcción</h3><p>Pronto encontrarás recorridos y contenidos propios de esta Aula. Mientras tanto, podés explorar las prácticas gratuitas que compartimos en SOMA.</p><a class="btn" href={path('/biblioteca/')}>Ir a la Biblioteca <Icon name="iconoir:arrow-up-right" size={17}/></a></div>}
     </div></section>
     <section class="section--tight aula-about"><div class="container aula-about__grid">

@@ -3,7 +3,8 @@ import SiteLayout from '../../../../../layouts/SiteLayout.astro';
 import type { Aula } from '../../../../../lib/content';
 import { loadAulas } from '../../../../../lib/content';
 import type { Curso, Seccion, Leccion } from '../../../../../lib/learning';
-import { loadCourses, loadSections, loadLessons, courseTree, lessonHref, courseHref } from '../../../../../lib/learning';
+import { loadCourses, loadSections, loadLessons, courseTree, lessonHref, courseHref, hasPublicLessonPage } from '../../../../../lib/learning';
+import { renderLearningMarkdown } from '../../../../../lib/markdown';
 import { path } from '../../../../../lib/paths';
 import CourseOutline from '../../../../../components/CourseOutline.astro';
 import LearningBlock from '../../../../../components/LearningBlock.astro';
@@ -14,7 +15,7 @@ export async function getStaticPaths() {
     const aula=aulas.find(a=>a.slug===course.aula);
     if (!aula) return [];
     return courseTree(course,sections,lessons).sections.flatMap(group=>
-      group.lessons.filter(l=>l.status==='published').map(lesson=>({
+      group.lessons.filter(hasPublicLessonPage).map(lesson=>({
         params:{slug:aula.slug,course:course.slug,section:group.section.slug,lesson:lesson.slug},
         props:{aula,course,section:group.section,lesson}
       }))
@@ -23,9 +24,11 @@ export async function getStaticPaths() {
 }
 const {aula,course,section,lesson}=Astro.props as {aula:Aula;course:Curso;section:Seccion;lesson:Leccion};
 const tree=courseTree(course,await loadSections(),await loadLessons());
-const currentIndex=tree.available.findIndex(x=>x.key===lesson.key);
-const previous=tree.available[currentIndex-1];
-const next=tree.available[currentIndex+1];
+// Navigation only visits public pages; never links to member/paid lessons.
+const browseable=tree.sections.flatMap(group=>group.lessons.filter(hasPublicLessonPage));
+const currentIndex=browseable.findIndex(x=>x.key===lesson.key);
+const previous=browseable[currentIndex-1];
+const next=browseable[currentIndex+1];
 const lookup=(target:Leccion|undefined)=>target?tree.sections.find(x=>x.lessons.some(l=>l.key===target.key))?.section:undefined;
 const previousSection=lookup(previous);
 const nextSection=lookup(next);
@@ -38,9 +41,20 @@ const lessonNum=String(section.order).padStart(2,'0')+'.'+String(lesson.order);
       <aside class="lesson-shell__sidebar"><div class="lesson-sidebar__heading"><span class="eyebrow">{aula.shortName}</span><strong>{course.title}</strong><span>{course.subtitle}</span></div><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></aside>
       <div class="lesson-shell__content">
         <details class="lesson-mobile-outline"><summary><Icon name="iconoir:menu" size={20}/> Índice del curso <Icon name="iconoir:nav-arrow-down" size={17}/></summary><CourseOutline tree={tree} course={course} aulaSlug={aula.slug} currentKey={lesson.key}/></details>
-        <div class="lesson-heading"><div class="lesson-heading__top"><span class="eyebrow">{section.title} · Lección {lessonNum}</span>{lesson.durationMinutes>0 && <span class="lesson-time"><Icon name="iconoir:clock" size={16}/> {lesson.durationMinutes} min aprox.</span>}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p></div>
-        <div class="lesson-blocks">{lesson.blocks.map((block,index)=><LearningBlock block={block} index={index}/>)}</div>
-        <div class="lesson-end"><span>La práctica continúa fuera de la pantalla.</span><p>Podés volver a esta lección cuando quieras. Tu ritmo es parte del camino.</p></div>
+        <div class="lesson-heading"><div class="lesson-heading__top"><span class="eyebrow">{section.title} · Lección {lessonNum}</span>{lesson.durationMinutes>0 && <span class="lesson-time"><Icon name="iconoir:clock" size={16}/> {lesson.durationMinutes} min aprox.</span>}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p>{lesson.accessLevel==='preview' && <span class="lesson-access-badge"><Icon name="iconoir:eye" size={16}/> Vista previa gratuita</span>}</div>
+        {lesson.accessLevel==='free'
+          ? <div class="lesson-blocks">{lesson.blocks.map((block,index)=><LearningBlock block={block} index={index}/>)}</div>
+          : <section class="lesson-preview-panel" aria-label="Vista previa pública">
+            <div class="lesson-preview-panel__eyebrow"><Icon name="iconoir:eye" size={21}/> Solo vista previa</div>
+            <h2>Conocé esta lección</h2>
+            <div class="lesson-richtext" set:html={renderLearningMarkdown(lesson.publicPreview)}/>
+            <div class="lesson-preview-panel__notice">
+              <Icon name="iconoir:lock" size={20}/>
+              <p>El contenido completo de esta lección no está disponible en la web pública. El acceso exclusivo se habilitará cuando SOMA cuente con un sistema seguro de membresías e inscripciones.</p>
+            </div>
+            <a class="btn btn--outline" href={courseHref(aula.slug,course)}>Volver al recorrido <Icon name="iconoir:arrow-left" size={17}/></a>
+          </section>}
+        {lesson.accessLevel==='free' && <div class="lesson-end"><span>La práctica continúa fuera de la pantalla.</span><p>Podés volver a esta lección cuando quieras. Tu ritmo es parte del camino.</p></div>}
         <nav class="lesson-pager" aria-label="Lecciones anterior y siguiente">
           <div>{previous && previousSection ? <a href={lessonHref(aula.slug,course,previousSection,previous)}><Icon name="iconoir:arrow-left" size={18}/><span><small>Anterior</small><strong>{previous.title}</strong></span></a> : <a href={courseHref(aula.slug,course)}><Icon name="iconoir:arrow-left" size={18}/><span><small>Curso</small><strong>Volver al recorrido</strong></span></a>}</div>
           <div>{next && nextSection ? <a href={lessonHref(aula.slug,course,nextSection,next)}><span><small>Siguiente lección</small><strong>{next.title}</strong></span><Icon name="iconoir:arrow-right" size={18}/></a> : <a href={courseHref(aula.slug,course)}><span><small>Recorrido</small><strong>Ver todas las etapas</strong></span><Icon name="iconoir:arrow-right" size={18}/></a>}</div>

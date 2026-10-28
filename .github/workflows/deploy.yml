@@ -24,6 +24,8 @@ jobs:
       - name: Diagnose editorial photo links
         continue-on-error: true
         run: node scripts/check-media-links.mjs
+      - name: Verify free/preview/locked static exports
+        run: npm run test:access
       - name: Build static site
         run: npm run build
       - name: Responsive browser verification
