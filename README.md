@@ -94,8 +94,11 @@ inscripción y cupos con Reservas se sigue en #34.
 En Umami, medí el embudo desde la portada hasta la solicitud para los círculos de integración online. Usá los eventos
 `waitlist_opened` y `waitlist_submitted`. El segundo se registra cuando
 la API confirma el envío y lleva solo el canal elegido. D1 mantiene el
-conteo de solicitudes deduplicadas en la tabla `offering_requests`. La verificación del despliegue
-comprueba ambos rastreadores en las páginas públicas.
+conteo de solicitudes deduplicadas en la tabla `offering_requests`. La
+verificación del despliegue comprueba ambos rastreadores en las páginas
+públicas. Umami se incluye solo en el build de producción de Cloudflare y su
+lista de dominios limita el envío de eventos. CI comprueba que las vistas
+previas no sirvan Umami ni el beacon de Cloudflare Web Analytics.
 
 Etiquetá los enlaces de campaña en minúsculas. Usá `programa_online`
 como campaña y elegí `utm_source`, `utm_medium` y `utm_content`
