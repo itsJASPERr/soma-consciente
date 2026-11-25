@@ -84,10 +84,11 @@ aplicar las migraciones al destino respectivo.
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
 La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
-comunidad**. Si una propuesta carece de enlace directo, el formulario guarda
-una solicitud en `offering_requests` con la propuesta y el canal elegido.
-El equipo puede consultar esa tabla en D1 para responder. La integración de
-inscripción y cupos con Reservas se sigue en #34.
+comunidad**. Los enlaces de los encuentros y del círculo abren WhatsApp con
+Yanina. Si una propuesta carece de enlace directo, su formulario guarda una
+solicitud en `offering_requests` con la propuesta y el canal elegido. El equipo
+puede consultar esa tabla en D1 para responder. La integración de inscripción
+y cupos con Reservas se sigue en #34.
 
 ### Medición del programa online
 
@@ -95,7 +96,7 @@ En Umami, medí el embudo desde la portada hasta la lista de espera del
 programa online. Usá los eventos `waitlist_opened` y `waitlist_submitted`. El
 segundo se registra cuando la API confirma el envío y lleva solo el canal
 elegido. D1 guarda las inscripciones deduplicadas en `waitlist_signups`.
-Las solicitudes para cada encuentro, círculo o comunidad se guardan en
+Las solicitudes recibidas por los formularios de las propuestas se guardan en
 `offering_requests`.
 
 Umami se incluye solo en el build de producción de Cloudflare y su lista de

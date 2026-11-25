@@ -11,14 +11,14 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   });
 
   const endpoint = new URL('/api/waitlist', baseURL).href;
-  let circleSubmissions = 0;
+  let communitySubmissions = 0;
   let programSubmissions = 0;
   await page.route(endpoint, async route => {
     assert.equal(route.request().method(), 'POST');
     const payload = route.request().postDataJSON();
-    if (payload.offering === 'circulos') {
+    if (payload.offering === 'grupo-whatsapp') {
       assert.equal(payload.consent, 'offering-1');
-      circleSubmissions += 1;
+      communitySubmissions += 1;
       await route.fulfill({ status: 204 });
       return;
     }
@@ -47,13 +47,13 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   };
 
   assert.deepEqual(await events(), []);
-  await page.locator('#circulos button[data-offering-signup="circulos"]').click();
+  await page.locator('#grupo-whatsapp button[data-offering-signup="grupo-whatsapp"]').click();
   await form.getByText(/para responder a esta solicitud/).waitFor();
   await fillEmailContact();
   await submit.click();
-  await page.getByText('Recibimos tu solicitud. Te enviaremos los horarios y los pasos para sumarte al círculo semanal.').waitFor();
-  assert.equal(circleSubmissions, 1);
-  assert.deepEqual(await events(), [], 'A circle request must stay outside the program funnel.');
+  await page.getByText('Recibimos tu solicitud. Te enviaremos el enlace para que puedas sumarte al grupo gratuito.').waitFor();
+  assert.equal(communitySubmissions, 1);
+  assert.deepEqual(await events(), [], 'A community request must stay outside the program funnel.');
   await page.getByRole('button', { name: 'Cerrar' }).click();
   await form.waitFor({ state: 'hidden' });
 
@@ -74,5 +74,5 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
     opened,
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
-  console.log('Program waitlist and circle requests use distinct consent, payloads and analytics.');
+  console.log('Program waitlist and community requests use distinct consent, payloads and analytics.');
 }
