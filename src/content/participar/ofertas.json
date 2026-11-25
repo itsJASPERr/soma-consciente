@@ -3,7 +3,7 @@
   "offers": [
     {
       "slug": "encuentro-enero",
-      "title": "Encuentro de enero",
+      "title": "Retreat SOMA Consciente",
       "when": "15 y 16 de enero de 2027",
       "description": "Dos días para encontrarnos y compartir experiencias en persona.",
       "venue": "Casa Sabia · La Falda, Córdoba",
@@ -14,7 +14,17 @@
       "context": "",
       "pending": "El detalle suma horarios, precio y condiciones cuando el equipo los confirma.",
       "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20enero.",
-      "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio."
+      "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+      "dates": [
+        {
+          "when": "15 y 16 de enero de 2027",
+          "venue": "Casa Sabia · La Falda, Córdoba",
+          "details": "Un mes de participación en los círculos de integración online.",
+          "action": "Solicitar inscripción",
+          "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+          "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20enero."
+        }
+      ]
     },
     {
       "slug": "circulos",

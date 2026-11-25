@@ -74,6 +74,17 @@ content:
           - { name: actionHint, label: Qué pasa al abrir el enlace directo, type: text }
           - { name: followUp, label: Próximo paso al enviar la solicitud, type: text }
           - { name: url, label: Enlace directo de inscripción o invitación, type: string }
+          - name: dates
+            label: Fechas de este encuentro
+            type: object
+            list: true
+            fields:
+              - { name: when, label: Fecha, type: string, required: true }
+              - { name: venue, label: Lugar, type: string, required: true }
+              - { name: details, label: Qué incluye, type: text, required: true }
+              - { name: action, label: Texto del botón, type: string, required: true }
+              - { name: actionHint, label: Qué pasa al abrir el enlace, type: text }
+              - { name: url, label: Enlace de inscripción, type: string, required: true }
 
   - name: aulas
     label: Las cuatro Aulas

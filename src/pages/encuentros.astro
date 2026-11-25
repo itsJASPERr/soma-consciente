@@ -2,15 +2,43 @@
 import EditorialPhoto from '../components/EditorialPhoto.astro';
 import OfferingAction from '../components/OfferingAction.astro';
 import SignupDialog from '../components/SignupDialog.astro';
+import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { loadAulas } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-import { offeringUrl, offerings } from '../lib/offerings';
+import { offeringUrl, offerings, type Offering } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 const home = await loadHomepage();
+const aulas = await loadAulas();
+const areas = ['nicole', 'jasper', 'yanina', 'nico']
+  .map((slug) => aulas.find((aula) => aula.slug === slug))
+  .filter((aula) => aula !== undefined);
 const encounter = offerings.find(offer => offer.slug === 'encuentro-enero');
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
+const retreatDates = encounter && 'dates' in encounter && encounter.dates?.length
+  ? encounter.dates
+  : [];
+const retreatEvents: Offering[] = encounter
+  ? (retreatDates.length ? retreatDates : [{
+      when: encounter.when || '',
+      venue: encounter.venue || '',
+      details: encounter.details || '',
+      action: encounter.action,
+      actionHint: encounter.actionHint,
+      url: encounter.url,
+    }]).map((date, index) => ({
+      ...encounter,
+      slug: index === 0 ? encounter.slug : encounter.slug + '-' + (index + 1),
+      when: date.when,
+      venue: date.venue,
+      details: date.details,
+      action: date.action,
+      actionHint: date.actionHint,
+      url: date.url,
+    }))
+  : [];
 const link = encounter && offeringUrl(encounter);
 const message = link?.startsWith('https://wa.me/') ? new URL(link).searchParams.get('text') : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
@@ -19,41 +47,53 @@ const action = encounter && link ? { label: encounter.action, href: link } : und
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Encuentros presenciales" description="Vivencias y retiros presenciales de SOMA. Conocé el encuentro del 15 y 16 de enero de 2027, con un mes de integración online incluido, y Puerta Abierta en La Falda." openJourney journeyAction={action}>
+<SiteLayout title="Retreat SOMA Consciente" description="Retreat SOMA Consciente. El encuentro presencial reúne las cuatro áreas y, en cada fecha, incluye un mes de círculos de integración online. La próxima fecha es el 15 y 16 de enero de 2027 en Casa Sabia, La Falda." openJourney journeyAction={action}>
   {encounter ? (
-    <article
-      id={encounter.slug}
-      class:list={['offering', 'container', 'journey-hero', { 'journey-hero--photo': fire.src }]}
-      aria-labelledby="encuentro-title"
-    >
-      <div class="journey-hero__copy">
-        <span class="eyebrow">Encuentros presenciales</span>
-        <h1 id="encuentro-title">{encounter.shortTitle || encounter.title}</h1>
-        <div class="event-facts">
-          {encounter.when && <strong>{encounter.when}</strong>}
-          {encounter.venue && <span>{encounter.venue}</span>}
+    <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
+      <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
+        <div class="journey-hero__copy">
+          <span class="eyebrow">Encuentros presenciales</span>
+          <h1 id="encuentro-title">{encounter.title}</h1>
+          <p class="journey-lead">{encounter.description}</p>
+          <ul class="retreat-areas" aria-label="Cuatro áreas del retreat">
+            {areas.map((area) => (
+              <li>
+                <SomaAulaSymbol symbol={area.symbol} />
+                <span>{area.name}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <p class="journey-lead">{encounter.description}</p>
-        {encounter.details && (
-          <div class="offering__panel event-benefit">
-            <h2>Qué incluye</h2>
-            <p>{encounter.details}</p>
-            <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
-          </div>
-        )}
-        <div class="offering__action">
-          <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} showArrow />
-          {encounter.followUp && <p>{encounter.followUp}</p>}
-        </div>
+        <EditorialPhoto image={fire} class="journey-photo--campfire" priority>
+          {message && (
+            <figcaption class="event-message">
+              <span class="eyebrow">Mensaje preparado para Yanina</span>
+              <p>«{message}»</p>
+            </figcaption>
+          )}
+        </EditorialPhoto>
       </div>
-      <EditorialPhoto image={fire} class="journey-photo--campfire" priority>
-        {message && (
-          <figcaption class="event-message">
-            <span class="eyebrow">Mensaje preparado para Yanina</span>
-            <p>«{message}»</p>
-          </figcaption>
-        )}
-      </EditorialPhoto>
+      <div class="container retreat-dates">
+        <h2>Próximas fechas</h2>
+        {retreatEvents.map((event) => (
+          <section class="retreat-date" aria-labelledby={event.slug + '-when'}>
+            <div class="event-facts">
+              <strong id={event.slug + '-when'}>{event.when}</strong>
+              {event.venue && <span>{event.venue}</span>}
+            </div>
+            {event.details && (
+              <div class="offering__panel event-benefit">
+                <h3>Qué incluye</h3>
+                <p>{event.details}</p>
+                <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+              </div>
+            )}
+            <div class="offering__action">
+              <OfferingAction offer={event} requestsEnabled={requestsEnabled} showArrow />
+            </div>
+          </section>
+        ))}
+      </div>
     </article>
   ) : (
     <section class="container journey-hero">
@@ -89,6 +129,30 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 
 <style>
   .offering { scroll-margin-top: 1.25rem; }
+  .retreat-areas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+    margin: 1.35rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .retreat-areas li {
+    display: grid;
+    justify-items: center;
+    gap: .4rem;
+    min-width: 0;
+    color: var(--pine-dark);
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .retreat-areas :global(img) { width: 3.4rem; height: 3.4rem; }
+  .retreat-dates { padding-block: clamp(1.5rem, 4vw, 3rem) 0; }
+  .retreat-dates > h2 { margin-bottom: .4rem; color: var(--pine-dark); font-size: clamp(2rem, 4vw, 3rem); }
+  .retreat-date { padding-block: 1.2rem; border-top: 1px solid var(--line); }
+  .event-benefit h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); color: var(--pine-dark); margin: 0 0 .3rem; }
   .event-facts {
     display: grid;
     gap: .1rem;
@@ -125,5 +189,6 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     .continuity.journey-hero--photo { grid-template-columns: minmax(0,1fr); }
     .continuity > div { grid-row: 1; }
     .continuity :global(.journey-photo) { max-inline-size: 26rem; }
+    .retreat-areas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 </style>
