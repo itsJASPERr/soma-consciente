@@ -30,8 +30,11 @@ const { signupEnabled } = Astro.props;
     </button>
   )}
   <div class="program-waitlist__encounter">
-    <h3>Encuentros presenciales. <em>Integración online.</em></h3>
-    <a class="btn" href={path('/encuentros/#encuentro-enero')}>Ver el encuentro <span aria-hidden="true">↗</span></a>
+    <div>
+      <h3>Programas activos</h3>
+      <p class="program-waitlist__description">Encuentros presenciales. Integración online.</p>
+    </div>
+    <a class="btn btn--outline" href={path('/encuentros/')}>Ver encuentros <span aria-hidden="true">↗</span></a>
   </div>
 </section>
 
@@ -77,14 +80,5 @@ const { signupEnabled } = Astro.props;
     padding-top: 1.1rem;
     border-top: 1px solid var(--journey-rule, var(--line));
   }
-  .program-waitlist__encounter h3 {
-    margin: 0;
-    color: var(--pine-dark);
-    font-size: clamp(1.7rem, 3vw, 2.4rem);
-  }
-  .program-waitlist__encounter em {
-    display: block;
-    color: var(--journey-clay, var(--terra));
-    font-style: italic;
-  }
+  .program-waitlist__encounter h3 { margin: 0 0 .4rem; }
 </style>
