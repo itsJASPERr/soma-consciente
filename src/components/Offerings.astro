@@ -17,13 +17,15 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
   {offers.map((offer) => {
     const url = offeringUrl(offer);
     const featured = offer.slug === 'encuentro-enero';
+    const details = featured ? offer.details : [offer.venue, offer.details].filter(Boolean).join(' · ');
     return (
       <article id={offer.slug} class:list={['offering', { 'offering--featured': featured }]} aria-labelledby={offer.slug + '-title'}>
         <div class="offering__copy">
           {offer.when && <p class="offering__when">{offer.when}</p>}
           <h3 id={offer.slug + '-title'}>{offer.title}</h3>
+          {featured && offer.venue && <p class="offering__venue">{offer.venue}</p>}
           <p>{offer.description}</p>
-          {(offer.details || offer.venue) && <p class="offering__details">{[offer.venue, offer.details].filter(Boolean).join(' · ')}</p>}
+          {details && <p class="offering__details">{details}</p>}
           {featured && <a class="text-link offering__integration" href={path('/acompanamiento/#circulos')}>Conocer los círculos incluidos <span aria-hidden="true">↗</span></a>}
           <OfferingAction offer={offer} requestsEnabled={requestsEnabled} />
           {!url && requestsEnabled && offer.followUp && <p class="offering__next">{offer.followUp}</p>}
@@ -79,6 +81,10 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
   }
   .offering--featured h3 { font-size: clamp(1.9rem, 4.15vw, 3.65rem); }
   .offering p { max-inline-size: 48ch; }
+  .offering__venue {
+    color: var(--pine);
+    margin-bottom: .6rem;
+  }
   .offering__details {
     color: var(--pine-dark);
     font-weight: 700;

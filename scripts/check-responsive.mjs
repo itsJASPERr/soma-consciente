@@ -55,7 +55,7 @@ try{
         const interesting=[
           '.site-header .brand',
           '.site-header .mobile-nav summary',
-          '.participation-hero h1','.participation-feature__date','.participation-feature .btn',
+          '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
           '.participation-row h2','.participation-row .btn','.participation-row .text-link',
           '#programa-online-title','.program-waitlist .btn',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
@@ -81,9 +81,9 @@ try{
         const feature = document.querySelector('.participation-feature');
         if (feature && viewport <= 680) {
           const photo = document.querySelector('.participation-hero__frame');
-          const details = feature.querySelectorAll('.participation-feature__date, .participation-feature__included, .btn');
+          const details = feature.querySelectorAll('.participation-feature__date, .participation-feature__venue, .participation-feature__included, .btn');
           if (photo && Array.from(details).some(node => node.getBoundingClientRect().bottom > photo.getBoundingClientRect().top + 1)) {
-            problems.push('the January date, included circles and CTA must appear before the photo on mobile');
+            problems.push('the January date, venue, included circles and CTA must appear before the photo on mobile');
           }
         }
         const menu=document.querySelector('.site-header .mobile-nav summary');

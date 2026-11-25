@@ -22,6 +22,7 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
         <div class="participation-feature" id={encounter.slug}>
           <p class="participation-label">Próximo encuentro</p>
           <h2 class="participation-feature__date">{encounter.when || encounter.title}</h2>
+          {encounter.venue && <p class="participation-feature__venue">{encounter.venue}</p>}
           {encounter.details && <p class="participation-feature__included">{encounter.details}</p>}
           <a class="btn" href={path('/encuentros/#' + encounter.slug)}>Ver el encuentro <span aria-hidden="true">↗</span></a>
         </div>
@@ -39,9 +40,15 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   <section id={circles.slug} class="participation-row participation-row--circles" aria-labelledby="participation-circles">
     <div class="container participation-row__layout">
       <h2 id="participation-circles">{circles.shortTitle || circles.title}</h2>
-      {circles.when && <p class="participation-row__frequency">{circles.when}</p>}
-      {circles.details && <p class="participation-row__price">{circles.details}</p>}
-      <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+      {(circles.details || circles.when) && (
+        <div class="participation-row__details">
+          {circles.details && <p class="participation-row__price">{circles.details}</p>}
+          {circles.when && <p class="participation-row__secondary">{circles.when}</p>}
+        </div>
+      )}
+      <div class="participation-row__action">
+        <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+      </div>
     </div>
   </section>
 )}
@@ -50,9 +57,15 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   <section id={openDoor.slug} class="participation-row participation-row--door" aria-labelledby="participation-door">
     <div class="container participation-row__layout">
       <h2 id="participation-door">{openDoor.shortTitle || openDoor.title}</h2>
-      {(openDoor.venue || openDoor.details) && <p class="participation-row__place">{[openDoor.venue, openDoor.details].filter(Boolean).join(' · ')}</p>}
-      {openDoor.when && <p class="participation-row__date">{openDoor.when}</p>}
-      <OfferingAction offer={openDoor} requestsEnabled={requestsEnabled} class="text-link" showArrow />
+      {(openDoor.when || openDoor.venue || openDoor.details) && (
+        <div class="participation-row__details">
+          {openDoor.when && <p class="participation-row__date">{openDoor.when}</p>}
+          {(openDoor.venue || openDoor.details) && <p class="participation-row__secondary">{[openDoor.venue, openDoor.details].filter(Boolean).join(' · ')}</p>}
+        </div>
+      )}
+      <div class="participation-row__action">
+        <OfferingAction offer={openDoor} requestsEnabled={requestsEnabled} class="text-link" showArrow />
+      </div>
     </div>
   </section>
 )}
@@ -61,7 +74,9 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   <section id={community.slug} class="participation-row participation-row--community" aria-labelledby="participation-community">
     <div class="container participation-row__layout">
       <h2 id="participation-community">{community.title}</h2>
-      <OfferingAction offer={community} requestsEnabled={requestsEnabled} class="btn btn--light" showArrow />
+      <div class="participation-row__action">
+        <OfferingAction offer={community} requestsEnabled={requestsEnabled} class="btn btn--light" showArrow />
+      </div>
     </div>
   </section>
 )}
@@ -129,6 +144,11 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     font-size: clamp(1.94rem, 3.55vw, 3.15rem);
     margin: 0 0 .26rem;
   }
+  .participation-feature__venue {
+    color: var(--pine);
+    line-height: 1.4;
+    margin: 0 0 .48rem;
+  }
   .participation-feature__included {
     max-width: 47ch;
     color: var(--pine-dark);
@@ -158,14 +178,20 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   }
   .participation-row__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    grid-template-columns: minmax(0, 1fr) minmax(13rem, 15rem) minmax(11.5rem, 12.5rem);
     align-items: center;
-    justify-items: start;
-    gap: .65rem clamp(.85rem, 2.3vw, 1.65rem);
+    gap: .65rem clamp(1rem, 3vw, 2.25rem);
     padding-block: clamp(.9rem, 2vw, 1.3rem);
   }
-  .participation-row--community .participation-row__layout {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .participation-row__details {
+    display: grid;
+    gap: .15rem;
+    line-height: 1.4;
+  }
+  .participation-row__action {
+    grid-column: 3;
+    justify-self: end;
+    max-inline-size: 100%;
   }
   .participation-row h2 {
     margin: 0;
@@ -183,24 +209,37 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     color: var(--pine-dark);
     font-weight: 700;
   }
-  .participation-row__place, .participation-row__frequency {
-    color: var(--pine-dark);
+  .participation-row__secondary {
+    color: var(--pine);
   }
   @media (max-width: 850px) {
     .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-columns: minmax(0, 1fr) minmax(10rem, 12.5rem);
+      row-gap: .38rem;
     }
-    .participation-row__layout h2 { grid-column: 1 / -1; }
-    .participation-row--community h2 { grid-column: auto; }
+    .participation-row__details { grid-column: 1; }
+    .participation-row__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+    .participation-row--community .participation-row__action { grid-row: 1; }
   }
   @media (max-width: 680px) {
     .participation-hero__layout--with-image { grid-template-columns: minmax(0, 1fr); }
     .participation-hero h1 { font-size: clamp(2.4rem, 8.3vw, 3.8rem); }
     .participation-hero__frame { min-block-size: 0; aspect-ratio: 1.62; }
   }
-  @media (max-width: 550px) {
-    .participation-row__layout,
-    .participation-row--community .participation-row__layout { grid-template-columns: minmax(0, 1fr); gap: .34rem; }
-    .participation-row :global(.btn) { margin-top: .32rem; }
+  @media (max-width: 600px) {
+    .participation-row__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: .45rem;
+    }
+    .participation-row__action,
+    .participation-row--community .participation-row__action {
+      grid-column: 1;
+      grid-row: auto;
+      justify-self: start;
+      margin-top: .25rem;
+    }
   }
 </style>
