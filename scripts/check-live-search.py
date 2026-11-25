@@ -24,6 +24,8 @@ class SearchMetadata(HTMLParser):
         self.canonicals = []
         self.og_urls = []
         self.robots = []
+        self.umami = 0
+        self.cloudflare = 0
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -33,6 +35,13 @@ class SearchMetadata(HTMLParser):
             self.og_urls.append(attrs.get('content'))
         if tag == 'meta' and attrs.get('name', '').lower() in ('robots', 'googlebot'):
             self.robots.append(attrs.get('content', ''))
+        if tag == 'script':
+            src = urlsplit(attrs.get('src') or '')
+            if (src.netloc == 'cloud.umami.is' and src.path == '/script.js'
+                    and attrs.get('data-website-id') == '41a6c926-f20e-4490-80f4-fc75e59ddfa3'):
+                self.umami += 1
+            if src.netloc == 'static.cloudflareinsights.com' and src.path.startswith('/beacon.min.js'):
+                self.cloudflare += 1
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -40,12 +49,12 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def request(url):
-    return Request(url, headers={'User-Agent': USER_AGENT})
+def request(url, accept='*/*'):
+    return Request(url, headers={'User-Agent': USER_AGENT, 'Accept': accept})
 
 
-def fetch(url):
-    with urlopen(request(url), timeout=12) as response:
+def fetch(url, accept='*/*'):
+    with urlopen(request(url, accept), timeout=12) as response:
         assert response.status == 200, f'{url} returned HTTP {response.status}.'
         assert response.url == url, f'{url} redirects to {response.url}.'
         body = response.read().decode(response.headers.get_content_charset() or 'utf-8')
@@ -69,12 +78,14 @@ def check_page(url):
     assert parts.scheme == 'https' and parts.netloc == 'soma-consciente.com', f'Unexpected page URL: {url}'
     assert not parts.query and not parts.fragment, f'The sitemap links to a URL variant: {url}'
 
-    html, headers = fetch(url)
+    html, headers = fetch(url, 'text/html')
     assert headers.get_content_type() == 'text/html', f'{url} did not serve HTML.'
     metadata = SearchMetadata()
     metadata.feed(html)
     assert metadata.canonicals == [url], f'{url} declares canonical URLs {metadata.canonicals}.'
     assert metadata.og_urls == [url], f'{url} declares Open Graph URLs {metadata.og_urls}.'
+    assert metadata.umami == 1, f'{url} serves {metadata.umami} SOMA Umami trackers.'
+    assert metadata.cloudflare == 1, f'{url} serves {metadata.cloudflare} Cloudflare Web Analytics beacons.'
     directives = metadata.robots + headers.get_all('X-Robots-Tag', [])
     assert not any(NOINDEX.search(rule) for rule in directives), f'{url} is marked noindex.'
 
@@ -110,7 +121,7 @@ def verify():
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(check_page, pages))
-    print(f'Live sitemap, robots.txt, redirects and metadata verified for {len(pages)} public pages.')
+    print(f'Live sitemap, robots.txt, redirects, metadata and analytics verified for {len(pages)} public pages.')
 
 
 if __name__ == '__main__':

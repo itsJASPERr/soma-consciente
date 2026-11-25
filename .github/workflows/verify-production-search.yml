@@ -22,5 +22,5 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
-      - name: Verify sitemap, robots.txt, redirects and live page metadata
+      - name: Verify search metadata and analytics on the public site
         run: python3 scripts/check-live-search.py

@@ -6,6 +6,7 @@
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
+import { checkWaitlistTracking } from './check-waitlist-tracking.mjs';
 
 const HOST='http://127.0.0.1:4321';
 const BASE='';
@@ -115,6 +116,9 @@ try{
     }
     console.log('Checked '+width+'px across '+paths.length+' pages');
   }
+  await checkWaitlistTracking(page, HOST+BASE, {
+    required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
+  });
 } catch(e){
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {

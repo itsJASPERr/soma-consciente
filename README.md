@@ -89,6 +89,20 @@ una solicitud en `offering_requests` con la propuesta y el canal elegido.
 El equipo puede consultar esa tabla en D1 para responder. La integración de
 inscripción y cupos con Reservas se sigue en #34.
 
+### Medición del programa online
+
+En Umami, medí el embudo desde la portada hasta la solicitud para los círculos de integración online. Usá los eventos
+`waitlist_opened` y `waitlist_submitted`. El segundo se registra cuando
+la API confirma el envío y lleva solo el canal elegido. D1 mantiene el
+conteo de solicitudes deduplicadas en la tabla `offering_requests`. La verificación del despliegue
+comprueba ambos rastreadores en las páginas públicas.
+
+Etiquetá los enlaces de campaña en minúsculas. Usá `programa_online`
+como campaña y elegí `utm_source`, `utm_medium` y `utm_content`
+según el canal y la ubicación del enlace.
+
+[Enlace para la bio de Instagram](https://soma-consciente.com/?utm_source=instagram&utm_medium=social&utm_campaign=programa_online&utm_content=bio#circulos)
+
 ## Edición de contenido
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
