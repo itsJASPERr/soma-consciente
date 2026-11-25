@@ -4,28 +4,34 @@
     {
       "slug": "encuentro-enero",
       "title": "Encuentro presencial de enero",
-      "when": "15 y 16 de enero de 2027",
+      "when": "15–16 de enero de 2027",
       "description": "Dos días para compartir prácticas, encontrarnos y abrir espacio a lo que vivimos juntos.",
       "details": "Incluye un mes de participación en los círculos de integración online.",
       "action": "Solicitar inscripción",
+      "followUp": "Te contactaremos para compartir los detalles y confirmar tu inscripción.",
       "url": ""
     },
     {
       "slug": "circulos",
       "title": "Círculo de integración online",
+      "shortTitle": "Círculo de integración",
       "when": "Una vez por semana",
       "description": "Un espacio grupal para volver sobre lo vivido, compartir lo que se va moviendo y darle lugar en lo cotidiano.",
       "details": "ARS 20.000 por mes",
       "action": "Quiero participar",
+      "followUp": "Te enviaremos los horarios y los pasos para sumarte al círculo semanal.",
       "url": ""
     },
     {
       "slug": "puerta-abierta",
       "title": "Puerta Abierta en Casa Sabia",
+      "shortTitle": "Puerta Abierta",
       "when": "Fecha a anunciar",
       "description": "Un encuentro presencial para conocer a SOMA y compartir un rato en Casa Sabia.",
+      "venue": "Casa Sabia",
       "details": "La Falda, Córdoba",
       "action": "Avisame la fecha",
+      "followUp": "Te avisaremos cuando se confirme la fecha de Puerta Abierta en Casa Sabia.",
       "url": ""
     },
     {
@@ -35,6 +41,7 @@
       "description": "Un espacio para estar en contacto con la comunidad de SOMA y enterarte de los próximos encuentros.",
       "details": "",
       "action": "Pedir el enlace",
+      "followUp": "Te enviaremos el enlace para que puedas sumarte al grupo gratuito.",
       "url": ""
     }
   ]

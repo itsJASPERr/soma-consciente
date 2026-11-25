@@ -63,10 +63,13 @@ content:
         fields:
           - { name: slug, label: Identificador del enlace, type: string, required: true }
           - { name: title, label: Título, type: string, required: true }
+          - { name: shortTitle, label: Título breve para la portada, type: string }
           - { name: when, label: Fecha o frecuencia, type: string }
           - { name: description, label: Descripción, type: text, required: true }
+          - { name: venue, label: Sede, type: string }
           - { name: details, label: Lugar, precio o beneficio incluido, type: string }
           - { name: action, label: Texto del botón, type: string, required: true }
+          - { name: followUp, label: Próximo paso al enviar la solicitud, type: text }
           - { name: url, label: Enlace directo de inscripción o invitación, type: string }
 
   - name: aulas

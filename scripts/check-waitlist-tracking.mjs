@@ -29,7 +29,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
   assert.deepEqual(await events(), []);
-  const otherOffering = page.locator('button[data-offering-signup="encuentro-enero"]');
+  const otherOffering = page.locator('button[data-offering-signup="puerta-abierta"]');
   if (await otherOffering.count()) {
     await otherOffering.click();
     assert.deepEqual(await events(), [], 'The in-person offering must stay outside the online funnel.');
@@ -51,7 +51,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
-  await page.getByText('Recibimos tu solicitud. Te contactaremos por el medio que elegiste.').waitFor();
+  await page.getByText('Recibimos tu solicitud. Te enviaremos los horarios y los pasos para sumarte al círculo semanal.').waitFor();
   assert.equal(submissions, 2);
   assert.deepEqual(await events(), [
     opened,

@@ -1,8 +1,8 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
-import Offerings from '../components/Offerings.astro';
-import { offerings, offeringIntro } from '../lib/offerings';
+import HomepageOfferings from '../components/HomepageOfferings.astro';
+import { offeringIntro } from '../lib/offerings';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
@@ -10,41 +10,15 @@ import ResourceCard from '../components/ResourceCard.astro';
 const programThemes = (await loadAulas()).map(({ name }) => name);
 const resources = await loadResources();
 const homeImages = await loadHomepage();
+const encountersPhoto = mediaUrl(homeImages.encountersImage);
+const heroPhoto = encountersPhoto
+  ? { src: encountersPhoto, alt: homeImages.encountersAlt }
+  : { src: mediaUrl(homeImages.heroImage) || '', alt: homeImages.heroAlt, position: homeImages.heroPosition };
 import { path } from '../lib/paths';
 ---
 <SiteLayout description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
-  <section class="hero">
-    <div class="container hero-inner">
-      <div class="hero-copy">
-        <span class="eyebrow">Un camino de integración, presencia y consciencia</span>
-        <h1>SOMA <span>CONSCIENTE</span></h1>
-        <p class="hero-lead">Encuentros presenciales, integración online.</p>
-        <p class="hero-description">{offeringIntro}</p>
-        <div class="btn-row">
-          <a class="btn" href="#encuentro-enero">Ver el próximo encuentro <span aria-hidden="true">↗</span></a>
-          <a class="btn btn--outline" href="#circulos">Círculos de integración <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="hero-tags"><span><i></i>Cuerpo</span><span><i></i>Emoción</span><span><i></i>Consciencia</span><span><i></i>Naturaleza</span></div>
-      </div>
-      <div class="hero-visual hero-visual--photographic">
-        <div class="hero-visual__photo-frame">
-          <img class="hero-visual__photo" src={mediaUrl(homeImages.heroImage) || ''} alt={homeImages.heroAlt} fetchpriority="high" decoding="async" width="1500" height="1200" style={'object-position:'+homeImages.heroPosition}/>
-        </div>
-        <span class="hero-visual__orbit hero-visual__orbit--one" aria-hidden="true"></span>
-        <span class="hero-visual__orbit hero-visual__orbit--two" aria-hidden="true"></span>
-        <span class="hero-visual-note">Aprender · Practicar · Integrar</span>
-      </div>
-    </div>
-  </section>
+  <HomepageOfferings image={heroPhoto} />
   <div class="values-strip"><div class="container values-list"><span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span></div></div>
-  <section class="section" aria-labelledby="participar-title">
-    <div class="container">
-      <div class="section-head">
-        <h2 id="participar-title">Encontrarnos e integrar</h2>
-      </div>
-      <Offerings offers={offerings} image={{ src: mediaUrl(homeImages.encountersImage) || '', alt: homeImages.encountersAlt }} />
-    </div>
-  </section>
   <section class="section">
     <div class="container intro-grid">
       <div>

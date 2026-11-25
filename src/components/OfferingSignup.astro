@@ -308,6 +308,7 @@ const countries = getCountries()
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const offering = opener?.dataset.offeringSignup;
+      const followUp = opener?.dataset.offeringFollowUp || 'Te contactaremos por el medio que elegiste.';
       if (submission || !offering || !contactConsent.checked) return;
 
       const name = nameInput.value.trim();
@@ -365,7 +366,7 @@ const countries = getCountries()
         if (!response.ok) throw new Error('Waitlist signup failed');
         if (currentSubmission.signal.aborted) return;
         resetForm();
-        showResult('Recibimos tu solicitud. Te contactaremos por el medio que elegiste.');
+        showResult('Recibimos tu solicitud. ' + followUp);
         if (offering === 'circulos') void trackWaitlist('waitlist_submitted', { channel });
       } catch {
         if (currentSubmission.signal.aborted) return;

@@ -1,0 +1,50 @@
+---
+import { offeringUrl, type Offering } from '../lib/offerings';
+
+interface Props {
+  offer: Offering;
+  requestsEnabled: boolean;
+  class?: string;
+  showArrow?: boolean;
+}
+
+const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false } = Astro.props;
+const url = offeringUrl(offer);
+const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer.action;
+---
+{url ? (
+  <a class={actionClass} href={url}>
+    {label}
+    {showArrow && <span aria-hidden="true">↗</span>}
+  </a>
+) : requestsEnabled && (
+  <button
+    class={actionClass}
+    type="button"
+    data-offering-signup={offer.slug}
+    data-offering-title={offer.title}
+    data-offering-action={offer.action}
+    data-offering-follow-up={offer.followUp}
+    aria-haspopup="dialog"
+    aria-controls="program-launch-dialog"
+    hidden
+  >
+    {label}
+    {showArrow && <span aria-hidden="true">↗</span>}
+  </button>
+)}
+
+<style>
+  button { cursor: pointer; font-family: inherit; text-align: left; }
+  button[hidden] { display: none; }
+  button.text-link { appearance: none; }
+  .text-link {
+    background: transparent;
+    border: 0;
+    color: var(--pine-dark);
+    text-decoration: underline;
+    text-underline-offset: .25em;
+    min-block-size: 44px;
+    padding: 0;
+  }
+</style>

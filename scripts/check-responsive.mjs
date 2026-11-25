@@ -55,7 +55,8 @@ try{
         const interesting=[
           '.site-header .brand',
           '.site-header .mobile-nav summary',
-          '.hero h1','.hero h1 span','.hero-copy','.hero .btn-row .btn',
+          '.participation-hero h1','.participation-feature__date','.participation-feature .btn',
+          '.participation-row h2','.participation-row .btn','.participation-row .text-link',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
           '.section-head h2','.course-outline__heading-copy strong'
@@ -74,6 +75,14 @@ try{
             if(el.clientWidth>0 && el.scrollWidth>el.clientWidth+3){
               problems.push(selector+'['+i+'] content='+el.scrollWidth+'/'+el.clientWidth);
             }
+          }
+        }
+        const feature = document.querySelector('.participation-feature');
+        if (feature && viewport <= 680) {
+          const photo = document.querySelector('.participation-hero__frame');
+          const details = feature.querySelectorAll('.participation-feature__date, .participation-feature__included, .btn');
+          if (photo && Array.from(details).some(node => node.getBoundingClientRect().bottom > photo.getBoundingClientRect().top + 1)) {
+            problems.push('the January date, included circles and CTA must appear before the photo on mobile');
           }
         }
         const menu=document.querySelector('.site-header .mobile-nav summary');
