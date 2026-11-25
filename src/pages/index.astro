@@ -5,7 +5,6 @@ import ProgramWaitlist from '../components/ProgramWaitlist.astro';
 import ResourceList from '../components/ResourceList.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SignupDialog from '../components/SignupDialog.astro';
-import { offeringIntro } from '../lib/offerings';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
@@ -25,7 +24,7 @@ const heroPhoto = sunrise
 const circlePhoto = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 ---
-<SiteLayout openJourney description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
+<SiteLayout openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
   <HomepageOfferings image={heroPhoto} circleImage={circlePhoto} requestsEnabled={signupEnabled} />
   <section class="program-section" id="metodologia" aria-labelledby="metodologia-title">
     {signupEnabled && landscape && <img class="program-overlay-art" src={landscape} alt="" width="1100" height="780" loading="lazy" decoding="async" />}
