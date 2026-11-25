@@ -74,6 +74,12 @@ aplicar las migraciones al destino respectivo.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
+La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
+comunidad**. Si una propuesta carece de enlace directo, el formulario guarda
+una solicitud en `offering_requests` con la propuesta y el canal elegido.
+El equipo puede consultar esa tabla en D1 para responder. La integración de
+inscripción y cupos con Reservas se sigue en #34.
+
 ## Edición de contenido
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
