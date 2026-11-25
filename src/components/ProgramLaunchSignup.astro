@@ -84,6 +84,10 @@ const countries = getCountries()
           <input id="program-launch-contact" name="contact" required maxlength="254" disabled />
         </div>
       </div>
+      <div class="program-signup__name">
+        <label for="program-launch-name">Tu nombre</label>
+        <input id="program-launch-name" name="name" autocomplete="name" required maxlength="120" />
+      </div>
       <label id="program-launch-contact-consent" class="program-signup__contact-consent" hidden>
         <input type="checkbox" name="contact-consent" value="yes" required disabled />
         <span>{waitlistConsentText}</span>
@@ -106,6 +110,7 @@ const countries = getCountries()
   const defaultChannel = form?.querySelector<HTMLInputElement>('input[name="channel"][checked]');
   const field = document.querySelector<HTMLElement>('#program-launch-contact-field');
   const contact = document.querySelector<HTMLInputElement>('#program-launch-contact');
+  const nameInput = document.querySelector<HTMLInputElement>('#program-launch-name');
   const label = document.querySelector<HTMLLabelElement>('label[for="program-launch-contact"]');
   const countryField = document.querySelector<HTMLElement>('#program-launch-country-field');
   const countryToggle = document.querySelector<HTMLButtonElement>('#program-launch-country-toggle');
@@ -121,7 +126,7 @@ const countries = getCountries()
   const result = document.querySelector<HTMLElement>('#program-launch-result');
 
   if (
-    trigger && dialog && close && form && defaultChannel && field && contact && label && submit && result &&
+    trigger && dialog && close && form && defaultChannel && field && contact && nameInput && label && submit && result &&
     countryField && countryToggle && countryCode && countryPicker && countrySearch &&
     countryOptions && countryEmpty && defaultOption && consentField && contactConsent
   ) {
@@ -255,6 +260,7 @@ const countries = getCountries()
 
     const resetForm = () => {
       form.reset();
+      nameInput.setCustomValidity('');
       selectCountry(defaultOption);
       setChannel(defaultChannel.value);
     };
@@ -274,6 +280,7 @@ const countries = getCountries()
       setChannel(option.value);
     });
 
+    nameInput.addEventListener('input', () => nameInput.setCustomValidity(''));
     contact.addEventListener('input', () => contact.setCustomValidity(''));
     contactConsent.addEventListener('change', () => {
       submit.disabled = !contactConsent.checked;
@@ -282,6 +289,13 @@ const countries = getCountries()
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (submission || !contactConsent.checked) return;
+
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.setCustomValidity('Ingresá tu nombre.');
+        nameInput.reportValidity();
+        return;
+      }
 
       if (contact.type === 'tel') {
         const number = parsePhoneNumberFromString(contact.value, {
@@ -318,6 +332,7 @@ const countries = getCountries()
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            name,
             channel: contact.type === 'tel' ? 'whatsapp' : 'email',
             contact: contact.value,
             country: contact.type === 'tel' ? selectedOption.dataset.country : undefined,
@@ -418,7 +433,8 @@ const countries = getCountries()
     border: 0;
   }
   .program-signup legend,
-  .program-signup__contact label {
+  .program-signup__contact label,
+  .program-signup__name label {
     margin-block-end: .4rem;
     padding: 0;
     font-weight: 700;
@@ -451,11 +467,13 @@ const countries = getCountries()
     grid-column: 2;
     grid-row: 1;
   }
-  .program-signup__contact label {
+  .program-signup__contact label,
+  .program-signup__name label {
     display: block;
     line-height: 1.3;
   }
   .program-signup__contact input,
+  .program-signup__name input,
   .program-signup__country-toggle {
     inline-size: 100%;
     min-block-size: 2.75rem;
@@ -524,7 +542,8 @@ const countries = getCountries()
     color: var(--muted);
     font-size: .9rem;
   }
-  .program-signup__contact :is(input, button):focus-visible {
+  .program-signup__contact :is(input, button):focus-visible,
+  .program-signup__name input:focus-visible {
     outline: 2px solid var(--pine);
     outline-offset: 2px;
   }

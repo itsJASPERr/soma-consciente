@@ -39,7 +39,7 @@ export async function onRequest({ request, env }: Context) {
   let bytes = 0;
   let body = '';
   const decoder = new TextDecoder();
-  let input: { channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown };
+  let input: { name?: unknown; channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown };
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -58,6 +58,9 @@ export async function onRequest({ request, env }: Context) {
   if (!input || typeof input !== 'object' || input.consent !== waitlistConsentVersion) {
     return response(400, 'consent');
   }
+
+  const name = typeof input.name === 'string' ? input.name.trim() : '';
+  if (!name || name.length > 120) return response(400, 'name');
 
   const { channel, country } = input;
   const address = typeof input.contact === 'string' ? input.contact.trim() : '';
@@ -83,10 +86,14 @@ export async function onRequest({ request, env }: Context) {
 
   try {
     await env.WAITLIST_DB.prepare(
-      "INSERT INTO waitlist_signups (channel, contact, consent_version) VALUES (?, ?, ?) " +
-      "ON CONFLICT (channel, contact) DO UPDATE SET consent_version = excluded.consent_version, " +
-      "consented_at = excluded.consented_at WHERE waitlist_signups.consent_version <> excluded.consent_version",
-    ).bind(channel, contact, waitlistConsentVersion).run();
+      "INSERT INTO waitlist_signups (channel, contact, name, consent_version) VALUES (?, ?, ?, ?) " +
+      "ON CONFLICT (channel, contact) DO UPDATE SET " +
+      "name = COALESCE(waitlist_signups.name, excluded.name), " +
+      "consented_at = CASE WHEN waitlist_signups.consent_version <> excluded.consent_version " +
+      "THEN excluded.consented_at ELSE waitlist_signups.consented_at END, " +
+      "consent_version = excluded.consent_version " +
+      "WHERE waitlist_signups.name IS NULL OR waitlist_signups.consent_version <> excluded.consent_version",
+    ).bind(channel, contact, name, waitlistConsentVersion).run();
   } catch {
     return response(503, 'unavailable');
   }

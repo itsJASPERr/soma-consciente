@@ -46,19 +46,20 @@ El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 
 ### Lista de espera en Cloudflare
 
-El formulario usa el endpoint `POST /api/waitlist` de Cloudflare Pages y la
-base D1 vinculada como `WAITLIST_DB`. La migración
-`migrations/0001_waitlist.sql` crea la tabla de contactos y guarda la fecha y la
-versión del consentimiento. Ejecutá `pnpm run test:waitlist` para probar la
-validación y la deduplicación con una base SQLite temporal.
+El formulario envía el nombre, el contacto y el consentimiento a
+`POST /api/waitlist` en Cloudflare Pages. La base D1 vinculada como
+`WAITLIST_DB` guarda esos datos junto con la fecha y la versión del
+consentimiento. Aplicá los archivos de `migrations/` en orden. Ejecutá
+`pnpm run test:waitlist` para probar la validación y la deduplicación
+con una base SQLite temporal.
 
-Para habilitar el formulario en un despliegue de Cloudflare, aplicá la
-migración a la base D1 del entorno, vinculala como `WAITLIST_DB` y compilá
+Para habilitar el formulario en un despliegue de Cloudflare, aplicá las
+migraciones a la base D1 del entorno, vinculala como `WAITLIST_DB` y compilá
 con `PUBLIC_WAITLIST_ENABLED=true`. En los PRs, Wrangler vincula esa base al
 entorno de vista previa si `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` es `true`
 y `CLOUDFLARE_WAITLIST_PREVIEW_DATABASE_ID` contiene su identificador.
 En producción, vinculá una base D1 dedicada en el proyecto Pages y activá
-`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` después de aplicar la migración.
+`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` después de aplicar las migraciones.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
