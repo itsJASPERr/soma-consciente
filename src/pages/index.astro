@@ -67,6 +67,12 @@ const calendar = [
     </div>
   </section>
 
+  <div class="values-strip">
+    <div class="container values-list">
+      <span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span>
+    </div>
+  </div>
+
   <section class="program-section" id="metodologia" aria-labelledby="metodologia-title">
     {signupEnabled && landscape && <img class="program-overlay-art" src={landscape} alt="" width="1100" height="780" loading="lazy" decoding="async" />}
     <div class="container program-preview">
@@ -109,6 +115,12 @@ const calendar = [
     <ResourceList resources={resources} />
   </section>
 
+  <div class="values-strip" aria-hidden="true">
+    <div class="container values-list">
+      <span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span>
+    </div>
+  </div>
+
   {calendar.length > 0 && (
     <section class="container home-calendar" aria-labelledby="proximos-encuentros">
       <div class="journey-row">
@@ -131,6 +143,14 @@ const calendar = [
           </li>
         ))}
       </ul>
+      <div class="home-base">
+        <div>
+          <p class="eyebrow">Nuestra base</p>
+          <h3>Casa Sabia</h3>
+          <p>La Falda, Córdoba. Desde aquí salen los encuentros presenciales.</p>
+        </div>
+        <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, La Falda" width="1126" height="718" loading="lazy" decoding="async" />
+      </div>
     </section>
   )}
   {signupEnabled && <SignupDialog />}
@@ -346,6 +366,32 @@ const calendar = [
   }
   .home-calendar__list p span { display: inline-flex; align-items: center; gap: .4rem; }
   .home-calendar__list :global(svg) { color: var(--terra); }
+  .home-base {
+    display: grid;
+    grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr);
+    align-items: center;
+    gap: clamp(1.2rem, 4vw, 3rem);
+    margin-top: clamp(1.6rem, 4vw, 2.8rem);
+    padding-top: clamp(1.2rem, 3vw, 2rem);
+    border-top: 1px solid var(--journey-rule);
+  }
+  .home-base h3 {
+    margin: .15rem 0 .45rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+  }
+  .home-base p:not(.eyebrow) { margin: 0; max-inline-size: 32ch; }
+  .home-base img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1.57;
+    object-fit: cover;
+    border-radius: 1.5rem;
+  }
+  @media (max-width: 740px) {
+    .home-base { grid-template-columns: minmax(0, 1fr); }
+  }
   @media (max-width: 760px) {
     .program-preview__composition {
       display: flex;

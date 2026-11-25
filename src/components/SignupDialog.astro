@@ -305,11 +305,14 @@ const countries = getCountries()
           : 'Enviar solicitud';
         consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
         const methodology = isProgramWaitlist && trigger.closest('#metodologia');
-        if (methodology) {
+        const heading = methodology?.querySelector('#metodologia-title');
+        if (heading instanceof HTMLElement) {
           restoreScroll = window.scrollY;
-          methodology.scrollIntoView({ block: 'start', behavior: 'instant' });
+          heading.style.scrollMarginTop = '5.25rem';
+          heading.scrollIntoView({ block: 'start', behavior: 'instant' });
         }
         dialog.showModal();
+        if (heading instanceof HTMLElement) heading.scrollIntoView({ block: 'start', behavior: 'instant' });
         if (form.dataset.collect === 'true' && isProgramWaitlist) {
           void trackWaitlist('waitlist_opened');
         }

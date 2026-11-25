@@ -6,6 +6,12 @@
   background: #f6efe3;
 }
 .journey-page .site-header { background: transparent; }
+.journey-page .values-strip {
+  border-top: 1px solid var(--pine-dark);
+  border-bottom: 0;
+  background: var(--cream);
+}
+.journey-page .values-list span { color: var(--pine-dark); }
 .site-header--reveal {
   position: fixed;
   inset-inline: 0;
