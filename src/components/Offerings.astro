@@ -33,7 +33,7 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
           <p>{offer.description}</p>
           {featured && offer.details && (
             <div class="offering__includes">
-              <p class="offering__includes-label">Qué incluye</p>
+              <h4 class="offering__includes-label">Qué incluye</h4>
               <p>{offer.details}</p>
             </div>
           )}
@@ -133,8 +133,9 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
   }
   .offering__includes p { margin: 0; }
   .offering__includes-label {
-    margin-bottom: .25rem;
+    margin: 0 0 .25rem;
     color: var(--pine-dark);
+    font-family: var(--font-body);
     font-size: .78rem;
     font-weight: 700;
     letter-spacing: .08em;

@@ -10,13 +10,17 @@ interface Props {
 
 const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false } = Astro.props;
 const url = offeringUrl(offer);
+const hintId = url && offer.actionHint ? offer.slug + '-action-hint' : undefined;
 const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer.action;
 ---
 {url ? (
-  <a class={actionClass} href={url}>
-    {label}
-    {showArrow && <span aria-hidden="true">↗</span>}
-  </a>
+  <>
+    <a class={actionClass} href={url} aria-describedby={hintId}>
+      {label}
+      {showArrow && <span aria-hidden="true">↗</span>}
+    </a>
+    {hintId && <p class="offering-action-hint" id={hintId}>{offer.actionHint}</p>}
+  </>
 ) : requestsEnabled && (
   <button
     class={actionClass}
@@ -37,6 +41,12 @@ const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer
 <style>
   button { cursor: pointer; font-family: inherit; text-align: left; }
   button[hidden] { display: none; }
+  .offering-action-hint {
+    margin: .5rem 0 0;
+    max-inline-size: 40ch;
+    font-size: .85rem;
+    line-height: 1.4;
+  }
   button.text-link { appearance: none; }
   .text-link {
     background: transparent;

@@ -35,6 +35,17 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   assert.deepEqual(await events(), []);
   await page.locator('#programa-online #program-launch-open').click();
   await form.getByText(/guarde mis datos y me contacte por este canal/).waitFor();
+  await page.getByRole('dialog', { name: 'Nuestro programa online' }).waitFor();
+  assert.ok(await form.getByRole('radio', { name: 'WhatsApp' }).isChecked());
+  const country = form.getByRole('button', { name: 'Código de país, Argentina (+54)' });
+  await country.click();
+  const countrySearch = form.getByRole('combobox', { name: 'Buscar país o prefijo' });
+  await countrySearch.fill('uruguay');
+  assert.equal(await form.getByRole('option').filter({ visible: true }).count(), 1);
+  await countrySearch.press('Enter');
+  assert.ok(await form.getByRole('button', { name: 'Código de país, Uruguay (+598)' }).isVisible());
+  await form.getByRole('checkbox').check();
+  assert.ok(await submit.isDisabled(), 'Consent alone must not enable the empty form.');
   assert.deepEqual(await events(), [opened]);
   await form.getByRole('radio', { name: 'Email' }).check();
   await form.getByRole('textbox', { name: 'Email' }).fill('prueba@example.com');
