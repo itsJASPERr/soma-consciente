@@ -20,6 +20,7 @@
   "dependencies": {
     "astro": "7.4.13",
     "astro-icon": "^1.2.0",
+    "libphonenumber-js": "^1.13.17",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {

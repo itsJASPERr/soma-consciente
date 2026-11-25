@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
+import ProgramLaunchSignup from '../components/ProgramLaunchSignup.astro';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
@@ -53,6 +54,7 @@ import { path } from '../lib/paths';
         <span class="program-preview__status">Próximamente</span>
         <h2 id="programa-online-title">Programa de acompañamiento online</h2>
         <p class="program-preview__intro">Estamos desarrollando nuestro propio programa online para acompañarte en tu camino. Cuatro miradas se encuentran en una metodología compartida.</p>
+        {import.meta.env.DEV && <ProgramLaunchSignup />}
         <div class="program-preview__mark">
           <img
             src={path('/media/soma-original-emblem.png')}
