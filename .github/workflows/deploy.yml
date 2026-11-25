@@ -43,7 +43,11 @@ jobs:
       - name: Build static site
         env:
           PUBLIC_WAITLIST_ENABLED: ${{ env.BUILD_WITH_WAITLIST }}
+          PUBLIC_ANALYTICS_ENABLED: ${{ github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != '' && 'true' || 'false' }}
         run: pnpm run build
+      - name: Verify preview build has no analytics trackers
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/check-live-search.py --preview-build
       - name: Verify canonical URLs and sitemap
         run: pnpm run test:domain
       - name: Verify social link previews
@@ -185,3 +189,9 @@ jobs:
           fi
           "${wrangler[@]}" pages deploy dist --project-name="$PAGES_PROJECT" \
             --branch="$PAGES_BRANCH" --commit-hash="$GITHUB_SHA" --commit-dirty=false
+
+      - name: Verify deployed preview has no analytics trackers
+        if: github.event_name == 'pull_request'
+        env:
+          PREVIEW_URL: ${{ format('https://pr-{0}.soma-consciente-preview.pages.dev/', github.event.pull_request.number) }}
+        run: python3 scripts/check-live-search.py --preview "$PREVIEW_URL"
