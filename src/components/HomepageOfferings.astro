@@ -1,7 +1,7 @@
 ---
 import EditorialPhoto from './EditorialPhoto.astro';
 import OfferingAction from './OfferingAction.astro';
-import { offeringIntro, offerings } from '../lib/offerings';
+import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 type Photo = { src?: string; alt: string; position?: string };
@@ -21,8 +21,8 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 <section class="participation-hero" aria-labelledby="participation-heading">
   <div class:list={['container', 'journey-hero', { 'journey-hero--photo': image?.src }]}>
     <div class="journey-hero__copy">
-      <h1 id="participation-heading">Encuentros presenciales.<br/><em>Integración online.</em></h1>
-      <p class="journey-lead participation-hero__intro">{offeringIntro}</p>
+      <h1 id="participation-heading">La consciencia <em>se vive.</em></h1>
+      <p class="journey-lead participation-hero__intro">Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.</p>
       {encounter && (
         <div class="participation-feature" id={encounter.slug}>
           <p class="eyebrow">Próximo encuentro</p>
@@ -84,7 +84,7 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     font-size: clamp(2.55rem, 4.65vw, 4.25rem);
     text-wrap: initial;
   }
-  .participation-hero em { color: var(--journey-clay); font-style: normal; }
+  .participation-hero em { display: block; color: var(--journey-clay); font-style: normal; }
   .participation-feature {
     max-inline-size: 33rem;
     margin-block-start: clamp(1.1rem, 2vw, 1.6rem);
