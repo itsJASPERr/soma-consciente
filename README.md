@@ -85,8 +85,8 @@ aplicar las migraciones al destino respectivo.
 
 La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
 comunidad**. Los enlaces de los encuentros y del círculo abren WhatsApp con
-Yanina. Si una propuesta carece de enlace directo, su formulario guarda una
-solicitud en `offering_requests` con la propuesta y el canal elegido. El equipo
+Yanina. El botón del grupo abre la invitación pública de WhatsApp. Si una
+propuesta carece de enlace directo, su formulario guarda una solicitud en `offering_requests` con la propuesta y el canal elegido. El equipo
 puede consultar esa tabla en D1 para responder. La integración de inscripción
 y cupos con Reservas se sigue en #34.
 
