@@ -1,5 +1,8 @@
 ---
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js/min';
+import { waitlistConsentText } from '../lib/waitlist-consent';
+
+const collectsSignups = import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 
 const regionNames = new Intl.DisplayNames('es', { type: 'region' });
 const defaultCountry = 'AR';
@@ -24,7 +27,7 @@ const countries = getCountries()
       <h3 id="program-launch-title">Avisame cuando esté listo</h3>
       <button id="program-launch-close" class="program-signup__close" type="button">Cerrar</button>
     </header>
-    <form id="program-launch-form" class="program-signup__form" method="post">
+    <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}>
       <fieldset>
         <legend>¿Cómo querés que te avisemos?</legend>
         <div class="program-signup__channels">
@@ -83,9 +86,9 @@ const countries = getCountries()
       </div>
       <label id="program-launch-contact-consent" class="program-signup__contact-consent" hidden>
         <input type="checkbox" name="contact-consent" value="yes" required disabled />
-        <span>Acepto que SOMA CONSCIENTE guarde mis datos de contacto y me contacte por el medio que elegí para informarme sobre el programa y sus productos.</span>
+        <span>{waitlistConsentText}</span>
       </label>
-      <p class="program-signup__note">Vista previa local. Los datos de esta prueba se descartan.</p>
+      {!collectsSignups && <p class="program-signup__note">Vista previa local. Los datos de esta prueba se descartan.</p>}
       <button class="btn" type="submit" disabled>Quiero recibir el aviso</button>
     </form>
     <p id="program-launch-result" class="program-signup__result" role="status" tabindex="-1" hidden></p>
@@ -94,6 +97,7 @@ const countries = getCountries()
 
 <script>
   import { parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
+  import { waitlistConsentVersion } from '../lib/waitlist-consent';
 
   const trigger = document.querySelector<HTMLButtonElement>('#program-launch-open');
   const dialog = document.querySelector<HTMLDialogElement>('#program-launch-dialog');
@@ -126,6 +130,7 @@ const countries = getCountries()
     let selectedOption = defaultOption;
     let matches: HTMLElement[] = [];
     let activeOption: HTMLElement | undefined;
+    let submission: AbortController | undefined;
 
     const selectCountry = (option: HTMLElement) => {
       selectedOption.setAttribute('aria-selected', 'false');
@@ -257,6 +262,9 @@ const countries = getCountries()
     trigger.addEventListener('click', () => dialog.showModal());
     close.addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => {
+      submission?.abort();
+      submission = undefined;
+      form.inert = false;
       resetForm();
       trigger.focus({ preventScroll: true });
     });
@@ -271,8 +279,9 @@ const countries = getCountries()
       submit.disabled = !contactConsent.checked;
     });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (submission || !contactConsent.checked) return;
 
       if (contact.type === 'tel') {
         const number = parsePhoneNumberFromString(contact.value, {
@@ -287,10 +296,49 @@ const countries = getCountries()
         }
       }
 
-      resetForm();
-      result.textContent = 'Vista previa completada. Los datos de esta prueba se descartaron.';
-      result.hidden = false;
-      result.focus();
+      const showResult = (message: string) => {
+        result.textContent = message;
+        result.hidden = false;
+        result.focus();
+      };
+
+      if (form.dataset.collect !== 'true') {
+        resetForm();
+        showResult('Vista previa completada. Los datos de esta prueba se descartaron.');
+        return;
+      }
+
+      const currentSubmission = new AbortController();
+      submission = currentSubmission;
+      submit.disabled = true;
+      result.hidden = true;
+      form.inert = true;
+      try {
+        const response = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channel: contact.type === 'tel' ? 'whatsapp' : 'email',
+            contact: contact.value,
+            country: contact.type === 'tel' ? selectedOption.dataset.country : undefined,
+            consent: waitlistConsentVersion,
+          }),
+          signal: currentSubmission.signal,
+        });
+        if (!response.ok) throw new Error('Waitlist signup failed');
+        if (currentSubmission.signal.aborted) return;
+        resetForm();
+        showResult('Gracias. Te avisaremos por el medio que elegiste.');
+      } catch {
+        if (currentSubmission.signal.aborted) return;
+        submit.disabled = !contactConsent.checked;
+        showResult('No pudimos guardar tu solicitud. Probá de nuevo en unos minutos.');
+      } finally {
+        if (submission === currentSubmission) {
+          submission = undefined;
+          form.inert = false;
+        }
+      }
     });
 
     resetForm();

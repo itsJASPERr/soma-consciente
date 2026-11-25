@@ -25,13 +25,14 @@ pnpm run build
 
 ## Despliegue
 
-En GitHub: **Settings → Pages → Source: GitHub Actions** y **Custom domain: `www.soma-consciente.com`**. El dominio se configura en *Settings → Pages* (el workflow no usa un `CNAME` como fuente de verdad). DNS en Porkbun: `www` CNAME → `itsjasperr.github.io`; el dominio raíz utiliza registros A/AAAA de GitHub Pages y puede redirigir a www. El archivo `public/CNAME` se incluye como metadato coherente del sitio; GitHub Actions ignora su contenido para configurar el dominio.
+El workflow `.github/workflows/deploy.yml` valida los PRs y publica automáticamente
+los cambios de main. Al configurar la variable de repositorio
+`CLOUDFLARE_PRODUCTION_PROJECT` con el nombre del proyecto Pages, los cambios de
+`main` se publican en Cloudflare con Wrangler. Con la variable vacía, GitHub
+Pages sigue publicando el sitio.
 
-En GitHub: **Settings → Pages → Source: GitHub Actions**. El workflow `.github/workflows/deploy.yml` valida PRs y despliega automáticamente los cambios de `main`.
-
-Dirección prevista: https://www.soma-consciente.com/
-
-Si Pages aún no está habilitado, el build puede finalizar correctamente pero la publicación fallará. Habilitá GitHub Actions como fuente y volvé a ejecutar el workflow.
+La dirección canónica es https://www.soma-consciente.com/. En Cloudflare, asigná
+el dominio personalizado al proyecto Pages que sirve producción.
 
 ### Vistas previas en Cloudflare Pages
 
@@ -42,6 +43,24 @@ se actualiza en `https://pr-<número>.soma-consciente-preview.pages.dev/`.
 El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 **Cloudflare Pages: Edit**. El token se puede guardar como
 `CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
+
+### Lista de espera en Cloudflare
+
+El formulario usa el endpoint `POST /api/waitlist` de Cloudflare Pages y la
+base D1 vinculada como `WAITLIST_DB`. La migración
+`migrations/0001_waitlist.sql` crea la tabla de contactos y guarda la fecha y la
+versión del consentimiento. Ejecutá `pnpm run test:waitlist` para probar la
+validación y la deduplicación con una base SQLite temporal.
+
+Para habilitar el formulario en un despliegue de Cloudflare, aplicá la
+migración a la base D1 del entorno, vinculala como `WAITLIST_DB` y compilá
+con `PUBLIC_WAITLIST_ENABLED=true`. El workflow de PR lee este valor de la
+variable de repositorio `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED`. El despliegue de
+Cloudflare en `main` usa `CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED`. Configurá cada
+variable en true después de aplicar la migración y vincular una base D1
+diferente para cada entorno.
+
+`pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
 ## Edición de contenido
 

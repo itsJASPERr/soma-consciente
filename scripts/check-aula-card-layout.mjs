@@ -74,7 +74,10 @@ try {
           if (themes.map(theme => theme.textContent.trim()).join('|') !== names.join('|')) {
             problems.push('methodology keywords differ from the four titles');
           }
-          if (logo) await logo.decode().catch(() => {});
+          if (logo) {
+            logo.loading = 'eager';
+            await logo.decode().catch(() => {});
+          }
           if (!logo?.naturalWidth || !logo.getAttribute('src').endsWith('/media/soma-original-emblem.png')) {
             problems.push('original SOMA logo is missing or did not load');
           }
