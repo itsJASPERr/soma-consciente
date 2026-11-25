@@ -107,12 +107,14 @@ const calendar = [
     </div>
   </section>
 
-  <section class="container home-library">
-    <div class="journey-row">
-      <div><h2>Biblioteca abierta</h2><p>Recursos gratuitos para explorar y practicar a tu propio ritmo.</p></div>
-      <a class="btn btn--outline" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
+  <section class="container home-library" aria-labelledby="biblioteca-home-title">
+    <p class="eyebrow">Abierto para todos</p>
+    <h2 id="biblioteca-home-title">Contenido para tu camino</h2>
+    <div class="home-library__intro">
+      <p>Recursos gratuitos para empezar hoy. Explorá, practicá y elegí a tu propio ritmo.</p>
+      <a class="journey-link" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
     </div>
-    <ResourceList resources={resources} />
+    <ResourceList resources={resources} cards />
   </section>
 
   <div class="values-strip" aria-hidden="true">
@@ -340,6 +342,20 @@ const calendar = [
   }
   .home-active .btn { margin-top: 1.15rem; }
   .home-library { margin-block: var(--journey-spacing); }
+  .home-library h2 {
+    margin: .15rem 0 .7rem;
+    color: var(--pine-dark);
+    font-size: clamp(2.3rem, 4.6vw, 4rem);
+    text-wrap: balance;
+  }
+  .home-library__intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .8rem 1.5rem;
+  }
+  .home-library__intro p { max-inline-size: 42ch; margin: 0; }
   .home-calendar { margin-block-end: var(--journey-spacing); }
   .home-calendar__list {
     margin: .4rem 0 0;
