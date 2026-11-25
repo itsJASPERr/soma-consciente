@@ -1,6 +1,6 @@
 ---
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js/min';
-import { waitlistConsentText } from '../lib/waitlist-consent';
+import { offeringConsentText } from '../lib/waitlist-consent';
 
 const collectsSignups = import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 
@@ -12,26 +12,21 @@ const countries = getCountries()
   .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 ---
 <div class="program-signup">
-  <button
-    id="program-launch-open"
-    class="btn"
-    type="button"
-    aria-haspopup="dialog"
-    aria-controls="program-launch-dialog"
-    hidden
-  >
-    Avisame cuando esté listo
-  </button>
   <dialog id="program-launch-dialog" class="program-signup__dialog" aria-labelledby="program-launch-title">
     <header class="program-signup__header">
-      <h3 id="program-launch-title">Avisame cuando esté listo</h3>
+      <h3 id="program-launch-title">Participar en SOMA</h3>
       <button id="program-launch-close" class="program-signup__close" type="button">Cerrar</button>
     </header>
+    <p id="program-launch-offering" class="program-signup__offering"></p>
     <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}>
+      <div class="program-signup__name">
+        <label for="program-launch-name">Tu nombre</label>
+        <input id="program-launch-name" name="name" autocomplete="name" required maxlength="120" autofocus />
+      </div>
       <fieldset>
         <legend>¿Cómo querés que te avisemos?</legend>
         <div class="program-signup__channels">
-          <label><input type="radio" name="channel" value="whatsapp" checked required autofocus /> WhatsApp</label>
+          <label><input type="radio" name="channel" value="whatsapp" checked required /> WhatsApp</label>
           <label><input type="radio" name="channel" value="email" required /> Correo electrónico</label>
         </div>
       </fieldset>
@@ -84,16 +79,12 @@ const countries = getCountries()
           <input id="program-launch-contact" name="contact" required maxlength="254" disabled />
         </div>
       </div>
-      <div class="program-signup__name">
-        <label for="program-launch-name">Tu nombre</label>
-        <input id="program-launch-name" name="name" autocomplete="name" required maxlength="120" />
-      </div>
       <label id="program-launch-contact-consent" class="program-signup__contact-consent" hidden>
         <input type="checkbox" name="contact-consent" value="yes" required disabled />
-        <span>{waitlistConsentText}</span>
+        <span>{offeringConsentText}</span>
       </label>
       {!collectsSignups && <p class="program-signup__note">Vista previa local. Los datos de esta prueba se descartan.</p>}
-      <button class="btn" type="submit" disabled>Quiero recibir el aviso</button>
+      <button class="btn" type="submit" disabled>Enviar solicitud</button>
     </form>
     <p id="program-launch-result" class="program-signup__result" role="status" tabindex="-1" hidden></p>
   </dialog>
@@ -101,7 +92,12 @@ const countries = getCountries()
 
 <script>
   import { parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
-  import { waitlistConsentVersion } from '../lib/waitlist-consent';
+  import {
+    offeringConsentText,
+    offeringConsentVersion,
+    waitlistConsentText,
+    waitlistConsentVersion,
+  } from '../lib/waitlist-consent';
 
   type SignupChannel = 'whatsapp' | 'email';
   type WaitlistEvent = 'waitlist_opened' | 'waitlist_submitted';
@@ -117,7 +113,9 @@ const countries = getCountries()
     }
   }
 
-  const trigger = document.querySelector<HTMLButtonElement>('#program-launch-open');
+  const triggers = document.querySelectorAll<HTMLButtonElement>('button[data-offering-signup], button[data-program-waitlist]');
+  const title = document.querySelector<HTMLElement>('#program-launch-title');
+  const offeringLabel = document.querySelector<HTMLElement>('#program-launch-offering');
   const dialog = document.querySelector<HTMLDialogElement>('#program-launch-dialog');
   const close = document.querySelector<HTMLButtonElement>('#program-launch-close');
   const form = document.querySelector<HTMLFormElement>('#program-launch-form');
@@ -136,13 +134,14 @@ const countries = getCountries()
   const defaultOption = countryOptions?.querySelector<HTMLElement>('[aria-selected="true"]');
   const consentField = document.querySelector<HTMLLabelElement>('#program-launch-contact-consent');
   const contactConsent = consentField?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+  const consentCopy = consentField?.querySelector('span');
   const submit = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
   const result = document.querySelector<HTMLElement>('#program-launch-result');
 
   if (
-    trigger && dialog && close && form && defaultChannel && field && contact && nameInput && label && submit && result &&
+    triggers.length && title && offeringLabel && dialog && close && form && defaultChannel && field && contact && nameInput && label && submit && result &&
     countryField && countryToggle && countryCode && countryPicker && countrySearch &&
-    countryOptions && countryEmpty && defaultOption && consentField && contactConsent
+    countryOptions && countryEmpty && defaultOption && consentField && contactConsent && consentCopy
   ) {
     const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase();
     const options = [...countryOptions.querySelectorAll<HTMLElement>('[data-country]')];
@@ -150,6 +149,7 @@ const countries = getCountries()
     let matches: HTMLElement[] = [];
     let activeOption: HTMLElement | undefined;
     let submission: AbortController | undefined;
+    let opener: HTMLButtonElement | undefined;
 
     const selectCountry = (option: HTMLElement) => {
       selectedOption.setAttribute('aria-selected', 'false');
@@ -207,6 +207,7 @@ const countries = getCountries()
       selectCountry(option);
       closeCountryPicker();
       countryToggle.focus();
+      syncSubmit();
     };
 
     countryToggle.addEventListener('mousedown', event => {
@@ -256,6 +257,11 @@ const countries = getCountries()
       if (option) acceptCountry(option);
     });
 
+    const syncSubmit = () => {
+      submit.disabled = Boolean(submission) || !contactConsent.checked ||
+        !nameInput.value.trim() || !contact.value.trim() || !contact.validity.valid;
+    };
+
     const setChannel = (channel: string) => {
       const isWhatsApp = channel === 'whatsapp';
       contact.value = '';
@@ -268,7 +274,7 @@ const countries = getCountries()
       countryField.hidden = !isWhatsApp;
       field.dataset.channel = channel;
       contactConsent.checked = false;
-      submit.disabled = true;
+      syncSubmit();
       result.hidden = true;
     };
 
@@ -279,17 +285,34 @@ const countries = getCountries()
       setChannel(defaultChannel.value);
     };
 
-    trigger.addEventListener('click', () => {
-      dialog.showModal();
-      if (form.dataset.collect === 'true') void trackWaitlist('waitlist_opened');
-    });
+    for (const trigger of triggers) {
+      trigger.addEventListener('click', () => {
+        opener = trigger;
+        const isProgramWaitlist = trigger.hasAttribute('data-program-waitlist');
+        title.textContent = isProgramWaitlist
+          ? trigger.dataset.signupTitle || 'Nuestro programa online'
+          : trigger.dataset.signupAction || 'Participar en SOMA';
+        offeringLabel.textContent = isProgramWaitlist
+          ? 'Dejanos tu contacto para recibir novedades cuando esté listo.'
+          : trigger.dataset.signupTitle || '';
+        submit.textContent = isProgramWaitlist
+          ? trigger.dataset.signupAction || 'Avisame cuando esté listo'
+          : 'Enviar solicitud';
+        consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
+        dialog.showModal();
+        if (form.dataset.collect === 'true' && isProgramWaitlist) {
+          void trackWaitlist('waitlist_opened');
+        }
+      });
+      trigger.hidden = false;
+    }
     close.addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => {
       submission?.abort();
       submission = undefined;
       form.inert = false;
       resetForm();
-      trigger.focus({ preventScroll: true });
+      opener?.focus({ preventScroll: true });
     });
     form.addEventListener('change', (event) => {
       const option = event.target;
@@ -297,15 +320,22 @@ const countries = getCountries()
       setChannel(option.value);
     });
 
-    nameInput.addEventListener('input', () => nameInput.setCustomValidity(''));
-    contact.addEventListener('input', () => contact.setCustomValidity(''));
-    contactConsent.addEventListener('change', () => {
-      submit.disabled = !contactConsent.checked;
+    nameInput.addEventListener('input', () => {
+      nameInput.setCustomValidity('');
+      syncSubmit();
     });
+    contact.addEventListener('input', () => {
+      contact.setCustomValidity('');
+      syncSubmit();
+    });
+    contactConsent.addEventListener('change', syncSubmit);
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (submission || !contactConsent.checked) return;
+      const offering = opener?.dataset.offeringSignup;
+      const isProgramWaitlist = opener?.hasAttribute('data-program-waitlist') === true;
+      const followUp = opener?.dataset.signupFollowUp || 'Te contactaremos por el medio que elegiste.';
+      if (submission || (!isProgramWaitlist && !offering) || !contactConsent.checked) return;
 
       const name = nameInput.value.trim();
       if (!name) {
@@ -350,27 +380,30 @@ const countries = getCountries()
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            offering,
             name,
             channel,
             contact: contact.value,
             country: channel === 'whatsapp' ? selectedOption.dataset.country : undefined,
-            consent: waitlistConsentVersion,
+            consent: isProgramWaitlist ? waitlistConsentVersion : offeringConsentVersion,
           }),
           signal: currentSubmission.signal,
         });
         if (!response.ok) throw new Error('Waitlist signup failed');
         if (currentSubmission.signal.aborted) return;
         resetForm();
-        showResult('Gracias. Te avisaremos por el medio que elegiste.');
-        void trackWaitlist('waitlist_submitted', { channel });
+        showResult(isProgramWaitlist
+          ? 'Gracias. Te avisaremos por el medio que elegiste.'
+          : 'Recibimos tu solicitud. ' + followUp);
+        if (isProgramWaitlist) void trackWaitlist('waitlist_submitted', { channel });
       } catch {
         if (currentSubmission.signal.aborted) return;
-        submit.disabled = !contactConsent.checked;
         showResult('No pudimos guardar tu solicitud. Probá de nuevo en unos minutos.');
       } finally {
         if (submission === currentSubmission) {
           submission = undefined;
           form.inert = false;
+          syncSubmit();
         }
       }
     });
@@ -380,14 +413,10 @@ const countries = getCountries()
     field.hidden = false;
     contactConsent.disabled = false;
     consentField.hidden = false;
-    trigger.hidden = false;
   }
 </script>
 
 <style>
-  .program-signup {
-    margin-block-start: 1.25rem;
-  }
   .program-signup [hidden] {
     display: none;
   }
@@ -426,6 +455,10 @@ const countries = getCountries()
     margin: 0;
     font-size: clamp(1.6rem, 5vw, 2.1rem);
     text-wrap: balance;
+  }
+  .program-signup__offering {
+    margin: 0 0 1.1rem;
+    color: var(--muted);
   }
   .program-signup__close {
     flex: none;

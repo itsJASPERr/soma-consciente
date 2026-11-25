@@ -3,6 +3,7 @@
  * Catches horizontal overflow and clipped headings at mobile, tablet and
  * desktop widths. Runs against built Astro preview, using GitHub runner's Chrome.
  */
+import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
@@ -12,6 +13,8 @@ const HOST='http://127.0.0.1:4321';
 const BASE='';
 const paths=[
  '/',
+ '/encuentros/',
+ '/acompanamiento/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
@@ -55,7 +58,10 @@ try{
         const interesting=[
           '.site-header .brand',
           '.site-header .mobile-nav summary',
-          '.hero h1','.hero h1 span','.hero-copy','.hero .btn-row .btn',
+          '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
+          '.participation-row h2','.participation-row .btn','.participation-row .text-link',
+          '.offering h3','.offering__action .btn','.offering__panel',
+          '#programa-online-title','.program-waitlist .btn',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
           '.section-head h2','.course-outline__heading-copy strong'
@@ -74,6 +80,14 @@ try{
             if(el.clientWidth>0 && el.scrollWidth>el.clientWidth+3){
               problems.push(selector+'['+i+'] content='+el.scrollWidth+'/'+el.clientWidth);
             }
+          }
+        }
+        const feature = document.querySelector('.participation-feature');
+        if (feature && viewport <= 680) {
+          const photo = document.querySelector('.participation-hero__frame');
+          const details = feature.querySelectorAll('.participation-feature__date, .participation-feature__venue, .participation-feature__included, .btn');
+          if (photo && Array.from(details).some(node => node.getBoundingClientRect().bottom > photo.getBoundingClientRect().top + 1)) {
+            problems.push('the January date, venue, included circles and CTA must appear before the photo on mobile');
           }
         }
         const menu=document.querySelector('.site-header .mobile-nav summary');
@@ -116,6 +130,26 @@ try{
     }
     console.log('Checked '+width+'px across '+paths.length+' pages');
   }
+  await page.setViewportSize({width:375,height:900});
+  await page.goto(HOST+BASE+'/');
+  await page.getByRole('link', { name: 'Ver el encuentro' }).click();
+  assert.equal(new URL(page.url()).hash, '#encuentro-enero');
+  const encounter = page.locator('article#encuentro-enero');
+  await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();
+  await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
+  const encounterLink = new URL(await encounter.getByRole('link', { name: 'Solicitar inscripción' }).getAttribute('href'));
+  assert.equal(encounterLink.origin, 'https://wa.me');
+  assert.match(encounterLink.searchParams.get('text'), /15 y 16 de enero de 2027/);
+  const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
+  assert.equal(doorLink.pathname, encounterLink.pathname);
+  assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
+  await encounter.getByRole('link', { name: 'Conocer los círculos' }).click();
+  assert.equal(new URL(page.url()).hash, '#circulos');
+  const circleLink = new URL(await page.getByRole('link', { name: 'Quiero participar' }).getAttribute('href'));
+  assert.equal(circleLink.pathname, encounterLink.pathname);
+  assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
+  assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });

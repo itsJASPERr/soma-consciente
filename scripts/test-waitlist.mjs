@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequest } from '../functions/api/waitlist.ts';
-import { waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
+import { offeringConsentVersion, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 const origin = 'https://www.soma-consciente.com';
 const url = origin + '/api/waitlist';
@@ -13,6 +13,7 @@ const legacyDate = '2026-11-25T00:00:00.000Z';
 database.prepare('INSERT INTO waitlist_signups (channel, contact, consent_version, consented_at) VALUES (?, ?, ?, ?)')
   .run('email', legacyContact, '1', legacyDate);
 database.exec(readFileSync(new URL('../migrations/0002_waitlist_name.sql', import.meta.url), 'utf8'));
+database.exec(readFileSync(new URL('../migrations/0003_offering_requests.sql', import.meta.url), 'utf8'));
 const selectSignup = database.prepare('SELECT name, consent_version, consented_at FROM waitlist_signups WHERE contact = ?');
 
 const env = {
@@ -81,7 +82,22 @@ try {
     { channel: 'whatsapp', contact: '+5491123456789', name: 'Noa', consent_version: waitlistConsentVersion },
   ]);
   for (const { consented_at } of rows) assert.ok(Number.isFinite(Date.parse(consented_at)));
-  console.log('PASS: waitlist API stores names and consent, preserves existing entries, and keeps one row per normalized contact.');
+  const request = { ...email, consent: offeringConsentVersion, offering: 'encuentro-enero' };
+  assert.equal(await submit({ ...request, offering: 'unknown' }), 400);
+  assert.equal(await submit({ ...request, consent: waitlistConsentVersion }), 400);
+  assert.equal(await submit({ ...request, consent: undefined }), 400);
+  assert.equal(await submit(request), 204);
+  assert.equal(await submit({ ...request, name: 'Duplicate' }), 204);
+  assert.equal(await submit({ ...request, offering: 'circulos' }), 204);
+  const offers = database.prepare(
+    'SELECT offering, name, consent_version FROM offering_requests ORDER BY offering',
+  ).all().map(row => ({ ...row }));
+  assert.deepEqual(offers, [
+    { offering: 'circulos', name: 'María Pérez', consent_version: offeringConsentVersion },
+    { offering: 'encuentro-enero', name: 'María Pérez', consent_version: offeringConsentVersion },
+  ]);
+  assert.equal(database.prepare('SELECT COUNT(*) AS total FROM waitlist_signups').get().total, 3);
+  console.log('PASS: signup requests are routed by offer, deduplicate per offer, and preserve prior waitlist entries.');
 } finally {
   database.close();
 }

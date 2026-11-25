@@ -88,6 +88,13 @@ Este contenido inicial es un piloto editorial de diseño, no un programa académ
 La jerarquía de entidades, sus claves y relaciones deben poder migrar a la instalación independiente de Mágico OS. El avance personal, las inscripciones, la membresía y los permisos requerirán backend autenticado; no se guardan hoy en Git ni en un formulario público.
 
 
+## Consultas y seguimiento del encuentro de enero
+
+- El botón de inscripción abre un mensaje preparado para Yanina. La persona decide cuándo enviarlo.
+- Cuando el equipo verifica que la inscripción quedó confirmada, Yanina puede responder: «Tu lugar para el encuentro del 15 y 16 de enero está confirmado. Nos vemos en Casa Sabia.» Agregá los datos de llegada acordados con el equipo.
+- Después del encuentro: «Gracias por compartir estos días. Tu mes de círculos de integración está incluido. Te compartimos por acá los horarios y cómo sumarte.» Agregá el acceso, los horarios y el período incluido acordado.
+- En Pages CMS, actualizá **Qué pasa al abrir el enlace directo** junto con el botón y su URL cuando cambie el destino. El enlace de comunidad lleva directamente a la invitación pública. La confirmación mediante Reservas corresponde a [#34](https://github.com/itsJASPERr/soma-consciente/issues/34).
+
 ## Gestión de imágenes del sitio (homepage y Aulas)
 
 La imagen de referencia de diseño era una composición conceptual, no una biblioteca de fotografías ni retratos auténticos del equipo. Las fotografías cargadas ahora son **imágenes editoriales ilustrativas** con licencia Unsplash; NO muestran necesariamente a Nicole, Jasper, Yanina ni Nico Pacha. Reemplazarlas con fotografías reales aprobadas del equipo cuando estén disponibles.

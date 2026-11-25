@@ -1,0 +1,237 @@
+---
+import { offeringUrl, type Offering } from '../lib/offerings';
+import { path } from '../lib/paths';
+import OfferingAction from './OfferingAction.astro';
+import SignupDialog from './SignupDialog.astro';
+
+type Image = { src: string; alt: string };
+
+interface Props {
+  offers: Offering[];
+  encounterImage?: Image;
+  circleImage?: Image;
+}
+
+const { offers, encounterImage, circleImage } = Astro.props;
+const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer));
+---
+<div class="offerings-grid">
+  {offers.map((offer) => {
+    const url = offeringUrl(offer);
+    const featured = offer.slug === 'encuentro-enero';
+    const circle = offer.slug === 'circulos';
+    const door = offer.slug === 'puerta-abierta';
+    const community = offer.slug === 'grupo-whatsapp';
+    return (
+      <article
+        id={offer.slug}
+        class:list={['offering', {
+          'offering--featured': featured,
+          'offering--split': featured && encounterImage?.src,
+          'offering--door': door,
+          'offering--community': community,
+        }]}
+        aria-labelledby={offer.slug + '-title'}
+      >
+        {circle && circleImage?.src && (
+          <img class="offering__circle-image" src={circleImage.src} alt={circleImage.alt} width="1050" height="680" loading="lazy" decoding="async" />
+        )}
+        <div class="offering__copy">
+          {community && <span class="offering__mark"><img src={path('/media/soma-original-emblem.png')} alt="" width="72" height="56" loading="lazy" decoding="async" /></span>}
+          <h3 id={offer.slug + '-title'}>{offer.title}</h3>
+
+          {featured && (offer.when || offer.venue) && (
+            <div class="offering__facts">
+              {offer.when && <p><strong>{offer.when}</strong></p>}
+              {offer.venue && <p>{offer.venue}</p>}
+            </div>
+          )}
+          <p>{offer.description}</p>
+
+          {featured && offer.details && (
+            <div class="offering__panel">
+              <h4>Qué incluye</h4>
+              <p>{offer.details}</p>
+              <a class="text-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+            </div>
+          )}
+          {circle && (offer.details || offer.when) && (
+            <div class="offering__panel">
+              {offer.details && <p><strong>{offer.details}</strong></p>}
+              {offer.when && <p>{offer.when}</p>}
+            </div>
+          )}
+          {door && (
+            <div class="offering__panel offering__door-facts">
+              {offer.when && <div><p class="offering__label">Cuándo</p><p><strong>{offer.when}</strong></p></div>}
+              {(offer.venue || offer.details) && (
+                <div>
+                  <p class="offering__label">Dónde</p>
+                  {offer.venue && <p><strong>{offer.venue}</strong></p>}
+                  {offer.details && <p>{offer.details}</p>}
+                </div>
+              )}
+            </div>
+          )}
+          {!featured && !circle && !door && !community && (
+            [offer.when, offer.venue, offer.details].filter(Boolean).length > 0 &&
+            <p class="offering__facts">{[offer.when, offer.venue, offer.details].filter(Boolean).join(' · ')}</p>
+          )}
+
+          <div class="offering__action">
+            <OfferingAction
+              offer={offer}
+              requestsEnabled={requestsEnabled}
+              class={community ? 'btn btn--light' : door ? 'btn btn--outline' : 'btn'}
+              showArrow
+            />
+            {!url && requestsEnabled && offer.followUp && <p class="offering__next">{offer.followUp}</p>}
+          </div>
+          {circle && (
+            <p class="offering__circle-note">
+              Podés sumarte por tu cuenta. Si participás del <a href={path('/encuentros/#encuentro-enero')}>encuentro de enero</a>, tenés un mes de círculos incluido.
+            </p>
+          )}
+        </div>
+        {featured && encounterImage?.src && (
+          <img class="offering__image" src={encounterImage.src} alt={encounterImage.alt} width="1100" height="780" loading="lazy" decoding="async" />
+        )}
+      </article>
+    );
+  })}
+</div>
+{hasRequests && <SignupDialog />}
+
+<style>
+  .offerings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: clamp(1rem, 2.5vw, 1.65rem);
+  }
+  .offering {
+    min-inline-size: 0;
+    scroll-margin-top: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--cream);
+  }
+  .offering--featured {
+    grid-column: 1 / -1;
+    background: var(--paper);
+  }
+  .offering--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  }
+  .offering__copy {
+    padding: clamp(1.3rem, 4vw, 2.5rem);
+  }
+  .offering h3 {
+    margin-bottom: .8rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.75rem, 3.35vw, 2.75rem);
+    text-wrap: balance;
+  }
+  .offering--featured h3 { font-size: clamp(2.05rem, 4.15vw, 3.65rem); }
+  .offering__copy > p { max-inline-size: 48ch; }
+  .offering__facts {
+    margin-block: 0 1rem;
+    padding-inline-start: .7rem;
+    border-inline-start: 2px solid #9cad99;
+    color: var(--pine-dark);
+  }
+  .offering__facts p,
+  .offering__panel p { margin: 0; }
+  .offering__panel {
+    max-inline-size: 46ch;
+    margin-block: 0 1rem;
+    padding: .8rem 1rem;
+    border-radius: .7rem;
+    background: #e8ecdf;
+    color: var(--pine-dark);
+  }
+  .offering__panel h4 {
+    margin: 0 0 .25rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+  .offering__panel a { margin-top: .45rem; }
+  .offering--door {
+    background: #fbf2e6;
+  }
+  .offering__door-facts {
+    background: #f2e4d8;
+  }
+  .offering__door-facts > div + div {
+    margin-top: .5rem;
+    padding-top: .5rem;
+    border-top: 1px solid #dec7b7;
+  }
+  .offering__label {
+    color: #903e2c;
+    font-size: .82rem;
+    font-weight: 700;
+  }
+  .offering__action { margin-top: .9rem; }
+  .offering__next {
+    margin: .5rem 0 0;
+    font-size: .85rem;
+  }
+  .offering__circle-note {
+    margin: 1.1rem 0 0;
+    padding-top: .8rem;
+    border-top: 1px solid var(--line);
+    font-size: .93rem;
+  }
+  .offering__circle-note a {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .15em;
+  }
+  .offering__image,
+  .offering__circle-image {
+    display: block;
+    inline-size: 100%;
+    object-fit: cover;
+  }
+  .offering__image {
+    block-size: 100%;
+    min-block-size: 15rem;
+    object-position: 61% center;
+  }
+  .offering__circle-image {
+    block-size: clamp(8.5rem, 20vw, 13rem);
+    object-position: center 43%;
+  }
+  .offering--community {
+    display: grid;
+    place-items: center;
+    background: var(--pine-dark);
+    color: var(--cream);
+    text-align: center;
+  }
+  .offering--community h3 { color: inherit; }
+  .offering--community .offering__action :global(.offering-action-hint) { margin-inline: auto; }
+  .offering__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 5.2rem;
+    block-size: 5.2rem;
+    margin: 0 auto 1rem;
+    padding: .55rem;
+    border-radius: 1rem;
+    background: var(--cream);
+  }
+  .offering__mark img {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+  @media (max-width: 680px) {
+    .offering--split { display: block; }
+    .offering__image { block-size: 12rem; min-block-size: 0; }
+  }
+</style>

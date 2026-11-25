@@ -11,12 +11,14 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   });
 
   const endpoint = new URL('/api/waitlist', baseURL).href;
-  let submissions = 0;
+  let programSubmissions = 0;
   await page.route(endpoint, async route => {
     assert.equal(route.request().method(), 'POST');
-    assert.equal(route.request().postDataJSON().offering, undefined);
-    submissions += 1;
-    await route.fulfill({ status: submissions === 1 ? 503 : 204 });
+    const payload = route.request().postDataJSON();
+    assert.equal(payload.offering, undefined);
+    assert.equal(payload.consent, '2');
+    programSubmissions += 1;
+    await route.fulfill({ status: programSubmissions === 1 ? 503 : 204 });
   });
 
   await page.goto(new URL('/', baseURL).href, { waitUntil: 'load' });
@@ -28,27 +30,39 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
 
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
+  const submit = form.getByRole('button', { name: 'Avisame cuando esté listo' });
   assert.deepEqual(await events(), []);
-  await page.locator('#program-launch-open').click();
+  await page.locator('#programa-online #program-launch-open').click();
+  await form.getByText(/para informarme sobre el programa y sus productos/).waitFor();
+  await page.getByRole('dialog', { name: 'Nuestro programa online' }).waitFor();
+  assert.ok(await form.getByRole('radio', { name: 'WhatsApp' }).isChecked());
+  const country = form.getByRole('button', { name: 'Código de país, Argentina (+54)' });
+  await country.click();
+  const countrySearch = form.getByRole('combobox', { name: 'Buscar país o prefijo' });
+  await countrySearch.fill('uruguay');
+  assert.equal(await form.getByRole('option').filter({ visible: true }).count(), 1);
+  await countrySearch.press('Enter');
+  assert.ok(await form.getByRole('button', { name: 'Código de país, Uruguay (+598)' }).isVisible());
+  await form.getByRole('checkbox').check();
+  assert.ok(await submit.isDisabled(), 'Consent alone must not enable the empty form.');
   assert.deepEqual(await events(), [opened]);
-
   await form.getByRole('radio', { name: 'Correo electrónico' }).check();
   await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
   await form.getByLabel('Tu nombre').fill('Participante de prueba');
+  assert.ok(await submit.isDisabled());
   await form.getByRole('checkbox').check();
-  const submit = form.getByRole('button', { name: 'Quiero recibir el aviso' });
 
   await submit.click();
   await page.getByText('No pudimos guardar tu solicitud.').waitFor();
-  assert.equal(submissions, 1);
+  assert.equal(programSubmissions, 1);
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
   await page.getByText('Gracias. Te avisaremos por el medio que elegiste.').waitFor();
-  assert.equal(submissions, 2);
+  assert.equal(programSubmissions, 2);
   assert.deepEqual(await events(), [
     opened,
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
-  console.log('Waitlist analytics verified with intercepted failure and success responses.');
+  console.log('Program waitlist consent, payload and analytics verified.');
 }

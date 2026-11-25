@@ -46,6 +46,15 @@ El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 **Cloudflare Pages: Edit**. El token se puede guardar como
 `CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
 
+Cuando la recolección está habilitada, el workflow aplica las migraciones de D1
+con Wrangler antes de publicar Pages. Las vistas previas migran su base
+compartida y los despliegues de `main` migran la base de producción. Cada base
+procesa una migración de despliegue a la vez. Si falla una migración, el
+workflow mantiene la versión publicada. Para usar un token con permiso
+**D1: Edit** aparte del token de Pages, guardalo como
+`CLOUDFLARE_D1_API_TOKEN` en GitHub. Si no está configurado, se usa el token de
+Pages y ese token necesita ambos permisos.
+
 ### Lista de espera en Cloudflare
 
 El formulario envía el nombre, el contacto y el consentimiento a
@@ -74,16 +83,25 @@ aplicar las migraciones al destino respectivo.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
+La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
+comunidad**. Los enlaces de los encuentros y del círculo abren WhatsApp con
+Yanina. El botón del grupo abre la invitación pública de WhatsApp. Si una
+propuesta carece de enlace directo, su formulario guarda una solicitud en `offering_requests` con la propuesta y el canal elegido. El equipo
+puede consultar esa tabla en D1 para responder. La integración de inscripción
+y cupos con Reservas se sigue en #34.
+
 ### Medición del programa online
 
-En Umami, medí el embudo desde la portada hasta la inscripción a la lista de espera del programa online. Usá los eventos
-`waitlist_opened` y `waitlist_submitted`. El segundo se registra cuando
-la API confirma el envío y lleva solo el canal elegido. D1 mantiene el
-conteo de inscripciones deduplicadas en la tabla `waitlist_signups`. La verificación del despliegue
-comprueba ambos rastreadores en las páginas públicas. Umami se incluye
-solo en el build de producción de Cloudflare y su lista de dominios limita
-el envío de eventos. CI comprueba que las vistas previas no sirvan Umami
-ni el beacon de Cloudflare Web Analytics.
+En Umami, medí el embudo desde la portada hasta la lista de espera del
+programa online. Usá los eventos `waitlist_opened` y `waitlist_submitted`. El
+segundo se registra cuando la API confirma el envío y lleva solo el canal
+elegido. D1 guarda las inscripciones deduplicadas en `waitlist_signups`.
+Las solicitudes recibidas por los formularios de las propuestas se guardan en
+`offering_requests`.
+
+Umami se incluye solo en el build de producción de Cloudflare y su lista de
+dominios limita el envío de eventos. CI comprueba que las vistas previas no
+sirvan Umami ni el beacon de Cloudflare Web Analytics.
 
 Etiquetá los enlaces de campaña en minúsculas. Usá `programa_online`
 como campaña y elegí `utm_source`, `utm_medium` y `utm_content`

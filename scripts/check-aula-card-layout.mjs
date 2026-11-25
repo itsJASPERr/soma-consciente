@@ -60,17 +60,15 @@ try {
       const directoryLink = page.locator('.site-header nav a[href="/aulas/"], .site-footer nav a[href="/aulas/"]');
       if (await directoryLink.count()) failures.push(width+'px '+route+': site navigation still links to the Aula directory');
       if (route === '/') {
-        const program = page.locator('#programa-online');
+        const program = page.locator('#metodologia');
         if (await page.locator('.aula-card').count()) failures.push(width+'px /: homepage shows Aula cards');
         await program.scrollIntoViewIfNeeded();
         const programIssues = await program.evaluate(async (section, names) => {
           const problems = [];
-          const status = section.querySelector('.program-preview__status');
           const title = section.querySelector('h2');
           const logo = section.querySelector('.program-preview__mark img');
           const themes = [...section.querySelectorAll('.program-preview__themes li')];
-          if (status?.textContent.trim() !== 'Próximamente') problems.push('missing program launch status');
-          if (title?.textContent.trim() !== 'Programa de acompañamiento online') problems.push('incorrect program title');
+          if (title?.textContent.trim() !== 'Cuatro miradas, un mismo núcleo') problems.push('incorrect methodology title');
           if (themes.map(theme => theme.textContent.trim()).join('|') !== names.join('|')) {
             problems.push('methodology keywords differ from the four titles');
           }
