@@ -1,0 +1,23 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { path } from '../lib/paths';
+---
+<SiteLayout
+  title="Página no encontrada"
+  description="Volvé al inicio para seguir explorando SOMA CONSCIENTE."
+  noIndex
+>
+  <section class="section">
+    <div class="container">
+      <h1 class="section-heading">Página no encontrada</h1>
+      <p class="section-intro">La página que buscás puede haber cambiado de dirección.</p>
+      <a class="btn" href={path('/')}>Volver al inicio</a>
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+  }
+</style>

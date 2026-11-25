@@ -50,6 +50,11 @@ for (const sitemapURL of sitemapURLs) {
 for (const path of ['/', '/biblioteca/', '/aulas/']) {
   assert.ok(pageURLs.has(site + path), 'The sitemap is missing ' + path);
 }
+const missingPage = readFileSync('dist/404.html', 'utf8');
+assert.match(missingPage, /<meta name="robots" content="noindex"/);
+for (const errorPath of ['/404', '/404/', '/404.html']) {
+  assert.ok(!pageURLs.has(site + errorPath), 'The sitemap must exclude the 404 page.');
+}
 const siteNameMarkup = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
 assert.ok(siteNameMarkup, 'Missing homepage WebSite structured data.');
 assert.deepEqual(JSON.parse(siteNameMarkup), {

@@ -9,6 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
 from urllib.robotparser import RobotFileParser
+from uuid import uuid4
 
 ORIGIN = 'https://soma-consciente.com'
 SITEMAP_INDEX = ORIGIN + '/sitemap-index.xml'
@@ -105,7 +106,7 @@ def verify():
     www = 'https://www.soma-consciente.com/biblioteca/'
     redirect = check_status(www, (301, 308)).get('Location', '')
     assert urljoin(www, redirect) == ORIGIN + '/biblioteca/', f'Unexpected www redirect: {redirect}'
-    check_status(ORIGIN + '/soma-ci-missing-route/', (404, 410))
+    check_status(f'{ORIGIN}/soma-ci-missing-{uuid4().hex}/', (404, 410))
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(check_page, pages))
