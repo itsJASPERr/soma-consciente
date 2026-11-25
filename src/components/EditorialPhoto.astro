@@ -1,0 +1,25 @@
+---
+interface Props {
+  image?: { src?: string; alt: string; position?: string };
+  priority?: boolean;
+  class?: string;
+}
+
+const { image, priority = false, class: extraClass } = Astro.props;
+---
+{image?.src && (
+  <figure class:list={['journey-photo', extraClass]}>
+    <img
+      class="journey-photo__image"
+      src={image.src}
+      alt={image.alt}
+      width="1100"
+      height="780"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      decoding="async"
+      style={image.position ? { objectPosition: image.position } : undefined}
+    />
+    <slot />
+  </figure>
+)}

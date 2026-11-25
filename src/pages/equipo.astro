@@ -1,16 +1,70 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import { loadAulas } from '../lib/content';
-const aulas = await loadAulas();
-import { path } from '../lib/paths';
 import { mediaUrl } from '../lib/media';
+import { path } from '../lib/paths';
+
+const aulas = await loadAulas();
 ---
-<SiteLayout title="El equipo">
-  <section class="page-hero"><div class="container"><span class="eyebrow">Las personas detrás de SOMA</span><h1>Cuatro historias. Una construcción compartida.</h1><p>Nuestras experiencias no son idénticas. Es justamente esa diversidad la que nos invita a crear un espacio de aprendizaje, encuentro y acompañamiento.</p></div></section>
-  <section class="section"><div class="container feature-grid">
-    {aulas.map((aula,index)=><article class="feature-card">{mediaUrl(aula.portraitImage) && <img class="team-authentic-portrait" src={mediaUrl(aula.portraitImage) || ''} alt={aula.portraitAlt || 'Retrato de '+aula.guide} loading="lazy" decoding="async" width="840" height="1050"/>}<span class="eyebrow">Integrante 0{index+1}</span><h3>{aula.guide}</h3><p><strong>{aula.qualification}</strong></p>
-      {aula.credentials?.length>0 && <ul class="team-credentials">{aula.credentials.map(credential=><li>{credential}</li>)}</ul>}
-      <p>{aula.approach}</p><a class="text-link" href={path('/aulas/' + aula.slug + '/')}>Conocer su Aula ↗</a></article>)}
-  </div></section>
-  <section class="section--tight digital-band"><div class="container"><span class="eyebrow">Nuestro punto de encuentro</span><h2>El Núcleo es lo que construimos juntos.</h2><p class="section-intro">Cada disciplina conserva su identidad y al mismo tiempo puede dialogar con las demás.</p><a class="btn" href={path('/nucleo/')}>Descubrir el Núcleo ↗</a></div></section>
+<SiteLayout title="El equipo" openJourney>
+  <section class="container journey-hero journey-hero--photo journey-hero--profile">
+    <div class="journey-hero__copy">
+      <span class="eyebrow">Equipo</span>
+      <h1>Cuatro historias. Una construcción compartida.</h1>
+      <p class="journey-lead">Cada integrante aporta su forma de mirar, escuchar y acompañar. El Núcleo es donde esas perspectivas trabajan juntas.</p>
+    </div>
+    <img class="journey-emblem" src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" />
+  </section>
+  <section class="container team-list" aria-label="Integrantes de SOMA">
+    {aulas.map((aula) => {
+      const portrait = mediaUrl(aula.portraitImage);
+      return (
+        <article class="team-profile">
+          <span class="team-profile__symbol" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} /></span>
+          <div>
+            <h2>{aula.guide}</h2>
+            <p class="team-profile__perspective">{aula.name}</p>
+            <p>{aula.approach}</p>
+            <details>
+              <summary>Trayectoria y perspectiva</summary>
+              {portrait && <img class="team-profile__portrait" src={portrait} alt={aula.portraitAlt || 'Retrato de ' + aula.guide} loading="lazy" width="336" height="420" />}
+              {aula.qualification && <p>{aula.qualification}</p>}
+              {aula.credentials?.length > 0 && <ul class="team-credentials">{aula.credentials.map(credential => <li>{credential}</li>)}</ul>}
+              <a class="journey-link" href={path('/aulas/' + aula.slug + '/')}>Conocer su perspectiva <span aria-hidden="true">↗</span></a>
+            </details>
+          </div>
+        </article>
+      );
+    })}
+  </section>
+  <section class="container journey-row">
+    <div><h2>El Núcleo es lo que construimos juntos.</h2></div>
+    <a class="btn btn--outline" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
+  </section>
 </SiteLayout>
+
+<style>
+  .team-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    column-gap: clamp(1.4rem, 4.5vw, 4rem);
+  }
+  .team-profile {
+    display: grid;
+    grid-template-columns: 2.9rem minmax(0,1fr);
+    align-content: start;
+    gap: .8rem;
+    padding-block: 1.15rem;
+    border-block-start: 1px solid var(--journey-rule);
+  }
+  .team-profile h2 { margin-block-end: .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.35vw, 2.35rem); }
+  .team-profile p { margin-block-end: .55rem; }
+  .team-profile__perspective { color: var(--journey-clay); font-weight: 700; }
+  .team-profile__symbol :global(img) { display: block; inline-size: 100%; block-size: auto; }
+  .team-profile__portrait { display: block; max-inline-size: min(13rem,100%); block-size: auto; margin-block-end: .55rem; }
+  .team-profile summary { cursor: pointer; min-block-size: 44px; align-content: center; font-weight: 700; font-size: .9rem; }
+  @media (max-width: 720px) {
+    .team-list { grid-template-columns: minmax(0,1fr); }
+  }
+</style>

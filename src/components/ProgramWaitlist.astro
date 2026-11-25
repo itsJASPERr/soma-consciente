@@ -6,9 +6,11 @@ interface Props {
 const { signupEnabled } = Astro.props;
 ---
 <section id="programa-online" class="program-waitlist" aria-labelledby="programa-online-title">
-  <p class="eyebrow">Próximamente</p>
-  <h3 id="programa-online-title">Nuestro programa online</h3>
-  <p class="program-waitlist__description">Estamos desarrollando nuestro propio programa para acompañarte online.</p>
+  <div>
+    <p class="eyebrow">Próximamente</p>
+    <h3 id="programa-online-title">Nuestro programa online</h3>
+    <p class="program-waitlist__description">Estamos desarrollando nuestro propio programa online para acompañarte online.</p>
+  </div>
   {signupEnabled && (
     <button
       id="program-launch-open"
@@ -16,6 +18,7 @@ const { signupEnabled } = Astro.props;
       type="button"
       data-program-waitlist
       data-signup-title="Nuestro programa online"
+      data-signup-intro="Dejanos tu contacto para recibir novedades cuando esté listo."
       data-signup-action="Avisame cuando esté listo"
       aria-haspopup="dialog"
       aria-controls="program-launch-dialog"
@@ -31,7 +34,13 @@ const { signupEnabled } = Astro.props;
     max-inline-size: 52rem;
     margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
     padding-top: 1.25rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--journey-rule, var(--line));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    text-align: start;
+    justify-content: space-between;
+    gap: .85rem 1.4rem;
     scroll-margin-top: 1.5rem;
   }
   .program-waitlist .eyebrow { margin-bottom: .35rem; }
@@ -41,12 +50,13 @@ const { signupEnabled } = Astro.props;
   }
   .program-waitlist__description {
     max-inline-size: 47ch;
-    margin: 0 auto .85rem;
+    margin: 0;
     color: var(--ink);
     text-wrap: pretty;
   }
   .program-waitlist button {
     cursor: pointer;
+    text-align: start;
     font-family: inherit;
   }
   .program-waitlist button[hidden] { display: none; }

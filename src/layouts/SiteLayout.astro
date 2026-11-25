@@ -10,10 +10,13 @@ import '../styles/portrait.css';
 import '../styles/aula-card-layout.css';
 import '../styles/aula-biography.css';
 import '../styles/learning-access.css';
+import '../styles/open-journey.css';
 const {
   title = 'SOMA CONSCIENTE',
   description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.',
   noIndex = false,
+  openJourney = false,
+  journeyAction = { label: 'Ver el encuentro', href: path('/encuentros/#encuentro-enero') },
   ogImage = '/og/soma-consciente.png',
   ogImageAlt = 'SOMA CONSCIENTE — cuatro caminos, un mismo núcleo, con el emblema original de las cuatro Aulas.'
 } = Astro.props;
@@ -78,9 +81,9 @@ const socialDescription = description.trim().length >= 60
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
   </head>
-  <body>
+  <body class:list={{ 'journey-page': openJourney }}>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <Header/>
+    <Header action={openJourney ? journeyAction : undefined}/>
     <main id="contenido"><slot/></main>
     <Footer/>
   </body>

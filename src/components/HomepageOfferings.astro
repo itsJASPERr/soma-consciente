@@ -1,85 +1,74 @@
 ---
+import EditorialPhoto from './EditorialPhoto.astro';
 import OfferingAction from './OfferingAction.astro';
 import { offeringIntro, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
+type Photo = { src?: string; alt: string; position?: string };
+
 interface Props {
-  image?: { src: string; alt: string; position?: string };
+  image?: Photo;
+  circleImage?: Photo;
   requestsEnabled: boolean;
 }
 
-const { image, requestsEnabled } = Astro.props;
+const { image, circleImage, requestsEnabled } = Astro.props;
 const encounter = offerings.find(({ slug }) => slug === 'encuentro-enero');
-const circles = offerings.find(({ slug }) => slug === 'circulos');
-const openDoor = offerings.find(({ slug }) => slug === 'puerta-abierta');
+const included = encounter?.homeNote || encounter?.details;
+const alternatives = offerings.filter(({ slug }) => slug === 'circulos' || slug === 'puerta-abierta');
 const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 ---
 <section class="participation-hero" aria-labelledby="participation-heading">
-  <div class:list={['container', 'participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
-    <div class="participation-hero__copy">
-      <h1 id="participation-heading">Encuentros presenciales. <em>Integración online.</em></h1>
-      <p class="participation-hero__intro">{offeringIntro}</p>
+  <div class:list={['container', 'journey-hero', { 'journey-hero--photo': image?.src }]}>
+    <div class="journey-hero__copy">
+      <h1 id="participation-heading">Encuentros presenciales.<br/><em>Integración online.</em></h1>
+      <p class="journey-lead participation-hero__intro">{offeringIntro}</p>
       {encounter && (
         <div class="participation-feature" id={encounter.slug}>
-          <p class="participation-label">Próximo encuentro</p>
+          <p class="eyebrow">Próximo encuentro</p>
           <h2 class="participation-feature__date">{encounter.when || encounter.title}</h2>
           {encounter.venue && <p class="participation-feature__venue">{encounter.venue}</p>}
-          {encounter.details && <p class="participation-feature__included">{encounter.details}</p>}
+          {included && <p class="participation-feature__included">{included}</p>}
           <a class="btn" href={path('/encuentros/#' + encounter.slug)}>Ver el encuentro <span aria-hidden="true">↗</span></a>
         </div>
       )}
     </div>
-    {image?.src && (
-      <div class="participation-hero__frame">
-        <img src={image.src} alt={image.alt} width="1100" height="780" fetchpriority="high" decoding="async" style={image.position && 'object-position:' + image.position} />
-      </div>
-    )}
+    <EditorialPhoto image={image} class="participation-hero__frame" priority />
   </div>
 </section>
 
-{circles && (
-  <section id={circles.slug} class="participation-row participation-row--circles" aria-labelledby="participation-circles">
-    <div class="container participation-row__layout">
-      <h2 id="participation-circles">
-        <a href={path('/acompanamiento/#circulos')}>{circles.shortTitle || circles.title}</a>
-      </h2>
-      {(circles.details || circles.when) && (
-        <div class="participation-row__details">
-          {circles.details && <p class="participation-row__price">{circles.details}</p>}
-          {circles.when && <p class="participation-row__secondary">{circles.when}</p>}
-        </div>
-      )}
-      <div class="participation-row__action">
-        <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
-      </div>
-    </div>
-  </section>
-)}
-
-{openDoor && (
-  <section id={openDoor.slug} class="participation-row participation-row--door" aria-labelledby="participation-door">
-    <div class="container participation-row__layout">
-      <h2 id="participation-door">
-        <a href={path('/encuentros/#puerta-abierta')}>{openDoor.shortTitle || openDoor.title}</a>
-      </h2>
-      {(openDoor.when || openDoor.venue || openDoor.details) && (
-        <div class="participation-row__details">
-          {openDoor.when && <p class="participation-row__date">{openDoor.when}</p>}
-          {(openDoor.venue || openDoor.details) && <p class="participation-row__secondary">{[openDoor.venue, openDoor.details].filter(Boolean).join(' · ')}</p>}
-        </div>
-      )}
-      <div class="participation-row__action">
-        <OfferingAction offer={openDoor} requestsEnabled={requestsEnabled} class="text-link" showArrow />
-      </div>
+{alternatives.length > 0 && (
+  <section class:list={['container', 'participation-options', { 'participation-options--photo': circleImage?.src }]} aria-labelledby="participation-options-title">
+    <EditorialPhoto image={circleImage} class="journey-photo--wide" />
+    <div class="participation-options__copy">
+      <h2 id="participation-options-title">Otras formas de participar</h2>
+      {alternatives.map((offer) => {
+        const circle = offer.slug === 'circulos';
+        const href = path(circle ? '/acompanamiento/#circulos' : '/encuentros/#puerta-abierta');
+        return (
+          <article class="participation-row journey-row" id={offer.slug} aria-labelledby={offer.slug + '-home-title'}>
+            <div>
+              <h3 id={offer.slug + '-home-title'}><a href={href}>{offer.shortTitle || offer.title}</a></h3>
+              <p class="participation-row__details">
+                {circle ? <><strong>{offer.details}</strong> <span>{offer.when}</span></> :
+                  <><strong class="participation-row__date">{offer.when}</strong> <span>{[offer.venue, offer.details].filter(Boolean).join(' · ')}</span></>}
+              </p>
+            </div>
+            <div class="participation-row__action">
+              <OfferingAction offer={offer} requestsEnabled={requestsEnabled} class="journey-link" showArrow />
+            </div>
+          </article>
+        );
+      })}
     </div>
   </section>
 )}
 
 {community && (
-  <section id={community.slug} class="participation-row participation-row--community" aria-labelledby="participation-community">
-    <div class="container participation-row__layout">
-      <div class="participation-community__copy">
-        <h2 id="participation-community">{community.title}</h2>
+  <section id={community.slug} class="participation-row--community journey-band" aria-labelledby="participation-community">
+    <div class="container journey-row">
+      <div>
+        <h2 id="participation-community">Comunidad gratuita de WhatsApp</h2>
         <p>{community.description}</p>
       </div>
       <div class="participation-row__action">
@@ -90,185 +79,65 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 )}
 
 <style>
-  .participation-hero {
-    background: var(--paper);
-    padding-block: clamp(1.65rem, 5vw, 4rem);
-  }
-  .participation-hero__layout {
-    display: grid;
-    align-items: stretch;
-    gap: clamp(1.25rem, 4.5vw, 3.25rem);
-  }
-  .participation-hero__layout--with-image {
-    grid-template-columns: minmax(0, 1.13fr) minmax(0, 1fr);
-  }
-  .participation-hero__copy {
-    min-inline-size: 0;
-    align-self: center;
-  }
   .participation-hero h1 {
-    color: var(--pine-dark);
-    font-size: clamp(2.4rem, 5.5vw, 4.65rem);
-    line-height: 1.01;
-    margin: 0;
+    max-inline-size: none;
+    font-size: clamp(2.55rem, 4.65vw, 4.25rem);
+    text-wrap: initial;
   }
-  .participation-hero h1 em {
-    display: block;
-    color: var(--terra);
-    font-style: normal;
-    font-weight: 400;
-  }
-  .participation-hero__intro {
-    max-inline-size: 49ch;
-    margin: .9rem 0 0;
-    line-height: 1.55;
-  }
-  .participation-hero__frame {
-    position: relative;
-    min-block-size: clamp(19rem, 37vw, 31rem);
-    border-radius: 41% 41% 1.15rem 1.15rem / 26% 26% 1.15rem 1.15rem;
-    overflow: hidden;
-    background: var(--pine-dark);
-  }
-  .participation-hero__frame img {
-    position: absolute;
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
-    object-position: 61% 50%;
-  }
+  .participation-hero em { color: var(--journey-clay); font-style: normal; }
   .participation-feature {
-    max-inline-size: 32rem;
-    margin-top: clamp(1rem, 2.7vw, 1.7rem);
-    padding: clamp(1rem, 2.5vw, 1.45rem);
-    border-radius: 1rem;
-    background: #e8ecdf;
-  }
-  .participation-label, .participation-row__date {
-    color: #994b37;
-    font-weight: 700;
-  }
-  .participation-label {
-    margin: 0 0 .42rem;
-    font-size: .72rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-  }
-  .participation-feature__date {
-    color: var(--pine-dark);
-    font-size: clamp(1.94rem, 3.55vw, 3.15rem);
-    margin: 0 0 .26rem;
-  }
-  .participation-feature__venue {
-    color: var(--pine);
-    line-height: 1.4;
-    margin: 0 0 .48rem;
-  }
-  .participation-feature__included {
-    max-width: 47ch;
-    color: var(--pine-dark);
-    font-weight: 700;
-    line-height: 1.38;
-    margin: 0 0 1rem;
-  }
-  .participation-feature .btn {
-    inline-size: fit-content;
-  }
-  .participation-feature, .participation-row {
+    max-inline-size: 33rem;
+    margin-block-start: clamp(1.1rem, 2vw, 1.6rem);
+    padding-block-start: .85rem;
+    border-block-start: 1px solid var(--journey-rule);
     scroll-margin-top: 1.5rem;
   }
-  .participation-row {
-    background: var(--cream);
+  .participation-feature p { margin: 0 0 .22rem; }
+  .participation-feature .eyebrow { margin-block-end: .4rem; }
+  .participation-feature__date {
+    margin: 0 0 .35rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.75rem, 3.25vw, 2.8rem);
+    text-wrap: balance;
   }
-  .participation-row + .participation-row,
-  .participation-row--circles {
-    border-top: 1px solid var(--line);
-  }
-  .participation-row--circles {
-    background: #e8ecdf;
-  }
-  .participation-row--community {
-    background: var(--pine-dark);
-    color: var(--cream);
-  }
-  .participation-row__layout {
+  .participation-feature__venue { font-weight: 700; }
+  .participation-feature .btn { margin-block-start: .75rem; }
+  .participation-options {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(13rem, 15rem) minmax(11.5rem, 12.5rem);
     align-items: center;
-    gap: .65rem clamp(1rem, 3vw, 2.25rem);
-    padding-block: clamp(.9rem, 2vw, 1.3rem);
+    gap: clamp(1.25rem, 4.5vw, 4.75rem);
+    padding-block: clamp(2rem, 4.4vw, 3.75rem);
+    border-block-start: 1px solid var(--journey-rule);
   }
+  .participation-options--photo { grid-template-columns: minmax(0, .73fr) minmax(0, 1.27fr); }
+  .participation-options__copy { min-inline-size: 0; }
+  .participation-options h2 {
+    color: var(--pine-dark);
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    margin-block-end: .85rem;
+  }
+  .participation-row { padding-block: .8rem; scroll-margin-top: 1.5rem; }
+  .participation-row h3 { margin-block-end: .2rem; }
+  .participation-row h3 a:hover { text-decoration: underline; }
   .participation-row__details {
-    display: grid;
-    gap: .15rem;
-    line-height: 1.4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .15rem .6rem;
+    font-size: .94rem;
   }
-  .participation-row__action {
-    grid-column: 3;
-    justify-self: end;
-    max-inline-size: 100%;
-    text-align: end;
+  .participation-row__date { color: var(--journey-clay); }
+  .participation-row__action { min-inline-size: 0; flex: 0 1 auto; }
+  .participation-row__action :global(.offering-action-hint) { margin-block-start: .15rem; }
+  .participation-row--community { scroll-margin-top: .5rem; }
+  @media (max-width: 740px) {
+    .participation-hero h1 { font-size: clamp(2.45rem, 9vw, 4.5rem); }
+    .participation-options--photo { grid-template-columns: minmax(0,1fr); }
+    .participation-options__copy { grid-row: 1; }
+    .participation-options :global(.journey-photo) { inline-size: min(100%, 29rem); }
   }
-  .participation-row h2 {
-    margin: 0;
-    color: var(--pine-dark);
-    font-size: clamp(1.63rem, 2.75vw, 2.38rem);
-  }
-  .participation-row h2 a:hover {
-    text-decoration: underline;
-    text-underline-offset: .14em;
-  }
-  .participation-community__copy {
-    grid-column: 1 / span 2;
-  }
-  .participation-row--community h2 {
-    color: inherit;
-  }
-  .participation-community__copy p {
-    max-inline-size: 56ch;
-    margin: .35rem 0 0;
-  }
-  .participation-row__details p {
-    margin: 0;
-    font-size: .93rem;
-  }
-  .participation-row__price {
-    color: var(--pine-dark);
-    font-weight: 700;
-  }
-  .participation-row__secondary {
-    color: var(--pine);
-  }
-  @media (max-width: 850px) {
-    .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr) minmax(10rem, 12.5rem);
-      row-gap: .38rem;
-    }
-    .participation-row__details,
-    .participation-community__copy { grid-column: 1; }
-    .participation-row__action {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
-    .participation-row--community .participation-row__action { grid-row: 1; }
-  }
-  @media (max-width: 680px) {
-    .participation-hero__layout--with-image { grid-template-columns: minmax(0, 1fr); }
-    .participation-hero h1 { font-size: clamp(2.4rem, 8.3vw, 3.8rem); }
-    .participation-hero__frame { min-block-size: 0; aspect-ratio: 1.62; border-radius: 1rem; }
-  }
-  @media (max-width: 600px) {
-    .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr);
-      gap: .45rem;
-    }
-    .participation-row__action,
-    .participation-row--community .participation-row__action {
-      grid-column: 1;
-      grid-row: auto;
-      justify-self: start;
-      margin-top: .25rem;
-      text-align: start;
-    }
+  @media (max-width: 510px) {
+    .participation-row { display: block; }
+    .participation-row__action { margin-block-start: .25rem; }
+    .participation-row__details { display: grid; }
   }
 </style>

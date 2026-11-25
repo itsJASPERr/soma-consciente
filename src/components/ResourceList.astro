@@ -1,0 +1,22 @@
+---
+import type { Resource } from '../lib/content';
+import { path } from '../lib/paths';
+
+const { resources } = Astro.props as { resources: Resource[] };
+---
+<ul class="journey-resource-list">
+  {resources.map((resource) => (
+    <li>
+      <div>
+        <h3>{resource.title}</h3>
+        <p>{resource.summary}</p>
+      </div>
+      <span>{resource.duration}</span>
+      <a
+        class="journey-link"
+        href={path('/biblioteca/' + resource.slug + '/')}
+        aria-label={'Leer práctica: ' + resource.title}
+      >Leer práctica <span aria-hidden="true">↗</span></a>
+    </li>
+  ))}
+</ul>

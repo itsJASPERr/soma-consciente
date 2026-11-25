@@ -1,22 +1,38 @@
 ---
+import EditorialPhoto from '../components/EditorialPhoto.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import OrbitArt from '../components/OrbitArt.astro';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-const home = await loadHomepage();
 import { path } from '../lib/paths';
+
+const home = await loadHomepage();
+const landscape = { src: mediaUrl(home.nucleoImage), alt: home.nucleoAlt };
+const emblem = path('/media/soma-original-emblem.png');
 ---
-<SiteLayout title="El Núcleo">
-  <section class="page-hero page-hero--dark"><div class="container"><span class="eyebrow" style="color:#dfb88a">Cuatro caminos · Una intención</span><h1>El Núcleo: donde las prácticas se encuentran.</h1><p>El Núcleo es el espacio compartido de SOMA. Aquí dialogan las miradas de las cuatro Aulas para construir propuestas de integración y acompañamiento respetuosas, sensibles y humanas.</p></div></section>
-  <section class="section"><div class="container aula-profile"><div class="nucleo-page-photo">
-      <img src={mediaUrl(home.nucleoImage) || ''} alt={home.nucleoAlt} loading="lazy" decoding="async" width="1100" height="850"/>
-      <div class="nucleo-page-photo__emblem" aria-hidden="true"><OrbitArt/></div>
-    </div><div><span class="eyebrow">La fuerza de lo colectivo</span><h2>Una integración sin perder las diferencias.</h2><p class="section-intro">La psicología, la música, las prácticas corporales y el vínculo con los caballos no son intercambiables. Cada una tiene su lenguaje, sus posibilidades y sus límites.</p><p class="section-intro">En el Núcleo imaginamos encuentros donde puedan complementarse sin diluir sus identidades, y donde la persona siga siendo protagonista de su experiencia.</p></div></div></section>
-  <section class="section--tight"><div class="container"><div class="section-head"><div><span class="eyebrow">Desde el diálogo</span><h2>¿Qué creamos en conjunto?</h2></div></div><div class="feature-grid">
-    <div class="feature-card"><span class="eyebrow">01</span><h3>Prácticas compartidas</h3><p>Meditación, presencia, escucha, expresión y reflexión como herramientas de exploración.</p></div>
-    <div class="feature-card"><span class="eyebrow">02</span><h3>Experiencias integradas</h3><p>Espacios donde distintas prácticas pueden dialogar, respetando sus alcances y su contexto.</p></div>
-    <div class="feature-card"><span class="eyebrow">03</span><h3>Aprendizaje continuo</h3><p>Contenidos abiertos y, más adelante, recorridos que acompañen la vida cotidiana.</p></div>
-    <div class="feature-card"><span class="eyebrow">04</span><h3>Comunidad y encuentro</h3><p>La dimensión relacional y colectiva de cualquier proceso de crecimiento.</p></div>
-  </div></div></section>
-  <section class="section"><div class="container"><h2>Comenzá con una práctica compartida.</h2><div class="btn-row"><a class="btn" href={path('/biblioteca/primeros-pasos-meditacion/')}>Meditación: primeros pasos ↗</a><a class="btn btn--outline" href={path('/aulas/')}>Conocer las Aulas ↗</a></div></div></section>
+<SiteLayout title="El Núcleo" openJourney>
+  <section class="container journey-hero journey-hero--photo">
+    <div class="journey-hero__copy">
+      <span class="eyebrow">El Núcleo</span>
+      <h1>Donde las prácticas se encuentran.</h1>
+      <p class="journey-lead">El Núcleo es el espacio que compartimos en SOMA. Reunimos miradas distintas para dar forma a encuentros y a espacios de integración.</p>
+      <div class="journey-actions">
+        <a class="btn" href={path('/equipo/')}>Conocer al equipo <span aria-hidden="true">↗</span></a>
+        <a class="btn btn--outline" href={path('/biblioteca/')}>Explorar la Biblioteca <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    {landscape.src ? (
+      <EditorialPhoto image={landscape} priority>
+        <img class="journey-photo__emblem" src={emblem} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" />
+      </EditorialPhoto>
+    ) : <img class="journey-emblem" src={emblem} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" />}
+  </section>
+  <section class="container journey-row">
+    <div>
+      <h2>Cuatro miradas, cada una con su lenguaje</h2>
+      <p>La psicología, la música, el movimiento y el vínculo con los caballos aportan formas distintas de acompañar. Las cuatro tienen su lugar en el trabajo compartido.</p>
+    </div>
+    <div>
+      <a class="journey-link" href={path('/aulas/')}>Conocer las Aulas <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
 </SiteLayout>
