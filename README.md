@@ -32,6 +32,16 @@ Dirección prevista: https://www.soma-consciente.com/
 
 Si Pages aún no está habilitado, el build puede finalizar correctamente pero la publicación fallará. Habilitá GitHub Actions como fuente y volvé a ejecutar el workflow.
 
+### Vistas previas en Cloudflare Pages
+
+Los pull requests abiertos desde este repositorio publican el sitio estático
+validado con Wrangler en el proyecto `soma-consciente-preview`. La vista previa
+se actualiza en `https://pr-<número>.soma-consciente-preview.pages.dev/`.
+
+El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
+**Cloudflare Pages: Edit**. El token se puede guardar como
+`CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
+
 ## Edición de contenido
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
