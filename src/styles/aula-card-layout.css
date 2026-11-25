@@ -21,6 +21,12 @@
   isolation: isolate;
   overflow: hidden;
 }
+.aula-card--disabled {
+  filter: grayscale(1);
+}
+.aula-card--disabled .aula-card__content {
+  background: #555954;
+}
 .aula-card .aula-card__art,
 .aula-card .aula-card__art--photo {
   position: relative;
@@ -65,7 +71,7 @@
   transform: none;
   transform-origin: center;
 }
-.aula-card:hover .aula-card__photo {
+.aula-card:where([href]):hover .aula-card__photo {
   /* No zoom: even a short animation must not mask an important subject. */
   transform: none;
   filter: saturate(.92);

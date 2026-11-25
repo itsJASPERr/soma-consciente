@@ -5,6 +5,7 @@ dist/
 /package-lock.json
 /public/og/soma-consciente.png
 /test-results/
+/.wrangler/
 .env
 .env.*
 !.env.example

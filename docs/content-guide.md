@@ -17,6 +17,8 @@ Abrí SOMA CONSCIENTE en tu cuenta de Pages CMS. La configuración `.pages.yml` 
 
 Los campos `published: false` ocultan la entrada del sitio en la próxima compilación. Para Aulas, esto también oculta la ruta individual.
 
+En **Las cuatro Aulas**, elegí **Próximamente** en **Estado de lanzamiento del Aula** para desactivar el enlace de la tarjeta en el directorio. Elegí **Disponible** para volver a enlazarla. La publicación del Aula y el acceso a sus cursos y lecciones se gestionan por separado.
+
 ## Buenas prácticas
 
 - Usar un lenguaje cálido, sobrio y responsable. Evitar promesas de curación, resultados garantizados o equivalencias impropias entre prácticas.

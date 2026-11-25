@@ -6,11 +6,23 @@ import SomaAulaSymbol from './SomaAulaSymbol.astro';
 import { mediaUrl } from '../lib/media';
 import { coverObjectPosition } from '../lib/cover-position';
 
-const { aula, index = 0 } = Astro.props as { aula: Aula; index?: number };
+interface Props {
+  aula: Aula;
+  index?: number;
+}
+
+const { aula, index = 0 } = Astro.props;
+const upcoming = aula.launchStatus === 'upcoming';
+const CardTag = upcoming ? 'div' : 'a';
 const photo = mediaUrl(aula.coverImage);
 const position = coverObjectPosition(aula.coverPosition);
 ---
-<a class:list={['aula-card', 'aula-card--' + aula.theme, 'aula-card--symbol-' + aula.symbol]} href={path('/aulas/' + aula.slug + '/')}>
+<CardTag
+  class:list={['aula-card', 'aula-card--' + aula.theme, 'aula-card--symbol-' + aula.symbol, { 'aula-card--disabled': upcoming }]}
+  href={upcoming ? undefined : path('/aulas/' + aula.slug + '/')}
+  role={upcoming ? 'link' : undefined}
+  aria-disabled={upcoming ? 'true' : undefined}
+>
   <div class:list={['aula-card__art', {'aula-card__art--photo':!!photo}]}>
     <div class="aula-card__media" aria-hidden={!photo ? 'true' : undefined}>
       {photo
@@ -24,6 +36,8 @@ const position = coverObjectPosition(aula.coverPosition);
     <span class="eyebrow eyebrow--light">{aula.guide}</span>
     <h3>{aula.name}</h3>
     <p>{aula.summary}</p>
-    <span class="text-link text-link--light">Entrar al Aula <Icon name="iconoir:arrow-up-right" size={18} aria-hidden="true"/></span>
+    {!upcoming && (
+      <span class="text-link text-link--light">Entrar al Aula <Icon name="iconoir:arrow-up-right" size={18} aria-hidden="true"/></span>
+    )}
   </div>
-</a>
+</CardTag>

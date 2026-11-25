@@ -25,13 +25,16 @@ pnpm run build
 
 ## Despliegue
 
-En GitHub: **Settings → Pages → Source: GitHub Actions** y **Custom domain: soma-consciente.com**. Cloudflare administra el DNS y www redirige al dominio raíz.
+El workflow `.github/workflows/deploy.yml` valida los PRs y publica automáticamente
+los cambios de main. Al configurar la variable de repositorio
+`CLOUDFLARE_PRODUCTION_PROJECT` con el nombre del proyecto Pages, los cambios de
+`main` se publican en Cloudflare con Wrangler. Con la variable vacía, GitHub
+Pages sigue publicando el sitio.
 
-En GitHub: **Settings → Pages → Source: GitHub Actions**. El workflow `.github/workflows/deploy.yml` valida PRs y despliega automáticamente los cambios de `main`.
-
-Sitio público en https://soma-consciente.com/. Astro genera el sitemap en https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
-
-Si Pages aún no está habilitado, el build puede finalizar correctamente pero la publicación fallará. Habilitá GitHub Actions como fuente y volvé a ejecutar el workflow.
+La dirección canónica es https://soma-consciente.com/. Cloudflare administra el
+DNS y www redirige al dominio raíz. Al migrar la producción a Cloudflare Pages,
+asigná ese dominio al proyecto Pages de producción. Astro genera el sitemap en
+https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
 
 ### Vistas previas en Cloudflare Pages
 
@@ -42,6 +45,34 @@ se actualiza en `https://pr-<número>.soma-consciente-preview.pages.dev/`.
 El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 **Cloudflare Pages: Edit**. El token se puede guardar como
 `CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
+
+### Lista de espera en Cloudflare
+
+El formulario envía el nombre, el contacto y el consentimiento a
+`POST /api/waitlist` en Cloudflare Pages. La base D1 vinculada como
+`WAITLIST_DB` guarda esos datos junto con la fecha y la versión del
+consentimiento. Aplicá los archivos de `migrations/` en orden. Ejecutá
+`pnpm run test:waitlist` para probar la validación y la deduplicación
+con una base SQLite temporal.
+
+Wrangler lee los destinos de `wrangler.d1.toml`. Para aplicar las migraciones:
+
+```sh
+pnpm run db:migrate preview --local
+pnpm run db:migrate preview --remote
+pnpm run db:migrate production --remote
+```
+
+Los comandos remotos requieren acceso D1 en la cuenta Cloudflare de SOMA.
+El comando reconoce el esquema de las primeras bases y registra las migraciones
+ya aplicadas antes de ejecutar las pendientes.
+
+El workflow vincula `WAITLIST_DB` a la base del entorno correspondiente.
+Activá `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` para vistas previas o
+`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` para producción después de
+aplicar las migraciones al destino respectivo.
+
+`pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
 ## Edición de contenido
 

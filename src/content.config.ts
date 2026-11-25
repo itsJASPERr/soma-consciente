@@ -9,6 +9,7 @@ export const aulas = defineCollection({
     name: z.string().min(1),
     shortName: z.string().min(1),
     guide: z.string().min(1),
+    launchStatus: z.enum(['upcoming', 'available']).default('available'),
     qualification: z.string(),
     theme: z.enum(['terra', 'azul', 'oro', 'verde']),
     symbol: z.enum(['heart', 'sound', 'horse', 'body']),

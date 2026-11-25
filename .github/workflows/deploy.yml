@@ -1,4 +1,4 @@
-name: Website - GitHub Pages
+name: Website build and deploy
 
 on:
   push:
@@ -31,7 +31,16 @@ jobs:
         run: node scripts/check-media-links.mjs
       - name: Verify free/preview/locked static exports
         run: pnpm run test:access
+      - name: Verify waitlist API and database schema
+        run: pnpm run test:waitlist
       - name: Build static site
+        env:
+          PUBLIC_WAITLIST_ENABLED: >-
+            ${{ (github.event_name == 'pull_request'
+                && vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED == 'true' && 'true')
+              || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != ''
+                && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED == 'true' && 'true')
+              || 'false' }}
         run: pnpm run build
       - name: Verify canonical URLs and sitemap
         run: pnpm run test:domain
@@ -47,21 +56,23 @@ jobs:
           name: mobile-layout-screenshots
           path: test-results/
           if-no-files-found: ignore
-      - name: Upload Cloudflare preview artifact
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      - name: Upload Cloudflare Pages artifact
+        if: >-
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+          || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != '')
         uses: actions/upload-artifact@v4
         with:
-          name: cloudflare-preview-dist
+          name: cloudflare-pages-dist
           path: dist/
           if-no-files-found: error
-      - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT == ''
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT == ''
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -75,31 +86,98 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  preview:
-    name: Cloudflare Pages preview
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+  cloudflare:
+    name: ${{ github.event_name == 'pull_request' && 'Cloudflare Pages preview' || 'Cloudflare Pages production' }}
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+      || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != '')
     needs: build
     runs-on: ubuntu-latest
     environment:
-      name: cloudflare-preview
-      url: https://pr-${{ github.event.pull_request.number }}.soma-consciente-preview.pages.dev/
+      name: ${{ github.event_name == 'pull_request' && 'cloudflare-preview' || 'cloudflare-production' }}
+      url: >-
+        ${{ github.event_name == 'pull_request'
+          && format('https://pr-{0}.soma-consciente-preview.pages.dev/', github.event.pull_request.number)
+          || format('https://{0}.pages.dev/', vars.CLOUDFLARE_PRODUCTION_PROJECT) }}
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - uses: pnpm/action-setup@v6
-        with:
-          version: '12.23.0'
+      - name: Install Pages Function dependencies
+        run: pnpm install --frozen-lockfile
       - uses: actions/download-artifact@v4
         with:
-          name: cloudflare-preview-dist
+          name: cloudflare-pages-dist
           path: dist/
-      - name: Deploy preview with Wrangler
+      - name: Deploy Pages with Wrangler
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_KEY }}
-          PREVIEW_BRANCH: pr-${{ github.event.pull_request.number }}
+          PAGES_PROJECT: ${{ github.event_name == 'pull_request' && 'soma-consciente-preview' || vars.CLOUDFLARE_PRODUCTION_PROJECT }}
+          PAGES_BRANCH: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          PREVIEW_WAITLIST_ENABLED: ${{ vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED }}
+          PRODUCTION_WAITLIST_ENABLED: ${{ vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED }}
           WRANGLER_SEND_METRICS: 'false'
         run: |
-          pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1 pages deploy dist --project-name=soma-consciente-preview \
-            --branch="$PREVIEW_BRANCH" --commit-hash="$GITHUB_SHA" --commit-dirty=false
+          set -euo pipefail
+          wrangler=(pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1)
+          if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+            export WAITLIST_ENVIRONMENT=preview
+            waitlist_enabled="$PREVIEW_WAITLIST_ENABLED"
+          else
+            export WAITLIST_ENVIRONMENT=production
+            waitlist_enabled="$PRODUCTION_WAITLIST_ENABLED"
+          fi
+          if [[ "$waitlist_enabled" == 'true' ]]; then
+            [[ ! -e wrangler.toml && ! -e wrangler.json && ! -e wrangler.jsonc ]]
+            "${wrangler[@]}" pages download config "$PAGES_PROJECT"
+            python3 - <<'PYCONFIG'
+          import json
+          import os
+          from pathlib import Path
+          from tomllib import load
+          from uuid import UUID
+
+          target = os.environ['WAITLIST_ENVIRONMENT']
+          with Path('wrangler.d1.toml').open('rb') as database_file:
+              database_settings = load(database_file)['env']
+          database = next(item for item in database_settings[target]['d1_databases'] if item['binding'] == 'WAITLIST_DB')
+          database_id = str(UUID(database['database_id']))
+          other = 'preview' if target == 'production' else 'production'
+          if any(item['database_id'] == database_id for item in database_settings[other]['d1_databases']):
+              raise SystemExit('The preview and production waitlist databases must be different.')
+          downloaded = Path('wrangler.toml')
+          with downloaded.open('rb') as config_file:
+              config = load(config_file)
+          if config['name'] != os.environ['PAGES_PROJECT']:
+              raise SystemExit('Wrangler returned a configuration for an unexpected Pages project.')
+          config['pages_build_output_dir'] = './dist'
+          environments = config.setdefault('env', {})
+          # Pages can export default placement as an empty table, which Wrangler rejects.
+          for settings in (config, *environments.values()):
+              if settings.get('placement') == {}:
+                  settings['placement'] = {'mode': 'off'}
+          # The Pages export represents preview bindings at the top level when it omits env.preview.
+          preview = environments.setdefault('preview', {})
+          preview_databases = preview.setdefault('d1_databases', list(config.get('d1_databases', [])))
+          production = environments.setdefault('production', {})
+          production_databases = production.setdefault('d1_databases', [])
+          databases, other_databases = (
+              (production_databases, preview_databases) if target == 'production'
+              else (preview_databases, production_databases)
+          )
+          if any(item['database_id'] == database_id for item in other_databases):
+              raise SystemExit('The desired waitlist database is already attached to the other Pages environment.')
+          binding = next((item for item in databases if item['binding'] == 'WAITLIST_DB'), None)
+          if binding and binding['database_id'] != database_id:
+              raise SystemExit('This Pages environment already binds WAITLIST_DB to a different database.')
+          if not binding:
+              databases.append({key: database[key] for key in ('binding', 'database_id', 'database_name')})
+          Path('wrangler.json').write_text(json.dumps(config, indent=2) + chr(10), encoding='utf-8')
+          downloaded.unlink()
+          PYCONFIG
+          fi
+          "${wrangler[@]}" pages deploy dist --project-name="$PAGES_PROJECT" \
+            --branch="$PAGES_BRANCH" --commit-hash="$GITHUB_SHA" --commit-dirty=false

@@ -12,6 +12,8 @@
     "test:responsive": "node scripts/check-responsive.mjs",
     "test:aula-cards": "node scripts/check-aula-card-layout.mjs",
     "test:access": "node scripts/test-learning-access.mjs",
+    "test:waitlist": "node --experimental-strip-types scripts/test-waitlist.mjs",
+    "db:migrate": "bash scripts/migrate-waitlist.sh",
     "test:domain": "node scripts/check-custom-domain.mjs",
     "prebuild": "node scripts/generate-social-image.mjs",
     "predev": "node scripts/generate-social-image.mjs",
@@ -21,6 +23,7 @@
     "@astrojs/sitemap": "^3.7.6",
     "astro": "7.4.13",
     "astro-icon": "^1.2.0",
+    "libphonenumber-js": "^1.13.17",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {

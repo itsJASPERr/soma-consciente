@@ -1,12 +1,12 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
-import AulaCard from '../components/AulaCard.astro';
+import ProgramLaunchSignup from '../components/ProgramLaunchSignup.astro';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import ResourceCard from '../components/ResourceCard.astro';
-const aulas = await loadAulas();
+const programThemes = (await loadAulas()).map(({ name }) => name);
 const resources = await loadResources();
 const homeImages = await loadHomepage();
 import { path } from '../lib/paths';
@@ -20,7 +20,7 @@ import { path } from '../lib/paths';
         <p class="hero-lead">Cuatro caminos, un mismo núcleo.</p>
         <p class="hero-description">Un espacio online y presencial para aprender, practicar y acompañar procesos humanos desde el cuerpo, la emoción, el vínculo, la naturaleza y la comunidad.</p>
         <div class="btn-row">
-          <a class="btn" href={path('/aulas/')}>Explorar las Aulas <span aria-hidden="true">↗</span></a>
+          <a class="btn" href="#programa-online">Programa online <span aria-hidden="true">↗</span></a>
           <a class="btn btn--outline" href={path('/biblioteca/')}>Contenido gratuito <span aria-hidden="true">↗</span></a>
         </div>
         <div class="hero-tags"><span><i></i>Cuerpo</span><span><i></i>Emoción</span><span><i></i>Consciencia</span><span><i></i>Naturaleza</span></div>
@@ -45,16 +45,30 @@ import { path } from '../lib/paths';
         <p class="section-intro">No proponemos un único camino ni resultados predeterminados. Ofrecemos herramientas, escucha y espacios de encuentro.</p>
         <a class="text-link" href={path('/enfoque/')}>Conocer nuestro enfoque <span aria-hidden="true">↗</span></a>
       </div>
-      <blockquote>“Cada Aula tiene su propia voz. El Núcleo crea un lenguaje compartido.”</blockquote>
+      <blockquote>“El Núcleo crea un lenguaje compartido.”</blockquote>
     </div>
   </section>
-  <section class="section aulas-section" id="aulas">
+  <section class="section program-section" id="programa-online" aria-labelledby="programa-online-title">
     <div class="container">
-      <div class="section-head">
-        <div><span class="eyebrow">Cuatro puertas de entrada</span><h2>Las cuatro Aulas</h2><p>Cada Aula es un espacio vivo de contenidos, prácticas y acompañamiento, creado desde la experiencia de quien lo comparte.</p></div>
-        <a class="text-link" href={path('/aulas/')}>Conocer todas las Aulas <span aria-hidden="true">↗</span></a>
+      <div class="program-preview">
+        <span class="program-preview__status">Próximamente</span>
+        <h2 id="programa-online-title">Programa de acompañamiento online</h2>
+        <p class="program-preview__intro">Estamos desarrollando nuestro propio programa online para acompañarte en tu camino. Cuatro miradas se encuentran en una metodología compartida.</p>
+        {(import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true') && <ProgramLaunchSignup />}
+        <div class="program-preview__mark">
+          <img
+            src={path('/media/soma-original-emblem.png')}
+            alt="Emblema original de SOMA CONSCIENTE"
+            width="520"
+            height="405"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
+          {programThemes.map(theme => <li>{theme}</li>)}
+        </ul>
       </div>
-      <div class="aula-grid">{aulas.map((aula,index) => <AulaCard aula={aula} index={index}/>)}</div>
     </div>
   </section>
   <section class="section nucleo-section">
@@ -90,7 +104,7 @@ import { path } from '../lib/paths';
   </section>
   <section class="section--tight digital-band">
     <div class="container digital-grid">
-      <div><span class="eyebrow">SOMA desde donde estés</span><h2>Un espacio que te acompaña también online.</h2><p class="section-intro">No hace falta participar de un retiro para comenzar. Nuestra propuesta digital nace para que puedas explorar contenidos gratuitos, acercarte a cada Aula y conocer futuras opciones de acompañamiento.</p><a class="btn" href={path('/acompanamiento/')}>Formas de acompañarte <span aria-hidden="true">↗</span></a></div>
+      <div><span class="eyebrow">SOMA desde donde estés</span><h2>Un espacio que te acompaña también online.</h2><p class="section-intro">No hace falta participar de un retiro para comenzar. Nuestra propuesta digital nace para que puedas explorar contenidos gratuitos y conocer futuras opciones de acompañamiento.</p><a class="btn" href={path('/acompanamiento/')}>Formas de acompañarte <span aria-hidden="true">↗</span></a></div>
       <div class="digital-visual digital-visual--editorial"><img src={mediaUrl(homeImages.onlineImage) || ''} alt={homeImages.onlineAlt} loading="lazy" decoding="async" width="1050" height="800"/><span class="digital-visual__detail" aria-hidden="true">Tu tiempo · Tu camino</span></div>
     </div>
   </section>
@@ -113,3 +127,83 @@ import { path } from '../lib/paths';
     </div>
   </section>
 </SiteLayout>
+
+<style>
+  .program-section {
+    padding-top: 35px;
+    scroll-margin-top: 2rem;
+  }
+  .program-preview {
+    padding: clamp(2.25rem, 6vw, 4.75rem) clamp(1.125rem, 5vw, 4.25rem);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: radial-gradient(ellipse at 50% 55%, #eee6d6, transparent 68%), var(--cream);
+    text-align: center;
+  }
+  .program-preview__status {
+    display: inline-block;
+    margin-bottom: .85rem;
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    background: #e4e9d8;
+    color: var(--pine-dark);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .program-preview h2 {
+    max-inline-size: 20ch;
+    margin: 0 auto .9rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.9rem, 5vw, 4.65rem);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  .program-preview__intro {
+    max-inline-size: 55ch;
+    margin: 0 auto;
+    color: var(--ink);
+    font-size: clamp(1rem, 2vw, 1.17rem);
+    text-wrap: pretty;
+  }
+  .program-preview__mark {
+    display: grid;
+    place-items: center;
+    inline-size: min(100%, 23rem);
+    aspect-ratio: 1;
+    margin: clamp(1.25rem, 3vw, 2rem) auto;
+    padding: clamp(.8rem, 2.8vw, 1.75rem);
+    border: 1px solid #c4974e55;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffdf7 30%, #f3e9d700 74%);
+  }
+  .program-preview__mark img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+  .program-preview__themes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .7rem clamp(.75rem, 2vw, 1.5rem);
+    max-inline-size: 52rem;
+    margin: 0 auto;
+    padding: 1.15rem 0 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    color: var(--pine-dark);
+    font-size: clamp(.86rem, 1.25vw, 1rem);
+    font-weight: 700;
+    line-height: 1.4;
+    text-wrap: balance;
+  }
+  @media (max-width: 680px) {
+    .program-preview__themes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .program-preview__mark {
+      inline-size: min(100%, 16rem);
+    }
+  }
+</style>
