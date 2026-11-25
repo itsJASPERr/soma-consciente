@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
+import { waitlistConsentText, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 export async function checkWaitlistTracking(page, baseURL, { required }) {
   await page.addInitScript(() => {
@@ -34,8 +34,11 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const submit = form.getByRole('button', { name: 'Avisame cuando esté listo' });
   assert.deepEqual(await events(), []);
   await page.locator('#programa-online #program-launch-open').click();
-  await form.getByText(/guarde mis datos y me contacte por este canal/).waitFor();
-  await page.getByRole('dialog', { name: 'Nuestro programa online' }).waitFor();
+  await form.getByText(waitlistConsentText, { exact: true }).waitFor();
+  const dialog = page.getByRole('dialog', { name: 'Nuestro programa online' });
+  await dialog.waitFor();
+  const sheet = await dialog.boundingBox();
+  assert.ok(sheet.y + sheet.height >= page.viewportSize().height - 14, 'The mobile program overlay should align to the bottom.');
   assert.ok(await form.getByRole('radio', { name: 'WhatsApp' }).isChecked());
   const country = form.getByRole('button', { name: 'Código de país, Argentina (+54)' });
   await country.click();
@@ -47,23 +50,31 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   await form.getByRole('checkbox').check();
   assert.ok(await submit.isDisabled(), 'Consent alone must not enable the empty form.');
   assert.deepEqual(await events(), [opened]);
-  await form.getByRole('radio', { name: 'Email' }).check();
-  await form.getByRole('textbox', { name: 'Email' }).fill('prueba@example.com');
-  await form.getByLabel('Nombre').fill('Participante de prueba');
+  await form.getByRole('radio', { name: 'Correo electrónico' }).check();
+  await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
+  await form.getByLabel('Tu nombre').fill('Participante de prueba');
   assert.ok(await submit.isDisabled());
   await form.getByRole('checkbox').check();
 
   await submit.click();
-  await page.getByText('No pudimos guardar tu solicitud.').waitFor();
+  await dialog.getByRole('status').filter({ hasText: 'No pudimos guardar tu solicitud.' }).waitFor();
+  assert.equal(await dialog.locator('#program-launch-result').getAttribute('data-state'), 'error');
   assert.equal(programSubmissions, 1);
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
-  await page.getByText('Gracias. Te avisaremos por el medio que elegiste.').waitFor();
+  await dialog.getByRole('status').filter({ hasText: 'Gracias. Te avisaremos por el medio que elegiste.' }).waitFor();
+  assert.equal(await dialog.locator('#program-launch-result').getAttribute('data-state'), 'success');
   assert.equal(programSubmissions, 2);
   assert.deepEqual(await events(), [
     opened,
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
-  console.log('Program waitlist consent, payload and analytics verified.');
+  await dialog.getByRole('button', { name: 'Cerrar' }).click();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator('#program-launch-open').click();
+  const desktopSheet = await dialog.boundingBox();
+  assert.ok(desktopSheet.x > 720, 'The desktop program overlay should align to the side.');
+  await dialog.getByRole('button', { name: 'Cerrar' }).click();
+  console.log('Program waitlist overlay, consent, payload and analytics verified.');
 }

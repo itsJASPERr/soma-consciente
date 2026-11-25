@@ -15,11 +15,17 @@ const paths=[
  '/',
  '/encuentros/',
  '/acompanamiento/',
+ '/enfoque/',
+ '/nucleo/',
+ '/equipo/',
+ '/biblioteca/',
+ '/biblioteca/pausa-de-presencia/',
+ '/aulas/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
 ];
-const widths=[320,375,480,768,1024];
+const widths=[320,375,480,768,1024,1440];
 const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',d=>{output+=String(d).slice(-4000);});
@@ -59,7 +65,8 @@ try{
           '.site-header .brand',
           '.site-header .mobile-nav summary',
           '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
-          '.participation-row h2','.participation-row .btn','.participation-row .text-link',
+          '.participation-row h3','.participation-row .btn','.participation-row .journey-link',
+          '.journey-hero h1','.journey-row h2','.journey-resource-list a',
           '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
@@ -150,6 +157,24 @@ try{
   assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
   const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
   assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
+  await page.goto(HOST+BASE+'/enfoque/');
+  const content = page.locator('main');
+  await content.getByRole('link', { name: 'Ir a la Biblioteca' }).click();
+  await page.waitForURL('**/biblioteca/');
+  await content.getByRole('link', { name: 'Leer práctica: Una pausa de presencia', exact: true }).click();
+  await page.waitForURL('**/biblioteca/pausa-de-presencia/');
+  await content.getByRole('heading', { name: 'Detenerse' }).waitFor();
+  await content.getByRole('link', { name: 'Volver a la Biblioteca' }).click();
+  await page.waitForURL('**/biblioteca/');
+
+  await page.goto(HOST+BASE+'/nucleo/');
+  await content.getByRole('link', { name: 'Conocer al equipo' }).click();
+  await page.waitForURL('**/equipo/');
+  await content.getByRole('heading', { name: 'Nicole Rosignoli Miranda' }).waitFor();
+  await content.getByRole('link', { name: 'Descubrir el Núcleo' }).click();
+  await content.getByRole('link', { name: 'Conocer las Aulas' }).click();
+  await page.waitForURL('**/aulas/');
+  await content.getByRole('link', { name: 'Ir a la Biblioteca' }).waitFor();
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });

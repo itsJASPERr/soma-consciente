@@ -1,247 +1,157 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import OrbitArt from '../components/OrbitArt.astro';
 import HomepageOfferings from '../components/HomepageOfferings.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
-import SignupDialog from '../components/SignupDialog.astro';
+import ResourceList from '../components/ResourceList.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
+import SignupDialog from '../components/SignupDialog.astro';
 import { offeringIntro } from '../lib/offerings';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-import ResourceCard from '../components/ResourceCard.astro';
-const perspectiveOrder = ['nicole', 'jasper', 'yanina', 'nico'];
-const aulas = await loadAulas();
-const perspectives = perspectiveOrder
-  .map((slug) => aulas.find((aula) => aula.slug === slug))
-  .filter((aula) => aula !== undefined);
-const resources = await loadResources();
-const openPractice = resources.find((resource) => resource.slug === 'pausa-de-presencia') ?? resources[0];
-const homeImages = await loadHomepage();
-const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
-const encountersPhoto = mediaUrl(homeImages.encountersImage);
-const heroPhoto = encountersPhoto
-  ? { src: encountersPhoto, alt: homeImages.encountersAlt }
-  : { src: mediaUrl(homeImages.heroImage) || '', alt: homeImages.heroAlt, position: homeImages.heroPosition };
 import { path } from '../lib/paths';
+
+const aulas = await loadAulas();
+const themes = ['nicole', 'jasper', 'yanina', 'nico']
+  .map(slug => aulas.find(aula => aula.slug === slug))
+  .filter(aula => aula !== undefined);
+const resources = await loadResources();
+const home = await loadHomepage();
+const sunrise = mediaUrl(home.heroImage);
+const landscape = mediaUrl(home.nucleoImage);
+const heroPhoto = sunrise
+  ? { src: sunrise, alt: home.heroAlt, position: home.heroPosition }
+  : { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
+const circlePhoto = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
+const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 ---
-<SiteLayout description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
-  <HomepageOfferings
-    image={heroPhoto}
-    circleImage={homeImages.onlineImage ? { src: mediaUrl(homeImages.onlineImage) || '', alt: homeImages.onlineAlt } : undefined}
-    requestsEnabled={signupEnabled}
-  />
-  <section class="section" aria-labelledby="enfoque-title">
-    <div class="container">
-      <span class="eyebrow">Enfoque</span>
-      <h2 id="enfoque-title" class="section-heading">Creamos espacios para estar presentes, disfrutar y compartir lo que nos pasa.</h2>
-      <p class="section-intro">También hacemos lugar a lo incómodo, con cuidado y respeto por el ritmo de cada persona.</p>
-      <a class="text-link" href={path('/enfoque/')}>Conocer nuestro enfoque <span aria-hidden="true">↗</span></a>
-    </div>
-  </section>
-  <section class="section program-section" id="metodologia" aria-labelledby="metodologia-title">
-    <div class="container">
-      <div class="program-preview">
-        <h2 id="metodologia-title">Cuatro miradas, un mismo núcleo</h2>
-        <p class="program-preview__intro">Estas perspectivas se encuentran en nuestras vivencias presenciales y en la integración de lo que compartimos.</p>
+<SiteLayout openJourney description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
+  <HomepageOfferings image={heroPhoto} circleImage={circlePhoto} requestsEnabled={signupEnabled} />
+  <section class="program-section" id="metodologia" aria-labelledby="metodologia-title">
+    {signupEnabled && landscape && <img class="program-overlay-art" src={landscape} alt="" width="1100" height="780" loading="lazy" decoding="async" />}
+    <div class="container program-preview">
+      <h2 id="metodologia-title">Cuatro miradas, un mismo núcleo</h2>
+      <p class="program-preview__intro">Estas perspectivas se encuentran en nuestras vivencias presenciales y en la integración de lo que compartimos.</p>
+      <div class="program-preview__composition">
         <div class="program-preview__mark">
-          <img
-            src={path('/media/soma-original-emblem.png')}
-            alt="Emblema original de SOMA CONSCIENTE"
-            width="520"
-            height="405"
-            loading="lazy"
-            decoding="async"
-          />
+          <img src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
         </div>
         <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
-          {perspectives.map((aula) => (
-            <li>
-              <SomaAulaSymbol symbol={aula.symbol} />
-              <span>{aula.name}</span>
-            </li>
+          {themes.map(({ name, symbol }) => (
+            <li><span aria-hidden="true"><SomaAulaSymbol symbol={symbol} /></span>{name}</li>
           ))}
         </ul>
-        <ProgramWaitlist signupEnabled={signupEnabled} />
       </div>
+      <ProgramWaitlist signupEnabled={signupEnabled} />
     </div>
   </section>
-  <section class="section nucleo-section">
-    <div class="container nucleo-grid">
-      <div>
-        <span class="eyebrow" style="color:#dbad83">Un camino integrado</span>
-        <h2>El Núcleo</h2>
-        <p>Donde las cuatro miradas se encuentran. Un espacio para cocrear propuestas que conectan cuerpo, emoción, consciencia y naturaleza sin perder la singularidad de cada disciplina.</p>
-        <ul class="nucleo-people">
-          {perspectives.map((aula) => (
-            <li><a href={path('/equipo/')}>{aula.guide}</a><span>{aula.name}</span></li>
-          ))}
-        </ul>
-        <a class="btn btn--light" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="nucleo-editorial-art">
-        <img src={mediaUrl(homeImages.nucleoImage) || ''} alt={homeImages.nucleoAlt} loading="lazy" decoding="async" width="1100" height="1100"/>
-        <div class="nucleo-editorial-art__emblem" aria-label="Emblema original de SOMA"><OrbitArt/></div>
-      </div>
-      <div class="nucleo-points">
-        <div class="nucleo-point"><span>01</span>Prácticas y herramientas compartidas</div>
-        <div class="nucleo-point"><span>02</span>Prácticas interdisciplinarias</div>
-        <div class="nucleo-point"><span>03</span>Acompañamiento e integración</div>
-        <div class="nucleo-point"><span>04</span>Encuentros y experiencias</div>
-      </div>
+  <section class="container journey-row">
+    <div>
+      <h2>Nuestra mirada</h2>
+      <p>Creamos espacios para estar presentes, disfrutar y compartir lo que nos pasa, con respeto por el ritmo de cada persona.</p>
+    </div>
+    <div class="journey-actions">
+      <a class="journey-link" href={path('/enfoque/')}>Conocer el enfoque <span aria-hidden="true">↗</span></a>
+      <a class="journey-link" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
     </div>
   </section>
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div><span class="eyebrow">Biblioteca</span><h2>La Biblioteca ofrece prácticas abiertas para quienes todavía están explorando.</h2></div>
-        <a class="text-link" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
-      </div>
-      {openPractice && (
-        <div class="resource-grid resource-grid--single">
-          <ResourceCard resource={openPractice} />
-        </div>
-      )}
+  <section class="container home-library">
+    <div class="journey-row">
+      <div><h2>Biblioteca abierta</h2><p>Recursos gratuitos para explorar y practicar a tu propio ritmo.</p></div>
+      <a class="btn btn--outline" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
     </div>
+    <ResourceList resources={resources} />
   </section>
   {signupEnabled && <SignupDialog />}
 </SiteLayout>
 
 <style>
   .program-section {
-    padding-top: 35px;
-    scroll-margin-top: 2rem;
+    padding-block: var(--journey-spacing);
+    scroll-margin-top: 1.5rem;
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
   }
-  .program-preview {
-    padding: clamp(1rem, 3vw, 2rem) 0 clamp(2rem, 5vw, 3.5rem);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    text-align: center;
+  .program-overlay-art {
+    position: absolute;
+    z-index: -1;
+    inset: 14% -6% auto auto;
+    inline-size: min(63%, 51rem);
+    block-size: 105%;
+    object-fit: cover;
+    border-radius: 54% 43% 41% 53% / 44% 44% 45% 47%;
+    visibility: hidden;
   }
+  :global(html:has(#program-launch-dialog[open][data-program-open])) .program-overlay-art { visibility: visible; opacity: .45; }
+  .program-preview { text-align: center; }
   .program-preview h2 {
-    max-inline-size: 20ch;
-    margin: 0 auto .9rem;
+    margin: 0 auto .85rem;
     color: var(--pine-dark);
-    font-size: clamp(1.9rem, 5vw, 4.65rem);
+    font-size: clamp(2.1rem, 4.4vw, 4rem);
     text-wrap: balance;
-    overflow-wrap: anywhere;
   }
-  .program-preview__intro {
-    max-inline-size: 55ch;
-    margin: 0 auto;
-    color: var(--ink);
-    font-size: clamp(1rem, 2vw, 1.17rem);
-    text-wrap: pretty;
+  .program-preview__intro { max-inline-size: 57ch; margin: 0 auto; text-wrap: pretty; }
+  .program-preview__composition {
+    --method-center: clamp(9rem, 22vw, 16rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--method-center) minmax(0, 1fr);
+    align-items: center;
+    max-inline-size: 64rem;
+    margin: 1.35rem auto;
   }
   .program-preview__mark {
+    grid-column: 2;
+    grid-row: 1;
     display: grid;
     place-items: center;
-    inline-size: min(100%, 16rem);
-    aspect-ratio: auto;
-    margin: clamp(1.5rem, 4vw, 2.75rem) auto;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: none;
+    aspect-ratio: 1;
+    padding: clamp(.6rem, 2vw, 1.4rem);
+    border: 1px solid #a77d473f;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffaf0 15%, transparent 70%);
   }
-  .program-preview__mark img {
-    display: block;
-    inline-size: 100%;
-    block-size: auto;
-  }
+  .program-preview__mark img { display: block; inline-size: 100%; block-size: auto; }
   .program-preview__themes {
+    grid-column: 1 / -1;
+    grid-row: 1;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(1rem, 3vw, 2rem);
-    max-inline-size: 62rem;
-    margin: 0 auto;
+    grid-template-columns: minmax(0,1fr) var(--method-center) minmax(0,1fr);
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    gap: .7rem clamp(.75rem, 2vw, 1.7rem);
     padding: 0;
-    border-top: 0;
+    margin: 0;
     list-style: none;
     color: var(--pine-dark);
-    font-size: clamp(.86rem, 1.25vw, 1rem);
+    font-size: clamp(.88rem, 1.35vw, 1rem);
     font-weight: 700;
-    line-height: 1.35;
-    text-align: center;
-    text-wrap: balance;
+    line-height: 1.4;
   }
   .program-preview__themes li {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: .65rem;
+    gap: .55rem;
+    text-align: start;
     min-inline-size: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
   }
-  .program-preview__themes :global(img) {
-    inline-size: 4.25rem;
-    block-size: 4.25rem;
-    flex: none;
-  }
-  .nucleo-people {
-    display: grid;
-    gap: .65rem;
-    margin: 1.1rem 0 1.25rem;
-    padding: 0;
-    list-style: none;
-  }
-  .nucleo-people li {
-    display: grid;
-    gap: .1rem;
-  }
-  .nucleo-people a {
-    color: inherit;
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: .18em;
-  }
-  .nucleo-people span {
-    color: #f6f1e7;
-    font-size: .92rem;
-  }
-  .resource-grid.resource-grid--single {
-    grid-template-columns: minmax(0, 52rem);
-  }
-  .resource-grid--single :global(.resource-card) {
-    display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
-    align-items: center;
-    gap: clamp(1.25rem, 4vw, 3rem);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    overflow: visible;
-  }
-  .resource-grid--single :global(.resource-card:hover) {
-    transform: none;
-    box-shadow: none;
-  }
-  .resource-grid--single :global(.resource-art) {
-    height: auto;
-    min-block-size: 16rem;
-    border-radius: 46% 46% 1.1rem 1.1rem / 22% 22% 1.1rem 1.1rem;
-    background: var(--pine-dark);
-  }
-  .resource-grid--single :global(.resource-art::before),
-  .resource-grid--single :global(.resource-art::after) { content: none; }
-  .resource-grid--single :global(.resource-body) { padding: 0; }
-  @media (max-width: 800px) {
-    .program-preview__themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 680px) {
+  .program-preview__themes li:nth-child(-n + 2) { justify-content: flex-end; }
+  .program-preview__themes li:nth-child(n + 3) { grid-column: 3; }
+  .program-preview__themes li span { flex: 0 0 1.5rem; }
+  .program-preview__themes li :global(img) { display: block; inline-size: 100%; block-size: auto; }
+  .home-library { margin-block-end: var(--journey-spacing); }
+  @media (max-width: 710px) {
+    .program-preview__composition { display: block; }
+    .program-preview__mark { inline-size: min(70%, 13rem); margin: 0 auto 1.2rem; }
     .program-preview__themes {
-      grid-template-columns: minmax(0, 1fr);
+      max-inline-size: 32rem;
+      margin-inline: auto;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      grid-auto-flow: row;
     }
-    .program-preview__mark {
-      inline-size: min(100%, 16rem);
-    }
-    .resource-grid--single { grid-template-columns: 1fr; }
-    .resource-grid--single :global(.resource-card) { grid-template-columns: 1fr; }
-    .resource-grid--single :global(.resource-art) { order: 2; min-block-size: 12rem; }
+    .program-preview__themes li:nth-child(n) { grid-column: auto; justify-content: start; }
+  }
+  @media (max-width: 360px) {
+    .program-preview__themes { grid-template-columns: minmax(0,1fr); }
   }
 </style>

@@ -68,6 +68,8 @@ content:
           - { name: description, label: Descripción, type: text, required: true }
           - { name: venue, label: Sede, type: string }
           - { name: details, label: Lugar, precio o beneficio incluido, type: string }
+          - { name: homeNote, label: Beneficio destacado en la portada, type: string }
+          - { name: context, label: Información para participantes, type: text }
           - { name: action, label: Texto del botón, type: string, required: true }
           - { name: actionHint, label: Qué pasa al abrir el enlace directo, type: text }
           - { name: followUp, label: Próximo paso al enviar la solicitud, type: text }

@@ -1,36 +1,129 @@
 ---
+import EditorialPhoto from '../components/EditorialPhoto.astro';
+import OfferingAction from '../components/OfferingAction.astro';
+import SignupDialog from '../components/SignupDialog.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import Offerings from '../components/Offerings.astro';
-import { offeringIntro, offerings } from '../lib/offerings';
-import { path } from '../lib/paths';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug === 'puerta-abierta');
+import { offeringUrl, offerings } from '../lib/offerings';
+import { path } from '../lib/paths';
+
 const home = await loadHomepage();
-const campfire = mediaUrl(home.encountersImage);
-const pictures = campfire ? { 'encuentro-enero': { src: campfire, alt: home.encountersAlt } } : {};
+const encounter = offerings.find(offer => offer.slug === 'encuentro-enero');
+const door = offerings.find(offer => offer.slug === 'puerta-abierta');
+const link = encounter && offeringUrl(encounter);
+const message = link?.startsWith('https://wa.me/') ? new URL(link).searchParams.get('text') : undefined;
+const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+const showDialog = requestsEnabled && [encounter, door].some(offer => offer && !offeringUrl(offer));
+const action = encounter && link ? { label: encounter.action, href: link } : undefined;
+const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
+const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Encuentro de enero" description="Encuentro presencial del 15 y 16 de enero de 2027 en Casa Sabia, La Falda. Incluye un mes de círculos de integración online. La inscripción se consulta con Yanina y el equipo confirma si hay lugar.">
-  <section class="page-hero">
-    <div class="container">
+<SiteLayout title="Encuentros presenciales" description="Vivencias y retiros presenciales de SOMA. Conocé el encuentro del 15 y 16 de enero de 2027, con un mes de integración online incluido, y Puerta Abierta en La Falda." openJourney journeyAction={action}>
+  {encounter ? (
+    <article
+      id={encounter.slug}
+      class:list={['offering', 'container', 'journey-hero', { 'journey-hero--photo': fire.src }]}
+      aria-labelledby="encuentro-title"
+    >
+      <div class="journey-hero__copy">
+        <span class="eyebrow">Encuentros presenciales</span>
+        <h1 id="encuentro-title">{encounter.shortTitle || encounter.title}</h1>
+        <div class="event-facts">
+          {encounter.when && <strong>{encounter.when}</strong>}
+          {encounter.venue && <span>{encounter.venue}</span>}
+        </div>
+        <p class="journey-lead">{encounter.description}</p>
+        {encounter.details && (
+          <div class="offering__panel event-benefit">
+            <h2>Qué incluye</h2>
+            <p>{encounter.details}</p>
+            <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+          </div>
+        )}
+        <div class="offering__action">
+          <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} showArrow />
+          {!link && requestsEnabled && encounter.followUp && <p>{encounter.followUp}</p>}
+        </div>
+      </div>
+      <EditorialPhoto image={fire} class="journey-photo--campfire" priority>
+        {message && (
+          <figcaption class="event-message">
+            <span class="eyebrow">Mensaje preparado para WhatsApp</span>
+            <p>«{message}»</p>
+          </figcaption>
+        )}
+      </EditorialPhoto>
+    </article>
+  ) : (
+    <section class="container journey-hero">
       <h1>Encuentros presenciales</h1>
-      <p>{offeringIntro}</p>
+    </section>
+  )}
+  {door && (
+    <article id={door.slug} class="offering container journey-row" aria-labelledby="puerta-title">
+      <div>
+        {door.when && <p class="eyebrow">{door.when}</p>}
+        <h2 id="puerta-title">{door.title}</h2>
+        <p>{[door.venue, door.details].filter(Boolean).join(' · ')}</p>
+        <p>{door.description}</p>
+      </div>
+      <div class="offering__action">
+        <OfferingAction offer={door} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+        {!offeringUrl(door) && requestsEnabled && door.followUp && <p>{door.followUp}</p>}
+      </div>
+    </article>
+  )}
+  <section class="journey-band">
+    <div class:list={['container', 'journey-hero', 'continuity', { 'journey-hero--photo': journal.src }]}>
+      <EditorialPhoto image={journal} class="journey-photo--wide" />
+      <div>
+        <h2>Después del encuentro</h2>
+        <p>El encuentro de enero incluye un mes de círculos online. Después del encuentro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
+        <a class="btn btn--light" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
   </section>
-  <section class="section">
-    <div class="container">
-      <Offerings offers={events} pictures={pictures} />
-    </div>
-  </section>
-  <section class="section--tight digital-band">
-    <div class="container">
-      <h2>Integrar después del encuentro</h2>
-      <p class="section-intro">En los círculos online retomamos lo vivido para llevarlo a la vida cotidiana. El encuentro de enero incluye un mes.</p>
-      <a class="btn" href={path('/acompanamiento/#circulos')}>Conocer los círculos ↗</a>
-    </div>
-  </section>
+  {showDialog && <SignupDialog />}
 </SiteLayout>
 
 <style>
-  .page-hero { background: transparent; padding-bottom: 1.5rem; }
+  .offering { scroll-margin-top: 1.25rem; }
+  .event-facts {
+    display: grid;
+    gap: .1rem;
+    padding-inline-start: .75rem;
+    border-inline-start: 2px solid #aa7f55;
+    color: var(--pine-dark);
+  }
+  .event-benefit {
+    max-inline-size: 38rem;
+    border-block: 1px solid var(--journey-rule);
+    margin-block: 1rem;
+    padding-block: .75rem .35rem;
+  }
+  .event-benefit h2 { font-size: clamp(1.3rem, 2vw, 1.7rem); color: var(--pine-dark); margin: 0 0 .3rem; }
+  .event-benefit p { margin: 0; }
+  .event-message {
+    position: absolute;
+    z-index: 3;
+    inset: auto 0 -.25rem auto;
+    inline-size: min(73%, 19rem);
+    padding: .75rem 1rem;
+    border-inline-start: 2px solid #9f7546;
+    color: var(--pine-dark);
+    background: var(--cream);
+    box-shadow: 0 12px 24px #342a1b20;
+  }
+  .event-message p { font: 1.04rem/1.35 var(--font-display); margin: .3rem 0 0; }
+  .continuity { padding-block: clamp(1.75rem, 3.7vw, 3rem); }
+  .continuity.journey-hero--photo { grid-template-columns: minmax(0,.75fr) minmax(0,1.25fr); }
+  .continuity h2 { font-size: clamp(1.85rem, 3.7vw, 3.6rem); margin-block-end: .6rem; }
+  .continuity p { max-inline-size: 58ch; }
+  @media (max-width: 720px) {
+    .event-message { position: relative; inset: auto; margin: -.75rem 0 0 auto; inline-size: min(89%, 19rem); }
+    .continuity.journey-hero--photo { grid-template-columns: minmax(0,1fr); }
+    .continuity > div { grid-row: 1; }
+    .continuity :global(.journey-photo) { max-inline-size: 26rem; }
+  }
 </style>

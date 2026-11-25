@@ -10,10 +10,11 @@
       "details": "Un mes de participación en los círculos de integración online.",
       "homeNote": "Incluye un mes de círculos de integración online.",
       "action": "Solicitar inscripción",
-      "followUp": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+      "followUp": "Te contactaremos para compartir los detalles y confirmar tu inscripción.",
       "context": "",
       "pending": "El detalle suma horarios, precio y condiciones cuando el equipo los confirma.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20enero."
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20enero.",
+      "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio."
     },
     {
       "slug": "circulos",
@@ -24,10 +25,11 @@
       "details": "ARS 20.000 por mes",
       "homeNote": "",
       "action": "Quiero participar",
-      "followUp": "Por WhatsApp con Yanina.",
+      "followUp": "Te enviaremos los horarios y los pasos para sumarte al círculo semanal.",
       "context": "Podés sumarte por tu cuenta. Si participás del encuentro de enero, tenés un mes incluido.",
       "pending": "El precio corresponde a la participación mensual independiente.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20saber%20c%C3%B3mo%20sumarme%20al%20c%C3%ADrculo%20semanal%20de%20integraci%C3%B3n."
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20saber%20c%C3%B3mo%20sumarme%20al%20c%C3%ADrculo%20semanal%20de%20integraci%C3%B3n.",
+      "actionHint": "Por WhatsApp con Yanina."
     },
     {
       "slug": "puerta-abierta",
@@ -39,10 +41,11 @@
       "details": "La Falda, Córdoba",
       "homeNote": "",
       "action": "Avisame la fecha",
-      "followUp": "Abre WhatsApp con Yanina para pedir novedades sobre la fecha.",
+      "followUp": "Te avisaremos cuando se confirme la fecha de Puerta Abierta en Casa Sabia.",
       "context": "",
       "pending": "La solicitud es para recibir la fecha cuando esté definida.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20%C2%BFMe%20avis%C3%A1s%20cuando%20haya%20fecha%20para%20Puerta%20Abierta%3F"
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20%C2%BFMe%20avis%C3%A1s%20cuando%20haya%20fecha%20para%20Puerta%20Abierta%3F",
+      "actionHint": "Abre WhatsApp con Yanina para pedir novedades sobre la fecha."
     },
     {
       "slug": "grupo-whatsapp",
@@ -52,10 +55,11 @@
       "details": "Comunidad gratuita",
       "homeNote": "",
       "action": "Unirme al grupo",
-      "followUp": "El enlace lleva directo a la invitación de WhatsApp.",
+      "followUp": "Te enviaremos el enlace para que puedas sumarte al grupo gratuito.",
       "context": "",
       "pending": "",
-      "url": "https://chat.whatsapp.com/ChxlvWZHbR28tlMI08V8mN"
+      "url": "https://chat.whatsapp.com/ChxlvWZHbR28tlMI08V8mN",
+      "actionHint": "El enlace lleva directo a la invitación de WhatsApp."
     }
   ]
 }

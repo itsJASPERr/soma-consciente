@@ -1,37 +1,78 @@
 ---
+import EditorialPhoto from '../components/EditorialPhoto.astro';
+import OfferingAction from '../components/OfferingAction.astro';
+import SignupDialog from '../components/SignupDialog.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import Offerings from '../components/Offerings.astro';
-import { offerings } from '../lib/offerings';
-import { path } from '../lib/paths';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
+import { offeringUrl, offerings } from '../lib/offerings';
+import { path } from '../lib/paths';
 
-const integration = offerings.filter(({ slug }) => slug === 'circulos' || slug === 'grupo-whatsapp');
 const home = await loadHomepage();
-const journal = mediaUrl(home.onlineImage);
-const pictures = journal ? { circulos: { src: journal, alt: home.onlineAlt } } : {};
+const circle = offerings.find(offer => offer.slug === 'circulos');
+const community = offerings.find(offer => offer.slug === 'grupo-whatsapp');
+const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
+const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+const showDialog = requestsEnabled && [circle, community].some(offer => offer && !offeringUrl(offer));
 ---
-<SiteLayout title="Integración online" description="Círculo de integración online, una vez por semana, ARS 20.000 por mes. También podés entrar al grupo gratuito de WhatsApp.">
-  <section class="page-hero">
-    <div class="container">
-      <h1>Integración online</h1>
-      <p>Un espacio grupal para retomar lo vivido y darle lugar en lo cotidiano.</p>
+<SiteLayout title="Integración online" description="Participá en el círculo online semanal de SOMA o sumate a la comunidad gratuita de WhatsApp." openJourney>
+  {circle ? (
+    <article
+      id={circle.slug}
+      class:list={['offering', 'container', 'journey-hero', { 'journey-hero--photo': journal.src }]}
+      aria-labelledby="circulo-title"
+    >
+      <div class="journey-hero__copy">
+        <span class="eyebrow">Integración online</span>
+        <h1 id="circulo-title">{circle.title}</h1>
+        <p class="journey-lead">{circle.description}</p>
+        <div class="offering__panel circle-price">
+          {circle.details && <strong>{circle.details}</strong>}
+          {circle.when && <span>{circle.when}</span>}
+        </div>
+        <div class="offering__action">
+          <OfferingAction offer={circle} requestsEnabled={requestsEnabled} showArrow />
+          {!offeringUrl(circle) && requestsEnabled && circle.followUp && <p>{circle.followUp}</p>}
+        </div>
+      </div>
+      <EditorialPhoto image={journal} priority />
+    </article>
+  ) : (
+    <section class="container journey-hero"><h1>Integración online</h1></section>
+  )}
+  {circle?.context && (
+    <div class="container journey-row">
+      <p>{circle.context}</p>
+      <a class="journey-link" href={path('/encuentros/#encuentro-enero')}>Ver el encuentro de enero <span aria-hidden="true">↗</span></a>
     </div>
-  </section>
-  <section class="section">
-    <div class="container">
-      <Offerings offers={integration} pictures={pictures} />
-    </div>
-  </section>
-  <section class="section--tight digital-band">
-    <div class="container">
-      <h2>Nos encontramos en persona</h2>
-      <p class="section-intro">Conocé las próximas vivencias presenciales de SOMA. El encuentro de enero incluye un mes de círculos de integración online.</p>
-      <a class="btn" href={path('/encuentros/#encuentro-enero')}>Ver el próximo encuentro ↗</a>
-    </div>
-  </section>
+  )}
+  {community && (
+    <section id={community.slug} class="offering journey-band" aria-labelledby="grupo-title">
+      <div class="container journey-row">
+        <div>
+          <h2 id="grupo-title">Comunidad gratuita de WhatsApp</h2>
+          <p>{community.description}</p>
+        </div>
+        <div class="offering__action">
+          <OfferingAction offer={community} requestsEnabled={requestsEnabled} class="btn btn--light" showArrow />
+          {!offeringUrl(community) && requestsEnabled && community.followUp && <p>{community.followUp}</p>}
+        </div>
+      </div>
+    </section>
+  )}
+  {showDialog && <SignupDialog />}
 </SiteLayout>
 
 <style>
-  .page-hero { background: transparent; padding-bottom: 1.5rem; }
+  .offering { scroll-margin-top: 1.25rem; }
+  .circle-price {
+    display: grid;
+    gap: .2rem;
+    max-inline-size: 24rem;
+    padding-block: .75rem;
+    margin-block: 1rem;
+    border-block: 1px solid var(--journey-rule);
+    color: var(--pine-dark);
+  }
+  .circle-price strong { font: clamp(1.55rem, 2.65vw, 2.4rem)/1.2 var(--font-display); }
 </style>

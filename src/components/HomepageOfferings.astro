@@ -1,305 +1,138 @@
 ---
+import EditorialPhoto from './EditorialPhoto.astro';
 import OfferingAction from './OfferingAction.astro';
 import { offeringIntro, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
+type Photo = { src?: string; alt: string; position?: string };
+
 interface Props {
-  image?: { src: string; alt: string; position?: string };
-  circleImage?: { src: string; alt: string };
+  image?: Photo;
+  circleImage?: Photo;
   requestsEnabled: boolean;
 }
 
 const { image, circleImage, requestsEnabled } = Astro.props;
 const encounter = offerings.find(({ slug }) => slug === 'encuentro-enero');
-const circles = offerings.find(({ slug }) => slug === 'circulos');
-const openDoor = offerings.find(({ slug }) => slug === 'puerta-abierta');
+const included = encounter?.homeNote || encounter?.details;
+const alternatives = offerings.filter(({ slug }) => slug === 'circulos' || slug === 'puerta-abierta');
 const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 ---
 <section class="participation-hero" aria-labelledby="participation-heading">
-  <div class:list={['participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
-    <div class="participation-hero__copy">
-      <h1 id="participation-heading">Encuentros presenciales. <em>Integración online.</em></h1>
-      <p class="participation-hero__lede">{offeringIntro}</p>
+  <div class:list={['container', 'journey-hero', { 'journey-hero--photo': image?.src }]}>
+    <div class="journey-hero__copy">
+      <h1 id="participation-heading">Encuentros presenciales.<br/><em>Integración online.</em></h1>
+      <p class="journey-lead participation-hero__intro">{offeringIntro}</p>
       {encounter && (
         <div class="participation-feature" id={encounter.slug}>
-          <p class="participation-label">Próximo encuentro</p>
+          <p class="eyebrow">Próximo encuentro</p>
           <h2 class="participation-feature__date">{encounter.when || encounter.title}</h2>
           {encounter.venue && <p class="participation-feature__venue">{encounter.venue}</p>}
-          {(encounter.homeNote || encounter.details) && <p class="participation-feature__included">{encounter.homeNote || encounter.details}</p>}
+          {included && <p class="participation-feature__included">{included}</p>}
           <a class="btn" href={path('/encuentros/#' + encounter.slug)}>Ver el encuentro <span aria-hidden="true">↗</span></a>
         </div>
       )}
     </div>
-    {image?.src && (
-      <div class="participation-hero__frame">
-        <img src={image.src} alt={image.alt} width="1100" height="780" fetchpriority="high" decoding="async" style={image.position && 'object-position:' + image.position} />
-      </div>
-    )}
+    <EditorialPhoto image={image} class="participation-hero__frame" priority />
   </div>
 </section>
 
-{circles && (
-  <section id={circles.slug} class="participation-row participation-row--circles" aria-labelledby="participation-circles">
-    <div class="participation-split">
-      <div class="participation-split__copy">
-        <h2 id="participation-circles">{circles.shortTitle || circles.title}</h2>
-        {circles.description && <p class="participation-row__summary">{circles.description}</p>}
-        {(circles.details || circles.when) && (
-          <div class="participation-row__details">
-            {circles.details && <p class="participation-row__price">{circles.details}</p>}
-            {circles.when && <p class="participation-row__secondary">{circles.when}</p>}
-          </div>
-        )}
-        {circles.context && <p class="participation-row__context">{circles.context}</p>}
-        <div class="participation-row__action">
-          <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
-          {circles.followUp && <p class="participation-row__handoff">{circles.followUp}</p>}
-        </div>
-      </div>
-      {circleImage?.src && (
-        <div class="participation-split__frame">
-          <img src={circleImage.src} alt={circleImage.alt} width="1100" height="780" loading="lazy" decoding="async" />
-        </div>
-      )}
-    </div>
-  </section>
-)}
-
-{openDoor && (
-  <section id={openDoor.slug} class="participation-row participation-row--door" aria-labelledby="participation-door">
-    <div class="container participation-row__layout">
-      <div class="participation-row__lead">
-        <h2 id="participation-door">{openDoor.shortTitle || openDoor.title}</h2>
-        {openDoor.description && <p class="participation-row__summary">{openDoor.description}</p>}
-      </div>
-      {(openDoor.when || openDoor.venue || openDoor.details) && (
-        <div class="participation-row__details">
-          {openDoor.when && <p class="participation-row__date">{openDoor.when}</p>}
-          {(openDoor.venue || openDoor.details) && <p class="participation-row__secondary">{[openDoor.venue, openDoor.details].filter(Boolean).join(' · ')}</p>}
-        </div>
-      )}
-      <div class="participation-row__action">
-        <OfferingAction offer={openDoor} requestsEnabled={requestsEnabled} class="text-link" showArrow />
-        {openDoor.followUp && <p class="participation-row__handoff">{openDoor.followUp}</p>}
-      </div>
+{alternatives.length > 0 && (
+  <section class:list={['container', 'participation-options', { 'participation-options--photo': circleImage?.src }]} aria-labelledby="participation-options-title">
+    <EditorialPhoto image={circleImage} class="journey-photo--wide" />
+    <div class="participation-options__copy">
+      <h2 id="participation-options-title">Otras formas de participar</h2>
+      {alternatives.map((offer) => {
+        const circle = offer.slug === 'circulos';
+        const href = path(circle ? '/acompanamiento/#circulos' : '/encuentros/#puerta-abierta');
+        return (
+          <article class="participation-row journey-row" id={offer.slug} aria-labelledby={offer.slug + '-home-title'}>
+            <div>
+              <h3 id={offer.slug + '-home-title'}><a href={href}>{offer.shortTitle || offer.title}</a></h3>
+              <p class="participation-row__details">
+                {circle ? <><strong>{offer.details}</strong> <span>{offer.when}</span></> :
+                  <><strong class="participation-row__date">{offer.when}</strong> <span>{[offer.venue, offer.details].filter(Boolean).join(' · ')}</span></>}
+              </p>
+            </div>
+            <div class="participation-row__action">
+              <OfferingAction offer={offer} requestsEnabled={requestsEnabled} class="journey-link" showArrow />
+            </div>
+          </article>
+        );
+      })}
     </div>
   </section>
 )}
 
 {community && (
-  <section id={community.slug} class="participation-row participation-row--community" aria-labelledby="participation-community">
-    <div class="container participation-row__layout">
-      <div class="participation-row__lead">
-        {community.details && <p class="participation-kicker">{community.details}</p>}
-        <h2 id="participation-community">{community.title}</h2>
-        {community.description && <p class="participation-row__invite">{community.description}</p>}
+  <section id={community.slug} class="participation-row--community journey-band" aria-labelledby="participation-community">
+    <div class="container journey-row">
+      <div>
+        <h2 id="participation-community">Comunidad gratuita de WhatsApp</h2>
+        <p>{community.description}</p>
       </div>
       <div class="participation-row__action">
         <OfferingAction offer={community} requestsEnabled={requestsEnabled} class="btn btn--light" showArrow />
-        {community.followUp && <p class="participation-row__handoff">{community.followUp}</p>}
       </div>
     </div>
   </section>
 )}
 
 <style>
-  .participation-hero {
-    background: transparent;
-    padding-block: clamp(2.4rem, 7vw, 5.75rem) clamp(1.5rem, 4vw, 3rem);
-  }
-  .participation-hero__layout {
-    display: grid;
-    align-items: center;
-    gap: clamp(1.75rem, 5vw, 4.5rem);
-    width: min(1180px, calc(100% - 48px));
-    margin-inline: auto;
-  }
-  .participation-hero__layout--with-image {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, .9fr);
-  }
-  .participation-hero__copy {
-    min-inline-size: 0;
-    align-self: center;
-  }
-  .participation-hero h1 {
-    color: var(--pine-dark);
-    font-size: clamp(2.4rem, 5.5vw, 4.65rem);
-    line-height: 1.01;
-    margin: 0;
-  }
-  .participation-hero h1 em {
-    display: block;
-    color: var(--pine);
-    font-weight: 400;
-  }
-  .participation-hero__lede {
-    max-inline-size: 42rem;
-    margin: .9rem 0 0;
-    color: var(--ink);
-    font-size: clamp(1rem, 2vw, 1.12rem);
-    line-height: 1.5;
-    text-wrap: pretty;
-  }
-  .participation-hero__frame {
-    position: relative;
-    min-block-size: clamp(20rem, 42vw, 34rem);
-    border-radius: 48% 48% 1.35rem 1.35rem / 28% 28% 1.35rem 1.35rem;
-    overflow: hidden;
-    background: var(--pine-dark);
-  }
-  .participation-hero__frame img {
-    position: absolute;
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
-    object-position: 61% 50%;
-  }
+  .participation-hero h1 { max-inline-size: none; text-wrap: initial; }
+  .participation-hero em { color: var(--journey-clay); font-style: normal; }
   .participation-feature {
-    max-inline-size: 34rem;
-    margin-top: clamp(1.4rem, 3vw, 2.2rem);
-    padding-top: 0;
-    border-top: 0;
-  }
-  .participation-label, .participation-row__date {
-    color: #994b37;
-    font-weight: 700;
-  }
-  .participation-label {
-    margin: 0 0 .42rem;
-    font-size: .72rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-  }
-  .participation-feature__date {
-    color: var(--pine-dark);
-    font-size: clamp(1.94rem, 3.55vw, 3.15rem);
-    margin: 0 0 .26rem;
-  }
-  .participation-feature__venue {
-    color: var(--pine);
-    line-height: 1.4;
-    margin: 0 0 .48rem;
-  }
-  .participation-feature__included {
-    max-width: 47ch;
-    color: var(--pine-dark);
-    font-weight: 700;
-    line-height: 1.38;
-    margin: 0 0 1rem;
-  }
-  .participation-feature .btn {
-    inline-size: fit-content;
-  }
-  .participation-feature, .participation-row {
+    max-inline-size: 33rem;
+    margin-block-start: clamp(1.1rem, 2vw, 1.6rem);
+    padding-block-start: .85rem;
+    border-block-start: 1px solid var(--journey-rule);
     scroll-margin-top: 1.5rem;
   }
-  .participation-row {
-    background: transparent;
-  }
-  .participation-row--circles {
-    background: transparent;
-  }
-  .participation-row--community {
-    background: var(--pine-dark);
-    color: var(--cream);
-  }
-  .participation-split,
-  .participation-row__layout {
-    display: grid;
-    grid-template-columns: minmax(0, 36rem);
-    align-items: start;
-    gap: .85rem 1.5rem;
-    width: min(1180px, calc(100% - 48px));
-    margin-inline: auto;
-    padding-block: clamp(2.75rem, 7vw, 5.25rem);
-  }
-  .participation-split {
-    grid-template-columns: minmax(0, 1.05fr) minmax(14rem, .82fr);
-    align-items: center;
-    gap: clamp(1.5rem, 4vw, 4rem);
-  }
-  .participation-split__frame {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    border-radius: 46% 46% 1.2rem 1.2rem / 24% 24% 1.2rem 1.2rem;
-    overflow: hidden;
-    background: var(--pine-dark);
-  }
-  .participation-split__frame img {
-    position: absolute;
-    inset: 0;
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
-  }
-  .participation-row__details {
-    display: grid;
-    gap: .15rem;
-    line-height: 1.4;
-  }
-  .participation-row__action {
-    grid-column: 1;
-    justify-self: start;
-    max-inline-size: 36rem;
-    margin-top: .35rem;
-  }
-  .participation-row h2 {
-    margin: 0;
-    color: var(--pine-dark);
-    font-size: clamp(2rem, 4vw, 3.4rem);
-  }
-  .participation-row--community h2 {
-    color: inherit;
-  }
-  .participation-row p {
-    margin: 0;
-    font-size: .93rem;
-  }
-  .participation-row__price {
-    color: var(--pine-dark);
-    font-weight: 700;
-  }
-  .participation-row__secondary {
-    color: var(--pine);
-  }
-  .participation-row__lead {
-    min-inline-size: 0;
-  }
-  .participation-row__context,
-  .participation-row__summary,
-  .participation-row__invite,
-  .participation-row__handoff {
-    margin-top: .35rem;
-    line-height: 1.4;
-    text-wrap: pretty;
-  }
-  .participation-row__handoff {
-    max-inline-size: 100%;
-    font-size: .82rem;
-  }
+  .participation-feature p { margin: 0 0 .22rem; }
+  .participation-feature .eyebrow { margin-block-end: .4rem; }
   .participation-feature__date {
+    margin: 0 0 .35rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.75rem, 3.25vw, 2.8rem);
     text-wrap: balance;
   }
-  .participation-kicker {
-    margin: 0 0 .2rem;
-    color: inherit;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+  .participation-feature__venue { font-weight: 700; }
+  .participation-feature .btn { margin-block-start: .75rem; }
+  .participation-options {
+    display: grid;
+    align-items: center;
+    gap: clamp(1.25rem, 4.5vw, 4.75rem);
+    padding-block: clamp(2rem, 4.4vw, 3.75rem);
+    border-block-start: 1px solid var(--journey-rule);
   }
-  @media (max-width: 800px) {
-    .participation-hero__layout,
-    .participation-split,
-    .participation-row__layout {
-      width: min(100% - 32px, 1180px);
-    }
-    .participation-split { grid-template-columns: minmax(0, 1fr); }
-    .participation-split__frame { order: 2; aspect-ratio: 1.5; }
+  .participation-options--photo { grid-template-columns: minmax(0, .73fr) minmax(0, 1.27fr); }
+  .participation-options__copy { min-inline-size: 0; }
+  .participation-options h2 {
+    color: var(--pine-dark);
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    margin-block-end: .85rem;
   }
-  @media (max-width: 680px) {
-    .participation-hero__layout--with-image { grid-template-columns: minmax(0, 1fr); }
-    .participation-hero h1 { font-size: clamp(2.4rem, 8.3vw, 3.8rem); }
-    .participation-hero__frame { min-block-size: 0; aspect-ratio: 1.62; }
+  .participation-row { padding-block: .8rem; scroll-margin-top: 1.5rem; }
+  .participation-row h3 { margin-block-end: .2rem; }
+  .participation-row h3 a:hover { text-decoration: underline; }
+  .participation-row__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .15rem .6rem;
+    font-size: .94rem;
+  }
+  .participation-row__date { color: var(--journey-clay); }
+  .participation-row__action { min-inline-size: 0; flex: 0 1 auto; }
+  .participation-row__action :global(.offering-action-hint) { margin-block-start: .15rem; }
+  .participation-row--community { scroll-margin-top: .5rem; }
+  @media (max-width: 740px) {
+    .participation-options--photo { grid-template-columns: minmax(0,1fr); }
+    .participation-options__copy { grid-row: 1; }
+    .participation-options :global(.journey-photo) { inline-size: min(100%, 29rem); }
+  }
+  @media (max-width: 510px) {
+    .participation-row { display: block; }
+    .participation-row__action { margin-block-start: .25rem; }
+    .participation-row__details { display: grid; }
   }
 </style>
