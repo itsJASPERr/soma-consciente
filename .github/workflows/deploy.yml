@@ -16,6 +16,13 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BUILD_WITH_WAITLIST: >-
+        ${{ (github.event_name == 'pull_request'
+            && vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED == 'true' && 'true')
+          || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != ''
+            && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED == 'true' && 'true')
+          || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,18 +42,15 @@ jobs:
         run: pnpm run test:waitlist
       - name: Build static site
         env:
-          PUBLIC_WAITLIST_ENABLED: >-
-            ${{ (github.event_name == 'pull_request'
-                && vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED == 'true' && 'true')
-              || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != ''
-                && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED == 'true' && 'true')
-              || 'false' }}
+          PUBLIC_WAITLIST_ENABLED: ${{ env.BUILD_WITH_WAITLIST }}
         run: pnpm run build
       - name: Verify canonical URLs and sitemap
         run: pnpm run test:domain
       - name: Verify social link previews
         run: pnpm run test:og
       - name: Responsive browser verification
+        env:
+          REQUIRE_WAITLIST_TRACKING: ${{ env.BUILD_WITH_WAITLIST }}
         timeout-minutes: 3
         run: pnpm run test:responsive
       - name: Save mobile screenshots
