@@ -13,6 +13,7 @@ import '../styles/learning-access.css';
 const {
   title = 'SOMA CONSCIENTE',
   description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.',
+  noIndex = false,
   ogImage = '/og/soma-consciente.png',
   ogImageAlt = 'SOMA CONSCIENTE — cuatro caminos, un mismo núcleo, con el emblema original de las cuatro Aulas.'
 } = Astro.props;
@@ -33,7 +34,9 @@ const socialDescription = description.trim().length >= 60
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="theme-color" content="#f7f1e8"/>
     <meta name="description" content={description}/>
-    <link rel="canonical" href={canonical.toString()}/>
+    {noIndex
+      ? <meta name="robots" content="noindex"/>
+      : <link rel="canonical" href={canonical.toString()}/>}
     <link rel="sitemap" href={path('/sitemap-index.xml')}/>
     <link rel="icon" type="image/svg+xml" href={path('/favicon.svg')}/>
     <meta property="og:type" content="website"/>
