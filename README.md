@@ -54,11 +54,11 @@ validación y la deduplicación con una base SQLite temporal.
 
 Para habilitar el formulario en un despliegue de Cloudflare, aplicá la
 migración a la base D1 del entorno, vinculala como `WAITLIST_DB` y compilá
-con `PUBLIC_WAITLIST_ENABLED=true`. El workflow de PR lee este valor de la
-variable de repositorio `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED`. El despliegue de
-Cloudflare en `main` usa `CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED`. Configurá cada
-variable en true después de aplicar la migración y vincular una base D1
-diferente para cada entorno.
+con `PUBLIC_WAITLIST_ENABLED=true`. En los PRs, Wrangler vincula esa base al
+entorno de vista previa si `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` es `true`
+y `CLOUDFLARE_WAITLIST_PREVIEW_DATABASE_ID` contiene su identificador.
+En producción, vinculá una base D1 dedicada en el proyecto Pages y activá
+`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` después de aplicar la migración.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
