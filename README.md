@@ -39,12 +39,21 @@ https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
 ### Vistas previas en Cloudflare Pages
 
 Los pull requests abiertos desde este repositorio publican el sitio estático
-validado con Wrangler en el proyecto `soma-consciente-preview`. La vista previa
+validado con Wrangler en el proyecto `soma-consciente-website`. La vista previa
 se actualiza en `https://pr-<número>.soma-consciente-preview.pages.dev/`.
 
 El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 **Cloudflare Pages: Edit**. El token se puede guardar como
 `CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
+
+Cuando la recolección está habilitada, el workflow aplica las migraciones de D1
+con Wrangler antes de publicar Pages. Las vistas previas migran su base
+compartida y los despliegues de `main` migran la base de producción. Cada base
+procesa una migración de despliegue a la vez. Si falla una migración, el
+workflow mantiene la versión publicada. Para usar un token con permiso
+**D1: Edit** aparte del token de Pages, guardalo como
+`CLOUDFLARE_D1_API_TOKEN` en GitHub. Si no está configurado, se usa el token de
+Pages y ese token necesita ambos permisos.
 
 ### Lista de espera en Cloudflare
 
@@ -73,6 +82,12 @@ Activá `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` para vistas previas o
 aplicar las migraciones al destino respectivo.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
+
+La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
+comunidad**. Si una propuesta carece de enlace directo, el formulario guarda
+una solicitud en `offering_requests` con la propuesta y el canal elegido.
+El equipo puede consultar esa tabla en D1 para responder. La integración de
+inscripción y cupos con Reservas se sigue en #34.
 
 ## Edición de contenido
 
