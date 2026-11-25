@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .astro/
+/.pnpm-store/
+/package-lock.json
+/public/og/soma-consciente.png
+/test-results/
 .env
 .env.*
 !.env.example

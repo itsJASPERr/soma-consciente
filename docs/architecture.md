@@ -62,4 +62,4 @@ All content is currently public. Future enrollment, access control, payment, per
 - Media lives in `public/media`, and Pages CMS saves URLs as `/media/…`. `src/lib/media.ts` normalizes older CMS paths that start with `/soma-consciente/media/`.
 - The previous repository-root `CNAME` contained the bare apex domain. It was removed; `public/CNAME` now contains `www.soma-consciente.com` so the build artifact is consistent. GitHub Pages configured via **GitHub Actions** ignores CNAME files for domain assignment; GitHub Pages settings remain the authority.
 - DNS is owned by Porkbun. Keep the `www` CNAME pointing at `itsjasperr.github.io` and apex A/AAAA records at GitHub Pages IPs. **Deploying these code changes cannot itself cure a GitHub InvalidCNAMEError if authoritative DNS is not resolving or if GitHub Pages settings are inconsistent.**
-- `npm run test:domain` checks generated canonical URLs, root-relative links, assets, CMS media config and the published `dist/CNAME`.
+- `pnpm run test:domain` checks generated canonical URLs, root-relative links, assets, CMS media config and the published `dist/CNAME`.

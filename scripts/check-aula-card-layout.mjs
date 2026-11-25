@@ -11,7 +11,7 @@ const ROOT='http://127.0.0.1:4321';
 const WIDTHS=[320,375,430,599,600,650,680,681,767,879,880,900,1024,1149,1150,1151,1280];
 const PAGES=['/','/aulas/'];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// Spawn Astro directly: terminating npm does not terminate its child Node process.
+// Spawn Astro directly so cleanup can terminate the server itself.
 const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{
   stdio:['ignore','pipe','pipe'],env:process.env
 });

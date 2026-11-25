@@ -2,6 +2,7 @@
   "name": "soma-consciente",
   "version": "0.3.0",
   "private": true,
+  "packageManager": "pnpm@12.23.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -17,15 +18,15 @@
     "test:og": "node scripts/check-og-metadata.mjs"
   },
   "dependencies": {
-    "astro": "^5.16.0",
+    "astro": "7.4.13",
     "astro-icon": "^1.2.0",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
     "@iconify-json/iconoir": "^1.2.12",
     "@types/markdown-it": "^14.1.2",
     "playwright-core": "^1.57.0",
-    "sharp": "^0.34.4"
+    "sharp": "^0.34.4",
+    "typescript": "^5.9.3"
   }
 }

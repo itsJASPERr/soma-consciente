@@ -4,7 +4,7 @@
 
 ## Stack
 
-- Astro 5 + TypeScript, HTML estático para GitHub Pages
+- Astro + TypeScript, HTML estático para GitHub Pages
 - Astro Content Collections (JSON validado con Zod)
 - Imágenes editoriales configurables por Pages CMS para portada, Aulas, cursos, Biblioteca, Núcleo y Encuentros
 - Pages CMS, ya conectado a GitHub; el archivo `.pages.yml` configura los editores
@@ -14,12 +14,13 @@
 
 ## Desarrollo local
 
-Node.js 22+.
+Node.js 22+ y pnpm 12.23.0.
 
 ```sh
-npm install
-npm run dev
-npm run content:check\nnpm run build
+pnpm install --frozen-lockfile
+pnpm run dev
+pnpm run content:check
+pnpm run build
 ```
 
 ## Despliegue
@@ -81,10 +82,10 @@ canonical URL, `og:image`, dimensions, Spanish locale and alt text) in
 the **original SOMA emblem** at build time:
 
 - Source: `public/media/soma-original-emblem.png` (unchanged).
-- Generator: `scripts/generate-social-image.mjs`, run automatically by npm's
+- Generator: `scripts/generate-social-image.mjs`, run automatically by pnpm's
   `prebuild` and `predev` hooks.
 - Output: `https://www.soma-consciente.com/og/soma-consciente.png` (1200 × 630).
-- Verification: `npm run test:og` after `npm run build`.
+- Verification: `pnpm run test:og` after `pnpm run build`.
 
 The common image can later be overridden in `SiteLayout` with `ogImage` and
 `ogImageAlt`, but only supply absolute HTTPS or domain-root image URLs that
