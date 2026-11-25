@@ -43,7 +43,7 @@ jobs:
                 && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED)
               || 'false' }}
         run: pnpm run build
-      - name: Verify www domain and root-relative URLs
+      - name: Verify canonical URLs and sitemap
         run: pnpm run test:domain
       - name: Verify social link previews
         run: pnpm run test:og

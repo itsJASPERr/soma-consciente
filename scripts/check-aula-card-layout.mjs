@@ -44,7 +44,7 @@ try {
       return route.continue();
     // Some Astro asset URLs resolve against the configured canonical site.
     // Serve those asset requests from the current local PR build instead.
-    if(url.hostname==='www.soma-consciente.com'){
+    if(url.hostname==='soma-consciente.com'){
       const response=await route.fetch({url:'http://127.0.0.1:4321'+url.pathname+url.search});
       return route.fulfill({response});
     }

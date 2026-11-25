@@ -31,8 +31,10 @@ los cambios de main. Al configurar la variable de repositorio
 `main` se publican en Cloudflare con Wrangler. Con la variable vacía, GitHub
 Pages sigue publicando el sitio.
 
-La dirección canónica es https://www.soma-consciente.com/. En Cloudflare, asigná
-el dominio personalizado al proyecto Pages que sirve producción.
+La dirección canónica es https://soma-consciente.com/. Cloudflare administra el
+DNS y www redirige al dominio raíz. Al migrar la producción a Cloudflare Pages,
+asigná ese dominio al proyecto Pages de producción. Astro genera el sitemap en
+https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
 
 ### Vistas previas en Cloudflare Pages
 
@@ -104,7 +106,7 @@ the **original SOMA emblem** at build time:
 - Source: `public/media/soma-original-emblem.png` (unchanged).
 - Generator: `scripts/generate-social-image.mjs`, run automatically by pnpm's
   `prebuild` and `predev` hooks.
-- Output: `https://www.soma-consciente.com/og/soma-consciente.png` (1200 × 630).
+- Output: `https://soma-consciente.com/og/soma-consciente.png` (1200 × 630).
 - Verification: `pnpm run test:og` after `pnpm run build`.
 
 The common image can later be overridden in `SiteLayout` with `ogImage` and

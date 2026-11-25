@@ -34,6 +34,7 @@ const socialDescription = description.trim().length >= 60
     <meta name="theme-color" content="#f7f1e8"/>
     <meta name="description" content={description}/>
     <link rel="canonical" href={canonical.toString()}/>
+    <link rel="sitemap" href={path('/sitemap-index.xml')}/>
     <link rel="icon" type="image/svg+xml" href={path('/favicon.svg')}/>
     <meta property="og:type" content="website"/>
     <meta property="og:locale" content="es_AR"/>
@@ -53,6 +54,23 @@ const socialDescription = description.trim().length >= 60
     <meta name="twitter:image" content={socialImage.toString()}/>
     <meta name="twitter:image:alt" content={ogImageAlt}/>
     <title>{pageTitle}</title>
+    {canonical.pathname === '/' && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'SOMA CONSCIENTE',
+        url: canonical.href,
+      })}></script>
+    )}
+    {import.meta.env.PROD && (
+      <script
+        is:inline
+        defer
+        src="https://cloud.umami.is/script.js"
+        data-website-id="41a6c926-f20e-4490-80f4-fc75e59ddfa3"
+        data-domains="soma-consciente.com,www.soma-consciente.com"
+      ></script>
+    )}
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
