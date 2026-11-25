@@ -97,7 +97,7 @@ jobs:
       group: ${{ github.event_name == 'pull_request' && 'soma-d1-preview' || 'soma-d1-production' }}
       queue: max
     env:
-      PAGES_PROJECT: ${{ github.event_name == 'pull_request' && 'soma-consciente-preview' || vars.CLOUDFLARE_PRODUCTION_PROJECT }}
+      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PRODUCTION_PROJECT || 'soma-consciente-website' }}
       PAGES_BRANCH: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
       WAITLIST_ENVIRONMENT: ${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
       WAITLIST_ENABLED: >-
@@ -109,7 +109,7 @@ jobs:
       url: >-
         ${{ github.event_name == 'pull_request'
           && format('https://pr-{0}.soma-consciente-preview.pages.dev/', github.event.pull_request.number)
-          || format('https://{0}.pages.dev/', vars.CLOUDFLARE_PRODUCTION_PROJECT) }}
+          || 'https://soma-consciente.com/' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -39,7 +39,7 @@ https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
 ### Vistas previas en Cloudflare Pages
 
 Los pull requests abiertos desde este repositorio publican el sitio estático
-validado con Wrangler en el proyecto `soma-consciente-preview`. La vista previa
+validado con Wrangler en el proyecto `soma-consciente-website`. La vista previa
 se actualiza en `https://pr-<número>.soma-consciente-preview.pages.dev/`.
 
 El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
