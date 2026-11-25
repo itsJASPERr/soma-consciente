@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import EditorialPhoto from '../components/EditorialPhoto.astro';
 import OfferingAction from '../components/OfferingAction.astro';
 import SignupDialog from '../components/SignupDialog.astro';
@@ -47,7 +48,7 @@ const action = encounter && link ? { label: encounter.action, href: link } : und
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Retreat SOMA Consciente" description="Retreat SOMA Consciente. El encuentro presencial reúne las cuatro áreas y, en cada fecha, incluye un mes de círculos de integración online. La próxima fecha es el 15 y 16 de enero de 2027 en Casa Sabia, La Falda." openJourney journeyAction={action}>
+<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas y, en cada fecha, incluye un mes de círculos de integración online. La próxima fecha es el 15 y 16 de enero de 2027 en Casa Sabia, La Falda." openJourney journeyAction={action}>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
@@ -55,7 +56,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
           <span class="eyebrow">Encuentros presenciales</span>
           <h1 id="encuentro-title">{encounter.title}</h1>
           <p class="journey-lead">{encounter.description}</p>
-          <ul class="retreat-areas" aria-label="Cuatro áreas del retreat">
+          <ul class="retreat-areas" aria-label="Cuatro áreas del retiro">
             {areas.map((area) => (
               <li>
                 <SomaAulaSymbol symbol={area.symbol} />
@@ -75,24 +76,25 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
       </div>
       <div class="container retreat-dates">
         <h2>Próximas fechas</h2>
-        {retreatEvents.map((event) => (
-          <section class="retreat-date" aria-labelledby={event.slug + '-when'}>
-            <div class="event-facts">
-              <strong id={event.slug + '-when'}>{event.when}</strong>
-              {event.venue && <span>{event.venue}</span>}
-            </div>
-            {event.details && (
-              <div class="offering__panel event-benefit">
-                <h3>Qué incluye</h3>
-                <p>{event.details}</p>
-                <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+        <div class="event-grid">
+          {retreatEvents.map((event, index) => (
+            <section class="event-card" aria-labelledby={event.slug + '-when'}>
+              <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{retreatDates[index]?.language || 'Español'}</span></p>
+              <p class="event-meta"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong id={event.slug + '-when'}>{event.when}</strong></p>
+              {event.venue && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{event.venue}</span></p>}
+              {event.details && (
+                <div class="event-benefit">
+                  <h3>Qué incluye</h3>
+                  <p>{event.details}</p>
+                  <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+                </div>
+              )}
+              <div class="offering__action">
+                <OfferingAction offer={event} requestsEnabled={requestsEnabled} showArrow />
               </div>
-            )}
-            <div class="offering__action">
-              <OfferingAction offer={event} requestsEnabled={requestsEnabled} showArrow />
-            </div>
-          </section>
-        ))}
+            </section>
+          ))}
+        </div>
       </div>
     </article>
   ) : (
@@ -101,18 +103,22 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     </section>
   )}
   {door && (
-    <article id={door.slug} class="offering container journey-row" aria-labelledby="puerta-title">
-      <div>
-        {door.when && <p class="eyebrow">{door.when}</p>}
-        <h2 id="puerta-title">{door.title}</h2>
-        <p>{[door.venue, door.details].filter(Boolean).join(' · ')}</p>
-        <p>{door.description}</p>
+    <section class="container other-events" aria-labelledby="otros-eventos">
+      <h2 id="otros-eventos">Otros eventos</h2>
+      <div class="event-grid">
+        <article id={door.slug} class="event-card" aria-labelledby="puerta-title">
+          <h3 id="puerta-title">{door.title}</h3>
+          <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>Español</span></p>
+          {door.when && <p class="event-meta"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><span>{door.when}</span></p>}
+          {(door.venue || door.details) && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{[door.venue, door.details].filter(Boolean).join(' · ')}</span></p>}
+          {door.description && <p>{door.description}</p>}
+          <div class="offering__action">
+            <OfferingAction offer={door} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+            {!offeringUrl(door) && requestsEnabled && door.followUp && <p class="event-note">{door.followUp}</p>}
+          </div>
+        </article>
       </div>
-      <div class="offering__action">
-        <OfferingAction offer={door} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
-        {!offeringUrl(door) && requestsEnabled && door.followUp && <p>{door.followUp}</p>}
-      </div>
-    </article>
+    </section>
   )}
   <section class="journey-band">
     <div class:list={['container', 'journey-hero', 'continuity', { 'journey-hero--photo': journal.src }]}>
@@ -150,24 +156,37 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
   }
   .retreat-areas :global(img) { width: 3.4rem; height: 3.4rem; }
   .retreat-dates { padding-block: clamp(1.5rem, 4vw, 3rem) 0; }
-  .retreat-dates > h2 { margin-bottom: .4rem; color: var(--pine-dark); font-size: clamp(2rem, 4vw, 3rem); }
-  .retreat-date { padding-block: 1.2rem; border-top: 1px solid var(--line); }
-  .event-benefit h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); color: var(--pine-dark); margin: 0 0 .3rem; }
-  .event-facts {
+  .retreat-dates > h2, .other-events > h2 { margin-bottom: .85rem; color: var(--pine-dark); font-size: clamp(2rem, 4vw, 3rem); }
+  .other-events { padding-block: clamp(1rem, 3vw, 2rem) clamp(1.5rem, 4vw, 3rem); }
+  .event-grid {
     display: grid;
-    gap: .1rem;
-    padding-inline-start: .75rem;
-    border-inline-start: 2px solid #aa7f55;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1.15rem;
+  }
+  .event-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .35rem;
+    min-width: 0;
+    padding: clamp(1.15rem, 2.5vw, 1.6rem);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--cream) 78%, white);
+  }
+  .event-card h3 { margin: 0 0 .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
+  .event-meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0;
     color: var(--pine-dark);
   }
-  .event-benefit {
-    max-inline-size: 38rem;
-    border-block: 1px solid var(--journey-rule);
-    margin-block: 1rem;
-    padding-block: .75rem .35rem;
-  }
-  .event-benefit h2 { font-size: clamp(1.3rem, 2vw, 1.7rem); color: var(--pine-dark); margin: 0 0 .3rem; }
+  .event-meta :global(svg) { flex: none; color: var(--terra); }
+  .event-benefit { margin-top: .7rem; }
+  .event-benefit h3 { font-size: 1.05rem; margin: 0 0 .25rem; color: var(--pine-dark); }
   .event-benefit p { margin: 0; }
+  .event-note { margin: .55rem 0 0; color: var(--muted); font-size: .9rem; }
   .event-message {
     position: absolute;
     z-index: 3;

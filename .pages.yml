@@ -79,6 +79,7 @@ content:
             type: object
             list: true
             fields:
+              - { name: language, label: Idioma, type: string }
               - { name: when, label: Fecha, type: string, required: true }
               - { name: venue, label: Lugar, type: string, required: true }
               - { name: details, label: Qué incluye, type: text, required: true }
