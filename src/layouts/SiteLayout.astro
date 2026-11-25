@@ -65,7 +65,7 @@ const socialDescription = description.trim().length >= 60
         url: canonical.href,
       })}></script>
     )}
-    {import.meta.env.PROD && (
+    {import.meta.env.PROD && import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && (
       <script
         is:inline
         defer
