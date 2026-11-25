@@ -1,32 +1,12 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import Offerings from '../components/Offerings.astro';
-import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-
 const home = await loadHomepage();
-const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug === 'puerta-abierta');
 ---
-<SiteLayout title="Encuentros presenciales" description="Vivencias y retiros presenciales de SOMA. Conocé el encuentro del 15 y 16 de enero de 2027, con un mes de integración online incluido, y Puerta Abierta en La Falda.">
-  <section class="page-hero">
-    <div class="container">
-      <h1>Encuentros presenciales</h1>
-      <p>Vivencias y retiros para compartir prácticas y encontrarnos. Después del encuentro, los círculos online nos dan un espacio para integrar lo vivido.</p>
-    </div>
-  </section>
-  <section class="section">
-    <div class="container">
-      <h2 class="section-heading">Próximos encuentros</h2>
-      <Offerings offers={events} image={{ src: mediaUrl(home.encountersImage) || '', alt: home.encountersAlt }} />
-    </div>
-  </section>
-  <section class="section--tight digital-band">
-    <div class="container">
-      <h2>Integrar después del encuentro</h2>
-      <p class="section-intro">En los círculos online seguimos conversando sobre lo vivido y exploramos cómo llevarlo a lo cotidiano.</p>
-      <a class="btn" href={path('/acompanamiento/#circulos')}>Conocer los círculos ↗</a>
-    </div>
-  </section>
+<SiteLayout title="Encuentros y experiencias">
+  <section class="page-hero"><div class="container"><span class="eyebrow">La dimensión presencial de SOMA</span><h1>Encontrarnos también es aprender.</h1><p>Experiencias, talleres y espacios de práctica donde las personas, las herramientas y el territorio se encuentran. Son una posibilidad de profundizar el camino, no una condición para formar parte de SOMA.</p></div></section>
+  <section class="section"><div class="container intro-grid"><div><span class="eyebrow">Agenda en preparación</span><h2>Próximos encuentros</h2><p class="section-intro">Todavía no hay encuentros con fechas y disponibilidad confirmadas para publicar. Cuando se abra una propuesta, acá vas a encontrar sus detalles, responsables y acceso a reservas.</p><p class="section-intro">SOMA podrá conectar su agenda con una instalación independiente de Mágico OS, sin mezclar reservas ni datos con otros proyectos.</p></div><figure class="encounter-page-photo"><img src={mediaUrl(home.encountersImage) || ''} alt={home.encountersAlt} loading="lazy" decoding="async" width="1100" height="780"/><figcaption>Imagen ilustrativa de un encuentro comunitario</figcaption></figure></div></section>
+  <section class="section--tight digital-band"><div class="container"><h2>Mientras tanto, el camino también es online.</h2><p class="section-intro">La Biblioteca permanece abierta para que puedas explorar prácticas y contenidos desde cualquier lugar.</p><a class="btn" href={path('/biblioteca/')}>Entrar a la Biblioteca ↗</a></div></section>
 </SiteLayout>

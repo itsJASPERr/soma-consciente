@@ -4,8 +4,7 @@ import {
   parsePhoneNumberFromString,
   type CountryCode,
 } from 'libphonenumber-js/min';
-import { offeringConsentVersion, waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
-import { offerings } from '../../src/lib/offerings.ts';
+import { waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
 
 type Context = {
   request: Request;
@@ -40,7 +39,7 @@ export async function onRequest({ request, env }: Context) {
   let bytes = 0;
   let body = '';
   const decoder = new TextDecoder();
-  let input: { offering?: unknown; name?: unknown; channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown };
+  let input: { name?: unknown; channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown };
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -56,13 +55,9 @@ export async function onRequest({ request, env }: Context) {
   } catch {
     return response(400, 'format');
   }
-  if (!input || typeof input !== 'object') return response(400, 'format');
-  const { offering } = input;
-  if (offering !== undefined && (typeof offering !== 'string' || !offerings.some(offer => offer.slug === offering))) {
-    return response(400, 'offering');
+  if (!input || typeof input !== 'object' || input.consent !== waitlistConsentVersion) {
+    return response(400, 'consent');
   }
-  const consentVersion = offering ? offeringConsentVersion : waitlistConsentVersion;
-  if (input.consent !== consentVersion) return response(400, 'consent');
 
   const name = typeof input.name === 'string' ? input.name.trim() : '';
   if (!name || name.length > 120) return response(400, 'name');
@@ -89,23 +84,16 @@ export async function onRequest({ request, env }: Context) {
     return response(400, 'channel');
   }
 
-  const table = offering ? 'offering_requests' : 'waitlist_signups';
-  const insert = offering
-    ? 'INSERT INTO offering_requests (offering, channel, contact, name, consent_version) VALUES (?, ?, ?, ?, ?)'
-    : 'INSERT INTO waitlist_signups (channel, contact, name, consent_version) VALUES (?, ?, ?, ?)';
-  const values = offering
-    ? [offering, channel, contact, name, consentVersion]
-    : [channel, contact, name, consentVersion];
   try {
     await env.WAITLIST_DB.prepare(
-      insert +
-      " ON CONFLICT DO UPDATE SET " +
-      "name = COALESCE(" + table + ".name, excluded.name), " +
-      "consented_at = CASE WHEN " + table + ".consent_version <> excluded.consent_version " +
-      "THEN excluded.consented_at ELSE " + table + ".consented_at END, " +
+      "INSERT INTO waitlist_signups (channel, contact, name, consent_version) VALUES (?, ?, ?, ?) " +
+      "ON CONFLICT (channel, contact) DO UPDATE SET " +
+      "name = COALESCE(waitlist_signups.name, excluded.name), " +
+      "consented_at = CASE WHEN waitlist_signups.consent_version <> excluded.consent_version " +
+      "THEN excluded.consented_at ELSE waitlist_signups.consented_at END, " +
       "consent_version = excluded.consent_version " +
-      "WHERE " + table + ".name IS NULL OR " + table + ".consent_version <> excluded.consent_version",
-    ).bind(...values).run();
+      "WHERE waitlist_signups.name IS NULL OR waitlist_signups.consent_version <> excluded.consent_version",
+    ).bind(channel, contact, name, waitlistConsentVersion).run();
   } catch {
     return response(503, 'unavailable');
   }

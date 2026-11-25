@@ -1,8 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
-import Offerings from '../components/Offerings.astro';
-import { offerings, offeringIntro } from '../lib/offerings';
+import ProgramLaunchSignup from '../components/ProgramLaunchSignup.astro';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
@@ -12,17 +11,17 @@ const resources = await loadResources();
 const homeImages = await loadHomepage();
 import { path } from '../lib/paths';
 ---
-<SiteLayout description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
+<SiteLayout>
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-copy">
         <span class="eyebrow">Un camino de integración, presencia y consciencia</span>
         <h1>SOMA <span>CONSCIENTE</span></h1>
-        <p class="hero-lead">Encuentros presenciales, integración online.</p>
-        <p class="hero-description">{offeringIntro}</p>
+        <p class="hero-lead">Cuatro caminos, un mismo núcleo.</p>
+        <p class="hero-description">Un espacio online y presencial para aprender, practicar y acompañar procesos humanos desde el cuerpo, la emoción, el vínculo, la naturaleza y la comunidad.</p>
         <div class="btn-row">
-          <a class="btn" href="#encuentro-enero">Ver el próximo encuentro <span aria-hidden="true">↗</span></a>
-          <a class="btn btn--outline" href="#circulos">Círculos de integración <span aria-hidden="true">↗</span></a>
+          <a class="btn" href="#programa-online">Programa online <span aria-hidden="true">↗</span></a>
+          <a class="btn btn--outline" href={path('/biblioteca/')}>Contenido gratuito <span aria-hidden="true">↗</span></a>
         </div>
         <div class="hero-tags"><span><i></i>Cuerpo</span><span><i></i>Emoción</span><span><i></i>Consciencia</span><span><i></i>Naturaleza</span></div>
       </div>
@@ -37,14 +36,6 @@ import { path } from '../lib/paths';
     </div>
   </section>
   <div class="values-strip"><div class="container values-list"><span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span></div></div>
-  <section class="section" aria-labelledby="participar-title">
-    <div class="container">
-      <div class="section-head">
-        <h2 id="participar-title">Encontrarnos e integrar</h2>
-      </div>
-      <Offerings offers={offerings} image={{ src: mediaUrl(homeImages.encountersImage) || '', alt: homeImages.encountersAlt }} />
-    </div>
-  </section>
   <section class="section">
     <div class="container intro-grid">
       <div>
@@ -57,11 +48,13 @@ import { path } from '../lib/paths';
       <blockquote>“El Núcleo crea un lenguaje compartido.”</blockquote>
     </div>
   </section>
-  <section class="section program-section" id="metodologia" aria-labelledby="metodologia-title">
+  <section class="section program-section" id="programa-online" aria-labelledby="programa-online-title">
     <div class="container">
       <div class="program-preview">
-        <h2 id="metodologia-title">Cuatro miradas, un mismo núcleo</h2>
-        <p class="program-preview__intro">Estas perspectivas se encuentran en nuestras vivencias presenciales y en la integración de lo que compartimos.</p>
+        <span class="program-preview__status">Próximamente</span>
+        <h2 id="programa-online-title">Programa de acompañamiento online</h2>
+        <p class="program-preview__intro">Estamos desarrollando nuestro propio programa online para acompañarte en tu camino. Cuatro miradas se encuentran en una metodología compartida.</p>
+        {(import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true') && <ProgramLaunchSignup />}
         <div class="program-preview__mark">
           <img
             src={path('/media/soma-original-emblem.png')}
@@ -92,7 +85,7 @@ import { path } from '../lib/paths';
       </div>
       <div class="nucleo-points">
         <div class="nucleo-point"><span>01</span>Prácticas y herramientas compartidas</div>
-        <div class="nucleo-point"><span>02</span>Prácticas interdisciplinarias</div>
+        <div class="nucleo-point"><span>02</span>Programas interdisciplinarios</div>
         <div class="nucleo-point"><span>03</span>Acompañamiento e integración</div>
         <div class="nucleo-point"><span>04</span>Encuentros y experiencias</div>
       </div>
@@ -109,6 +102,30 @@ import { path } from '../lib/paths';
       </div>
     </div>
   </section>
+  <section class="section--tight digital-band">
+    <div class="container digital-grid">
+      <div><span class="eyebrow">SOMA desde donde estés</span><h2>Un espacio que te acompaña también online.</h2><p class="section-intro">No hace falta participar de un retiro para comenzar. Nuestra propuesta digital nace para que puedas explorar contenidos gratuitos y conocer futuras opciones de acompañamiento.</p><a class="btn" href={path('/acompanamiento/')}>Formas de acompañarte <span aria-hidden="true">↗</span></a></div>
+      <div class="digital-visual digital-visual--editorial"><img src={mediaUrl(homeImages.onlineImage) || ''} alt={homeImages.onlineAlt} loading="lazy" decoding="async" width="1050" height="800"/><span class="digital-visual__detail" aria-hidden="true">Tu tiempo · Tu camino</span></div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><span class="eyebrow">Diferentes maneras de participar</span><h2>Tu propio recorrido</h2></div></div>
+      <div class="modes-grid">
+        <div class="mode"><div class="mode-symbol">01</div><h3>Aprendizaje online</h3><p>Artículos, ejercicios y recursos disponibles a tu ritmo.</p></div>
+        <div class="mode"><div class="mode-symbol">02</div><h3>Práctica personal</h3><p>Herramientas sencillas para explorar en tu vida cotidiana.</p></div>
+        <div class="mode"><div class="mode-symbol">03</div><h3>Acompañamiento</h3><p>Futuras propuestas de sesiones y recorridos individuales y grupales.</p></div>
+        <div class="mode"><div class="mode-symbol">04</div><h3>Encuentros</h3><p>Talleres, experiencias y espacios presenciales de comunidad.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="section encounter-section encounter-section--editorial">
+    <div class="encounter-section__backdrop"><img src={mediaUrl(homeImages.encountersImage) || ''} alt={homeImages.encountersAlt} loading="lazy" decoding="async" width="1600" height="900"/></div>
+    <div class="container encounter-grid">
+      <div><span class="eyebrow" style="color:#ebc097">Experiencias que nutren</span><h2>Del espacio digital al encuentro humano.</h2><p>SOMA también vive en encuentros y experiencias presenciales, donde las prácticas se encuentran con las personas, el territorio y la comunidad.</p><a class="btn btn--light" href={path('/encuentros/')}>Conocer los encuentros <span aria-hidden="true">↗</span></a></div>
+      <div class="encounter-section__wordmark" aria-hidden="true">Encuentro<br/>y presencia</div>
+    </div>
+  </section>
 </SiteLayout>
 
 <style>
@@ -122,6 +139,18 @@ import { path } from '../lib/paths';
     border-radius: 28px;
     background: radial-gradient(ellipse at 50% 55%, #eee6d6, transparent 68%), var(--cream);
     text-align: center;
+  }
+  .program-preview__status {
+    display: inline-block;
+    margin-bottom: .85rem;
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    background: #e4e9d8;
+    color: var(--pine-dark);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
   }
   .program-preview h2 {
     max-inline-size: 20ch;

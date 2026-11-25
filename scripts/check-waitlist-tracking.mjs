@@ -14,7 +14,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   let submissions = 0;
   await page.route(endpoint, async route => {
     assert.equal(route.request().method(), 'POST');
-    assert.equal(route.request().postDataJSON().offering, 'circulos');
+    assert.equal(route.request().postDataJSON().offering, undefined);
     submissions += 1;
     await route.fulfill({ status: submissions === 1 ? 503 : 204 });
   });
@@ -29,21 +29,14 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
   assert.deepEqual(await events(), []);
-  const otherOffering = page.locator('button[data-offering-signup="encuentro-enero"]');
-  if (await otherOffering.count()) {
-    await otherOffering.click();
-    assert.deepEqual(await events(), [], 'The in-person offering must stay outside the online funnel.');
-    await page.getByRole('button', { name: 'Cerrar' }).click();
-    await form.waitFor({ state: 'hidden' });
-  }
-  await page.locator('button[data-offering-signup="circulos"]').click();
+  await page.locator('#program-launch-open').click();
   assert.deepEqual(await events(), [opened]);
 
   await form.getByRole('radio', { name: 'Correo electrónico' }).check();
   await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
   await form.getByLabel('Tu nombre').fill('Participante de prueba');
   await form.getByRole('checkbox').check();
-  const submit = form.getByRole('button', { name: 'Enviar solicitud' });
+  const submit = form.getByRole('button', { name: 'Quiero recibir el aviso' });
 
   await submit.click();
   await page.getByText('No pudimos guardar tu solicitud.').waitFor();
@@ -51,7 +44,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
-  await page.getByText('Recibimos tu solicitud. Te contactaremos por el medio que elegiste.').waitFor();
+  await page.getByText('Gracias. Te avisaremos por el medio que elegiste.').waitFor();
   assert.equal(submissions, 2);
   assert.deepEqual(await events(), [
     opened,
