@@ -1,0 +1,15 @@
+name = "soma-waitlist"
+account_id = "9746a53c191542c8c78ce228a529b388"
+compatibility_date = "2026-11-10"
+
+[[env.preview.d1_databases]]
+binding = "WAITLIST_DB"
+database_name = "soma-waitlist-preview"
+database_id = "a04cd2fe-4571-43cd-8a1c-0ece66464133"
+migrations_dir = "migrations"
+
+[[env.production.d1_databases]]
+binding = "WAITLIST_DB"
+database_name = "soma-waitlist-production"
+database_id = "89ec098e-c119-416b-89d6-d4692af42037"
+migrations_dir = "migrations"

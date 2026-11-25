@@ -37,10 +37,9 @@ jobs:
         env:
           PUBLIC_WAITLIST_ENABLED: >-
             ${{ (github.event_name == 'pull_request'
-                && vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED == 'true'
-                && vars.CLOUDFLARE_WAITLIST_PREVIEW_DATABASE_ID != '' && 'true')
+                && vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED == 'true' && 'true')
               || (github.ref == 'refs/heads/main' && vars.CLOUDFLARE_PRODUCTION_PROJECT != ''
-                && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED)
+                && vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED == 'true' && 'true')
               || 'false' }}
         run: pnpm run build
       - name: Verify canonical URLs and sitemap
@@ -119,13 +118,19 @@ jobs:
           PAGES_PROJECT: ${{ github.event_name == 'pull_request' && 'soma-consciente-preview' || vars.CLOUDFLARE_PRODUCTION_PROJECT }}
           PAGES_BRANCH: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
           PREVIEW_WAITLIST_ENABLED: ${{ vars.CLOUDFLARE_WAITLIST_PREVIEW_ENABLED }}
-          PREVIEW_WAITLIST_DATABASE_ID: ${{ vars.CLOUDFLARE_WAITLIST_PREVIEW_DATABASE_ID }}
+          PRODUCTION_WAITLIST_ENABLED: ${{ vars.CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED }}
           WRANGLER_SEND_METRICS: 'false'
         run: |
           set -euo pipefail
           wrangler=(pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1)
-          if [[ "$GITHUB_EVENT_NAME" == 'pull_request' && "$PREVIEW_WAITLIST_ENABLED" == 'true' ]]; then
-            test "$PAGES_PROJECT" = 'soma-consciente-preview'
+          if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+            export WAITLIST_ENVIRONMENT=preview
+            waitlist_enabled="$PREVIEW_WAITLIST_ENABLED"
+          else
+            export WAITLIST_ENVIRONMENT=production
+            waitlist_enabled="$PRODUCTION_WAITLIST_ENABLED"
+          fi
+          if [[ "$waitlist_enabled" == 'true' ]]; then
             [[ ! -e wrangler.toml && ! -e wrangler.json && ! -e wrangler.jsonc ]]
             "${wrangler[@]}" pages download config "$PAGES_PROJECT"
             python3 - <<'PYCONFIG'
@@ -135,7 +140,14 @@ jobs:
           from tomllib import load
           from uuid import UUID
 
-          database_id = str(UUID(os.environ['PREVIEW_WAITLIST_DATABASE_ID']))
+          target = os.environ['WAITLIST_ENVIRONMENT']
+          with Path('wrangler.d1.toml').open('rb') as database_file:
+              database_settings = load(database_file)['env']
+          database = next(item for item in database_settings[target]['d1_databases'] if item['binding'] == 'WAITLIST_DB')
+          database_id = str(UUID(database['database_id']))
+          other = 'preview' if target == 'production' else 'production'
+          if any(item['database_id'] == database_id for item in database_settings[other]['d1_databases']):
+              raise SystemExit('The preview and production waitlist databases must be different.')
           downloaded = Path('wrangler.toml')
           with downloaded.open('rb') as config_file:
               config = load(config_file)
@@ -147,13 +159,22 @@ jobs:
           for settings in (config, *environments.values()):
               if settings.get('placement') == {}:
                   settings['placement'] = {'mode': 'off'}
+          # The Pages export represents preview bindings at the top level when it omits env.preview.
           preview = environments.setdefault('preview', {})
-          databases = preview.setdefault('d1_databases', list(config.get('d1_databases', [])))
+          preview_databases = preview.setdefault('d1_databases', list(config.get('d1_databases', [])))
+          production = environments.setdefault('production', {})
+          production_databases = production.setdefault('d1_databases', [])
+          databases, other_databases = (
+              (production_databases, preview_databases) if target == 'production'
+              else (preview_databases, production_databases)
+          )
+          if any(item['database_id'] == database_id for item in other_databases):
+              raise SystemExit('The desired waitlist database is already attached to the other Pages environment.')
           binding = next((item for item in databases if item['binding'] == 'WAITLIST_DB'), None)
           if binding and binding['database_id'] != database_id:
-              raise SystemExit('The preview deployment already binds WAITLIST_DB to a different database.')
+              raise SystemExit('This Pages environment already binds WAITLIST_DB to a different database.')
           if not binding:
-              databases.append({'binding': 'WAITLIST_DB', 'database_id': database_id})
+              databases.append({key: database[key] for key in ('binding', 'database_id', 'database_name')})
           Path('wrangler.json').write_text(json.dumps(config, indent=2) + chr(10), encoding='utf-8')
           downloaded.unlink()
           PYCONFIG

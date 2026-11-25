@@ -13,6 +13,7 @@
     "test:aula-cards": "node scripts/check-aula-card-layout.mjs",
     "test:access": "node scripts/test-learning-access.mjs",
     "test:waitlist": "node --experimental-strip-types scripts/test-waitlist.mjs",
+    "db:migrate": "bash scripts/migrate-waitlist.sh",
     "test:domain": "node scripts/check-custom-domain.mjs",
     "prebuild": "node scripts/generate-social-image.mjs",
     "predev": "node scripts/generate-social-image.mjs",

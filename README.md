@@ -55,13 +55,22 @@ consentimiento. Aplicá los archivos de `migrations/` en orden. Ejecutá
 `pnpm run test:waitlist` para probar la validación y la deduplicación
 con una base SQLite temporal.
 
-Para habilitar el formulario en un despliegue de Cloudflare, aplicá las
-migraciones a la base D1 del entorno, vinculala como `WAITLIST_DB` y compilá
-con `PUBLIC_WAITLIST_ENABLED=true`. En los PRs, Wrangler vincula esa base al
-entorno de vista previa si `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` es `true`
-y `CLOUDFLARE_WAITLIST_PREVIEW_DATABASE_ID` contiene su identificador.
-En producción, vinculá una base D1 dedicada en el proyecto Pages y activá
-`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` después de aplicar las migraciones.
+Wrangler lee los destinos de `wrangler.d1.toml`. Para aplicar las migraciones:
+
+```sh
+pnpm run db:migrate preview --local
+pnpm run db:migrate preview --remote
+pnpm run db:migrate production --remote
+```
+
+Los comandos remotos requieren acceso D1 en la cuenta Cloudflare de SOMA.
+El comando reconoce el esquema de las primeras bases y registra las migraciones
+ya aplicadas antes de ejecutar las pendientes.
+
+El workflow vincula `WAITLIST_DB` a la base del entorno correspondiente.
+Activá `CLOUDFLARE_WAITLIST_PREVIEW_ENABLED` para vistas previas o
+`CLOUDFLARE_WAITLIST_PRODUCTION_ENABLED` para producción después de
+aplicar las migraciones al destino respectivo.
 
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
