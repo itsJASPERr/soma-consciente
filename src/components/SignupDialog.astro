@@ -24,7 +24,7 @@ const countries = getCountries()
     <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}>
       <div class="program-signup__name">
         <label for="program-launch-name">Tu nombre</label>
-        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Tu nombre" required maxlength="120" autofocus />
+        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Nombre y apellido" required maxlength="120" autofocus />
       </div>
       <fieldset>
         <legend>¿Cómo querés que te avisemos?</legend>
@@ -460,21 +460,22 @@ const countries = getCountries()
     background: #142b25a6;
   }
   .program-signup__dialog[data-program-open] {
-    margin-inline: auto clamp(1rem, 7vw, 7rem);
-    border-radius: 1.35rem 2.6rem 1.6rem 1.6rem;
-    border-color: #c3b49b;
-    background: #fcf6ec;
+    margin: auto;
+    border: 0;
+    border-radius: 28px;
+    background: var(--paper);
+    box-shadow: 0 30px 80px #17382f55;
   }
   .program-signup__dialog[data-program-open]::backdrop { background: #19392f5c; }
   .program-signup__status { display: none; margin: 0 0 .3rem; }
   [data-program-open] .program-signup__status { display: block; }
   @media (max-width: 650px) {
     .program-signup__dialog[data-program-open] {
-      inline-size: calc(100% - 1rem);
+      inline-size: 100%;
       max-inline-size: none;
-      max-block-size: calc(100dvh - 1.15rem);
-      margin: auto .5rem .5rem;
-      border-radius: 1.3rem;
+      max-block-size: min(92dvh, 100%);
+      margin: auto 0 0;
+      border-radius: 24px 24px 0 0;
     }
     .program-signup__dialog[data-program-open] .program-signup__form { gap: .7rem; }
   }

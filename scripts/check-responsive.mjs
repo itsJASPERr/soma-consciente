@@ -139,7 +139,7 @@ try{
   }
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
-  await page.getByRole('link', { name: 'Ver el encuentro' }).click();
+  await page.locator('.participation-feature').getByRole('link', { name: 'Ver el encuentro' }).click();
   assert.equal(new URL(page.url()).hash, '#encuentro-enero');
   const encounter = page.locator('article#encuentro-enero');
   await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();

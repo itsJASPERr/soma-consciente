@@ -76,7 +76,9 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const desktopSheet = await dialog.boundingBox();
   const methodologyTitle = await page.locator('#metodologia-title').boundingBox();
   assert.ok(methodologyTitle.y >= 0 && methodologyTitle.y < desktopSheet.y, 'The methodology heading should stay in view behind the overlay.');
-  assert.ok(desktopSheet.x > 720, 'The desktop program overlay should align to the side.');
+  const viewport = page.viewportSize();
+  const center = desktopSheet.x + desktopSheet.width / 2;
+  assert.ok(Math.abs(center - viewport.width / 2) < 80, 'The desktop program overlay should sit in the center.');
   await dialog.getByRole('button', { name: 'Cerrar' }).click();
   console.log('Program waitlist overlay, consent, payload and analytics verified.');
 }

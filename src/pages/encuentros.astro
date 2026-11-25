@@ -43,13 +43,13 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
         )}
         <div class="offering__action">
           <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} showArrow />
-          {!link && requestsEnabled && encounter.followUp && <p>{encounter.followUp}</p>}
+          {encounter.followUp && <p>{encounter.followUp}</p>}
         </div>
       </div>
       <EditorialPhoto image={fire} class="journey-photo--campfire" priority>
         {message && (
           <figcaption class="event-message">
-            <span class="eyebrow">Mensaje preparado para WhatsApp</span>
+            <span class="eyebrow">Mensaje preparado para Yanina</span>
             <p>«{message}»</p>
           </figcaption>
         )}
