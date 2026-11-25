@@ -3,10 +3,13 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import Offerings from '../components/Offerings.astro';
 import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
 
+const home = await loadHomepage();
 const integration = offerings.filter(({ slug }) => slug === 'circulos' || slug === 'grupo-whatsapp');
 ---
-<SiteLayout title="Integración online" description="Acompañamiento para integrar las vivencias presenciales de SOMA. Participá en el círculo online semanal o pedí acceso al grupo gratuito de WhatsApp.">
+<SiteLayout title="Integración online" description="Acompañamiento para integrar las vivencias presenciales de SOMA. Participá en el círculo online semanal o sumate a la comunidad gratuita de WhatsApp.">
   <section class="page-hero">
     <div class="container">
       <h1>Integración online</h1>
@@ -16,7 +19,7 @@ const integration = offerings.filter(({ slug }) => slug === 'circulos' || slug =
   <section class="section">
     <div class="container">
       <h2 class="section-heading">Círculos y comunidad</h2>
-      <Offerings offers={integration} />
+      <Offerings offers={integration} circleImage={{ src: mediaUrl(home.onlineImage) || '', alt: home.onlineAlt }} />
     </div>
   </section>
   <section class="section--tight digital-band">

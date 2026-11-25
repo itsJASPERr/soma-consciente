@@ -3,6 +3,7 @@
  * Catches horizontal overflow and clipped headings at mobile, tablet and
  * desktop widths. Runs against built Astro preview, using GitHub runner's Chrome.
  */
+import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
@@ -12,6 +13,8 @@ const HOST='http://127.0.0.1:4321';
 const BASE='';
 const paths=[
  '/',
+ '/encuentros/',
+ '/acompanamiento/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
@@ -57,6 +60,7 @@ try{
           '.site-header .mobile-nav summary',
           '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
           '.participation-row h2','.participation-row .btn','.participation-row .text-link',
+          '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
@@ -126,6 +130,26 @@ try{
     }
     console.log('Checked '+width+'px across '+paths.length+' pages');
   }
+  await page.setViewportSize({width:375,height:900});
+  await page.goto(HOST+BASE+'/');
+  await page.getByRole('link', { name: 'Ver el encuentro' }).click();
+  assert.equal(new URL(page.url()).hash, '#encuentro-enero');
+  const encounter = page.locator('article#encuentro-enero');
+  await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();
+  await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
+  const encounterLink = new URL(await encounter.getByRole('link', { name: 'Solicitar inscripción' }).getAttribute('href'));
+  assert.equal(encounterLink.origin, 'https://wa.me');
+  assert.match(encounterLink.searchParams.get('text'), /15 y 16 de enero de 2027/);
+  const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
+  assert.equal(doorLink.pathname, encounterLink.pathname);
+  assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
+  await encounter.getByRole('link', { name: 'Conocer los círculos' }).click();
+  assert.equal(new URL(page.url()).hash, '#circulos');
+  const circleLink = new URL(await page.getByRole('link', { name: 'Quiero participar' }).getAttribute('href'));
+  assert.equal(circleLink.pathname, encounterLink.pathname);
+  assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
+  assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });

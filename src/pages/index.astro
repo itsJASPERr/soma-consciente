@@ -3,13 +3,14 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
 import HomepageOfferings from '../components/HomepageOfferings.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
+import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SignupDialog from '../components/SignupDialog.astro';
 import { offeringIntro } from '../lib/offerings';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import ResourceCard from '../components/ResourceCard.astro';
-const programThemes = (await loadAulas()).map(({ name }) => name);
+const programThemes = (await loadAulas()).map(({ name, symbol }) => ({ name, symbol }));
 const resources = await loadResources();
 const homeImages = await loadHomepage();
 const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
@@ -27,8 +28,7 @@ import { path } from '../lib/paths';
       <div>
         <span class="eyebrow">Nuestra mirada</span>
         <h2 class="section-heading">Un lugar para volver a escucharte.</h2>
-        <p class="section-intro">Creemos que cada proceso tiene su propio ritmo. En SOMA se encuentran distintas experiencias y saberes para abrir preguntas, explorar prácticas y crear puentes entre lo vivido y la vida cotidiana.</p>
-        <p class="section-intro">No proponemos un único camino ni resultados predeterminados. Ofrecemos herramientas, escucha y espacios de encuentro.</p>
+        <p class="section-intro">Creamos espacios para estar presentes, disfrutar y compartir lo que nos pasa. También hacemos lugar a lo incómodo, con cuidado y respeto por el ritmo de cada persona.</p>
         <a class="text-link" href={path('/enfoque/')}>Conocer nuestro enfoque <span aria-hidden="true">↗</span></a>
       </div>
       <blockquote>“El Núcleo crea un lenguaje compartido.”</blockquote>
@@ -50,7 +50,12 @@ import { path } from '../lib/paths';
           />
         </div>
         <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
-          {programThemes.map(theme => <li>{theme}</li>)}
+          {programThemes.map(({ name, symbol }) => (
+            <li>
+              <span aria-hidden="true"><SomaAulaSymbol symbol={symbol} /></span>
+              {name}
+            </li>
+          ))}
         </ul>
         <ProgramWaitlist signupEnabled={signupEnabled} />
       </div>
@@ -148,6 +153,25 @@ import { path } from '../lib/paths';
     line-height: 1.4;
     text-wrap: balance;
   }
+  .program-preview__themes li {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .45rem .55rem;
+    text-align: start;
+    border: 1px solid var(--line);
+    border-radius: .6rem;
+    background: var(--paper);
+  }
+  .program-preview__themes li span {
+    flex: 0 0 auto;
+    inline-size: clamp(1.2rem, 3.5vw, 1.75rem);
+  }
+  .program-preview__themes li :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
   @media (max-width: 680px) {
     .program-preview__themes {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -155,5 +179,8 @@ import { path } from '../lib/paths';
     .program-preview__mark {
       inline-size: min(100%, 16rem);
     }
+  }
+  @media (max-width: 380px) {
+    .program-preview__themes { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

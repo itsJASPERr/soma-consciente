@@ -19,13 +19,13 @@ const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug
   <section class="section">
     <div class="container">
       <h2 class="section-heading">Próximos encuentros</h2>
-      <Offerings offers={events} image={{ src: mediaUrl(home.encountersImage) || '', alt: home.encountersAlt }} />
+      <Offerings offers={events} encounterImage={{ src: mediaUrl(home.encountersImage) || '', alt: home.encountersAlt }} />
     </div>
   </section>
   <section class="section--tight digital-band">
     <div class="container">
       <h2>Integrar después del encuentro</h2>
-      <p class="section-intro">En los círculos online seguimos conversando sobre lo vivido y exploramos cómo llevarlo a lo cotidiano.</p>
+      <p class="section-intro">El encuentro de enero incluye un mes de círculos online. Después del encuentro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
       <a class="btn" href={path('/acompanamiento/#circulos')}>Conocer los círculos ↗</a>
     </div>
   </section>
