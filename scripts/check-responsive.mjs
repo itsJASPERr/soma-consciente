@@ -57,7 +57,7 @@ try{
           '.site-header .mobile-nav summary',
           '.participation-hero h1','.participation-feature__date','.participation-feature .btn',
           '.participation-row h2','.participation-row .btn','.participation-row .text-link',
-          '.program-waitlist h2','.program-waitlist .btn',
+          '#programa-online-title','.program-waitlist .btn',
           '.page-hero h1','.aula-hero h1','.course-hero h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
           '.section-head h2','.course-outline__heading-copy strong'

@@ -52,10 +52,10 @@ import { path } from '../lib/paths';
         <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
           {programThemes.map(theme => <li>{theme}</li>)}
         </ul>
+        <ProgramWaitlist signupEnabled={signupEnabled} />
       </div>
     </div>
   </section>
-  <ProgramWaitlist signupEnabled={signupEnabled} />
   <section class="section nucleo-section">
     <div class="container nucleo-grid">
       <div>

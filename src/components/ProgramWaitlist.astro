@@ -6,67 +6,45 @@ interface Props {
 const { signupEnabled } = Astro.props;
 ---
 <section id="programa-online" class="program-waitlist" aria-labelledby="programa-online-title">
-  <div class="container">
-    <div class="program-waitlist__panel">
-      <div>
-        <p class="program-waitlist__status">Próximamente</p>
-        <h2 id="programa-online-title">Nuestro programa online</h2>
-        <p class="program-waitlist__description">Estamos desarrollando nuestro propio programa online para acompañarte en tu camino.</p>
-      </div>
-      {signupEnabled && (
-        <button
-          id="program-launch-open"
-          class="btn"
-          type="button"
-          data-program-waitlist
-          data-signup-title="Nuestro programa online"
-          data-signup-action="Avisame cuando esté listo"
-          aria-haspopup="dialog"
-          aria-controls="program-launch-dialog"
-          hidden
-        >
-          Avisame cuando esté listo <span aria-hidden="true">↗</span>
-        </button>
-      )}
-    </div>
-  </div>
+  <p class="eyebrow">Próximamente</p>
+  <h3 id="programa-online-title">Nuestro programa online</h3>
+  <p class="program-waitlist__description">Estamos desarrollando nuestro propio programa online para acompañarte en tu camino.</p>
+  {signupEnabled && (
+    <button
+      id="program-launch-open"
+      class="btn"
+      type="button"
+      data-program-waitlist
+      data-signup-title="Nuestro programa online"
+      data-signup-action="Avisame cuando esté listo"
+      aria-haspopup="dialog"
+      aria-controls="program-launch-dialog"
+      hidden
+    >
+      Avisame cuando esté listo <span aria-hidden="true">↗</span>
+    </button>
+  )}
 </section>
 
 <style>
   .program-waitlist {
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
     scroll-margin-top: 1.5rem;
-    padding-block: 0 clamp(2rem, 5vw, 4rem);
   }
-  .program-waitlist__panel {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem 2rem;
-    border-top: 1px solid var(--line);
-    padding-block: clamp(1rem, 3vw, 2rem);
-  }
-  .program-waitlist__status {
-    color: #994b37;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+  .program-waitlist .eyebrow { margin-bottom: .35rem; }
+  .program-waitlist h3 {
+    color: var(--pine-dark);
     margin: 0 0 .4rem;
   }
-  .program-waitlist h2 {
-    color: var(--pine-dark);
-    font-size: clamp(1.7rem, 3vw, 2.5rem);
-    margin: 0 0 .36rem;
-  }
   .program-waitlist__description {
-    color: var(--muted);
-    margin: 0;
+    max-inline-size: 47ch;
+    margin: 0 auto .85rem;
+    color: var(--ink);
+    text-wrap: pretty;
   }
   .program-waitlist button {
     cursor: pointer;
     font-family: inherit;
-    text-align: left;
   }
   .program-waitlist button[hidden] { display: none; }
 </style>
