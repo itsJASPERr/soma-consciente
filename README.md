@@ -46,6 +46,15 @@ El workflow usa el secreto `CLOUDFLARE_ACCOUNT_ID` y un token con permiso
 **Cloudflare Pages: Edit**. El token se puede guardar como
 `CLOUDFLARE_API_TOKEN` o en el secreto existente `CLOUDFLARE_API_KEY`.
 
+Cuando la recolección está habilitada, el workflow aplica las migraciones de D1
+con Wrangler antes de publicar Pages. Las vistas previas migran su base
+compartida y los despliegues de `main` migran la base de producción. Cada base
+procesa una migración de despliegue a la vez. Si falla una migración, el
+workflow mantiene la versión publicada. Para usar un token con permiso
+**D1: Edit** aparte del token de Pages, guardalo como
+`CLOUDFLARE_D1_API_TOKEN` en GitHub. Si no está configurado, se usa el token de
+Pages y ese token necesita ambos permisos.
+
 ### Lista de espera en Cloudflare
 
 El formulario envía el nombre, el contacto y el consentimiento a
