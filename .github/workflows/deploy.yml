@@ -142,7 +142,12 @@ jobs:
           if config['name'] != os.environ['PAGES_PROJECT']:
               raise SystemExit('Wrangler returned a configuration for an unexpected Pages project.')
           config['pages_build_output_dir'] = './dist'
-          preview = config.setdefault('env', {}).setdefault('preview', {})
+          environments = config.setdefault('env', {})
+          # Pages can export default placement as an empty table, which Wrangler rejects.
+          for settings in (config, *environments.values()):
+              if settings.get('placement') == {}:
+                  settings['placement'] = {'mode': 'off'}
+          preview = environments.setdefault('preview', {})
           databases = preview.setdefault('d1_databases', list(config.get('d1_databases', [])))
           binding = next((item for item in databases if item['binding'] == 'WAITLIST_DB'), None)
           if binding and binding['database_id'] != database_id:
