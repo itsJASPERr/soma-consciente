@@ -3,7 +3,12 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import Offerings from '../components/Offerings.astro';
 import { offeringIntro, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
 const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug === 'puerta-abierta');
+const home = await loadHomepage();
+const campfire = mediaUrl(home.encountersImage);
+const pictures = campfire ? { 'encuentro-enero': { src: campfire, alt: home.encountersAlt } } : {};
 ---
 <SiteLayout title="Encuentro de enero" description="Encuentro presencial del 15 y 16 de enero de 2027 en Casa Sabia, La Falda. Incluye un mes de círculos de integración online. La inscripción se consulta con Yanina y el equipo confirma si hay lugar.">
   <section class="page-hero">
@@ -14,7 +19,7 @@ const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug
   </section>
   <section class="section">
     <div class="container">
-      <Offerings offers={events} />
+      <Offerings offers={events} pictures={pictures} />
     </div>
   </section>
   <section class="section--tight digital-band">
@@ -25,3 +30,7 @@ const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug
     </div>
   </section>
 </SiteLayout>
+
+<style>
+  .page-hero { background: transparent; padding-bottom: 1.5rem; }
+</style>

@@ -58,37 +58,29 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
 <style>
   .offerings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-    gap: clamp(1rem, 2.5vw, 1.65rem);
+    gap: clamp(3.5rem, 9vw, 7rem);
   }
   .offering {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(14rem, .85fr);
+    gap: clamp(1.5rem, 5vw, 4.5rem);
+    align-items: center;
     min-inline-size: 0;
     scroll-margin-top: 1.5rem;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 22px;
-    background: var(--cream);
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
-  .offering--featured,
-  .offering--featured + .offering {
-    grid-column: 1 / -1;
-  }
-  .offering--featured {
-    background: #e8ecdf;
-  }
-  .offering--featured + .offering {
-    max-inline-size: 36rem;
-  }
-  .offering:not(.offering--featured) {
-    flex-direction: column;
+  .offering:not(:has(.offering__image)) {
+    grid-template-columns: minmax(0, 40rem);
   }
   .offering__copy {
     display: flex;
     flex: 1;
     flex-direction: column;
     align-items: flex-start;
-    padding: clamp(1.3rem, 4vw, 2.5rem);
+    padding: 0;
   }
   .offering__kicker {
     margin: 0 0 .35rem;
@@ -127,9 +119,9 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
   }
   .offering__includes {
     margin: .2rem 0 1rem;
-    padding: .85rem 1rem;
-    border-radius: 16px;
-    background: #f7f1e8;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
   }
   .offering__includes p { margin: 0; }
   .offering__includes-label {
@@ -151,19 +143,20 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
     text-wrap: pretty;
   }
   .offering__pending { color: var(--muted); }
+  .offering__copy { order: 1; }
   .offering__image {
+    order: 2;
     inline-size: 100%;
-    block-size: 100%;
-    min-block-size: 15rem;
-    max-block-size: 25rem;
-    object-fit: cover;
-  }
-  .offering:not(.offering--featured) .offering__image {
-    block-size: 13rem;
+    block-size: auto;
+    aspect-ratio: 4 / 5;
     min-block-size: 0;
     max-block-size: none;
+    object-fit: cover;
+    border-radius: 48% 48% 1.2rem 1.2rem / 26% 26% 1.2rem 1.2rem;
   }
-  @media (max-width: 680px) {
-    .offering__image { block-size: 12rem; min-block-size: 0; }
+  @media (max-width: 720px) {
+    .offering,
+    .offering:not(:has(.offering__image)) { grid-template-columns: minmax(0, 1fr); }
+    .offering__image { aspect-ratio: 16 / 10; }
   }
 </style>

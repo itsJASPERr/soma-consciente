@@ -5,17 +5,18 @@ import { path } from '../lib/paths';
 
 interface Props {
   image?: { src: string; alt: string; position?: string };
+  circleImage?: { src: string; alt: string };
   requestsEnabled: boolean;
 }
 
-const { image, requestsEnabled } = Astro.props;
+const { image, circleImage, requestsEnabled } = Astro.props;
 const encounter = offerings.find(({ slug }) => slug === 'encuentro-enero');
 const circles = offerings.find(({ slug }) => slug === 'circulos');
 const openDoor = offerings.find(({ slug }) => slug === 'puerta-abierta');
 const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 ---
 <section class="participation-hero" aria-labelledby="participation-heading">
-  <div class:list={['container', 'participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
+  <div class:list={['participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
     <div class="participation-hero__copy">
       <h1 id="participation-heading">Encuentros presenciales. <em>Integración online.</em></h1>
       <p class="participation-hero__lede">{offeringIntro}</p>
@@ -39,21 +40,27 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 
 {circles && (
   <section id={circles.slug} class="participation-row participation-row--circles" aria-labelledby="participation-circles">
-    <div class="container participation-row__layout">
-      <div class="participation-row__lead">
+    <div class="participation-split">
+      <div class="participation-split__copy">
         <h2 id="participation-circles">{circles.shortTitle || circles.title}</h2>
+        {circles.description && <p class="participation-row__summary">{circles.description}</p>}
+        {(circles.details || circles.when) && (
+          <div class="participation-row__details">
+            {circles.details && <p class="participation-row__price">{circles.details}</p>}
+            {circles.when && <p class="participation-row__secondary">{circles.when}</p>}
+          </div>
+        )}
         {circles.context && <p class="participation-row__context">{circles.context}</p>}
+        <div class="participation-row__action">
+          <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+          {circles.followUp && <p class="participation-row__handoff">{circles.followUp}</p>}
+        </div>
       </div>
-      {(circles.details || circles.when) && (
-        <div class="participation-row__details">
-          {circles.details && <p class="participation-row__price">{circles.details}</p>}
-          {circles.when && <p class="participation-row__secondary">{circles.when}</p>}
+      {circleImage?.src && (
+        <div class="participation-split__frame">
+          <img src={circleImage.src} alt={circleImage.alt} width="1100" height="780" loading="lazy" decoding="async" />
         </div>
       )}
-      <div class="participation-row__action">
-        <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
-        {circles.followUp && <p class="participation-row__handoff">{circles.followUp}</p>}
-      </div>
     </div>
   </section>
 )}
@@ -97,16 +104,18 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 
 <style>
   .participation-hero {
-    background: var(--paper);
-    padding-block: clamp(1.65rem, 5vw, 4rem);
+    background: transparent;
+    padding-block: clamp(2.4rem, 7vw, 5.75rem) clamp(1.5rem, 4vw, 3rem);
   }
   .participation-hero__layout {
     display: grid;
-    align-items: stretch;
-    gap: clamp(1.25rem, 4.5vw, 3.25rem);
+    align-items: center;
+    gap: clamp(1.75rem, 5vw, 4.5rem);
+    width: min(1180px, calc(100% - 48px));
+    margin-inline: auto;
   }
   .participation-hero__layout--with-image {
-    grid-template-columns: minmax(0, 1.13fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, .9fr);
   }
   .participation-hero__copy {
     min-inline-size: 0;
@@ -133,8 +142,8 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   }
   .participation-hero__frame {
     position: relative;
-    min-block-size: clamp(19rem, 37vw, 31rem);
-    border-radius: 41% 41% 1.15rem 1.15rem / 26% 26% 1.15rem 1.15rem;
+    min-block-size: clamp(20rem, 42vw, 34rem);
+    border-radius: 48% 48% 1.35rem 1.35rem / 28% 28% 1.35rem 1.35rem;
     overflow: hidden;
     background: var(--pine-dark);
   }
@@ -146,10 +155,10 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     object-position: 61% 50%;
   }
   .participation-feature {
-    max-inline-size: 32rem;
-    margin-top: clamp(1rem, 2.7vw, 1.7rem);
-    padding-top: clamp(.75rem, 2vw, 1.2rem);
-    border-top: 1px solid var(--line);
+    max-inline-size: 34rem;
+    margin-top: clamp(1.4rem, 3vw, 2.2rem);
+    padding-top: 0;
+    border-top: 0;
   }
   .participation-label, .participation-row__date {
     color: #994b37;
@@ -185,31 +194,43 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     scroll-margin-top: 1.5rem;
   }
   .participation-row {
-    background: var(--cream);
-  }
-  .participation-row + .participation-row,
-  .participation-row--circles {
-    border-top: 1px solid var(--line);
+    background: transparent;
   }
   .participation-row--circles {
-    background: #e8ecdf;
+    background: transparent;
   }
   .participation-row--community {
     background: var(--pine-dark);
     color: var(--cream);
   }
-  .participation-row--community .participation-row__layout {
-    grid-template-columns: minmax(0, 1fr) minmax(11.5rem, 16rem);
-  }
-  .participation-row--community .participation-row__action {
-    grid-column: 2;
-  }
+  .participation-split,
   .participation-row__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(13rem, 15rem) minmax(11.5rem, 12.5rem);
+    grid-template-columns: minmax(0, 36rem);
+    align-items: start;
+    gap: .85rem 1.5rem;
+    width: min(1180px, calc(100% - 48px));
+    margin-inline: auto;
+    padding-block: clamp(2.75rem, 7vw, 5.25rem);
+  }
+  .participation-split {
+    grid-template-columns: minmax(0, 1.05fr) minmax(14rem, .82fr);
     align-items: center;
-    gap: .65rem clamp(1rem, 3vw, 2.25rem);
-    padding-block: clamp(.9rem, 2vw, 1.3rem);
+    gap: clamp(1.5rem, 4vw, 4rem);
+  }
+  .participation-split__frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 46% 46% 1.2rem 1.2rem / 24% 24% 1.2rem 1.2rem;
+    overflow: hidden;
+    background: var(--pine-dark);
+  }
+  .participation-split__frame img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
   }
   .participation-row__details {
     display: grid;
@@ -217,14 +238,15 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     line-height: 1.4;
   }
   .participation-row__action {
-    grid-column: 3;
-    justify-self: end;
-    max-inline-size: 100%;
+    grid-column: 1;
+    justify-self: start;
+    max-inline-size: 36rem;
+    margin-top: .35rem;
   }
   .participation-row h2 {
     margin: 0;
     color: var(--pine-dark);
-    font-size: clamp(1.63rem, 2.75vw, 2.38rem);
+    font-size: clamp(2rem, 4vw, 3.4rem);
   }
   .participation-row--community h2 {
     color: inherit;
@@ -266,37 +288,18 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     letter-spacing: .12em;
     text-transform: uppercase;
   }
-  @media (max-width: 850px) {
+  @media (max-width: 800px) {
+    .participation-hero__layout,
+    .participation-split,
     .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr) minmax(10rem, 12.5rem);
-      row-gap: .38rem;
+      width: min(100% - 32px, 1180px);
     }
-    .participation-row__details { grid-column: 1; }
-    .participation-row__action {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
-    .participation-row--community .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr) minmax(10rem, 14rem);
-    }
-    .participation-row--community .participation-row__action { grid-column: 2; grid-row: 1; }
+    .participation-split { grid-template-columns: minmax(0, 1fr); }
+    .participation-split__frame { order: 2; aspect-ratio: 1.5; }
   }
   @media (max-width: 680px) {
     .participation-hero__layout--with-image { grid-template-columns: minmax(0, 1fr); }
     .participation-hero h1 { font-size: clamp(2.4rem, 8.3vw, 3.8rem); }
     .participation-hero__frame { min-block-size: 0; aspect-ratio: 1.62; }
-  }
-  @media (max-width: 600px) {
-    .participation-row__layout {
-      grid-template-columns: minmax(0, 1fr);
-      gap: .45rem;
-    }
-    .participation-row__action,
-    .participation-row--community .participation-row__action {
-      grid-column: 1;
-      grid-row: auto;
-      justify-self: start;
-      margin-top: .25rem;
-    }
   }
 </style>
