@@ -18,6 +18,8 @@ const aulas = await Promise.all(aulaFiles.map(async file => (
 const expectedAulas = aulas.filter(aula => aula.published)
   .sort((a, b) => a.order - b.order)
   .map(aula => ({ href: `/aulas/${aula.slug}/`, name: aula.name, upcoming: aula.launchStatus === 'upcoming' }));
+const methodologyNames = ['nicole', 'jasper', 'yanina', 'nico']
+  .map(slug => aulas.find(aula => aula.slug === slug)?.name);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // Spawn Astro directly so cleanup can terminate the server itself.
 const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{
@@ -95,7 +97,7 @@ try {
             }
           }
           return problems;
-        }, expectedAulas.map(aula => aula.name));
+        }, methodologyNames);
         failures.push(...programIssues.map(issue => width+'px /: '+issue));
         if (width === 430 || width === 900 || width === 1151) {
           await program.locator('.program-preview').screenshot({ path: 'test-results/program-'+width+'.png', timeout: 10000 });
