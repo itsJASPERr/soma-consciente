@@ -1,48 +1,60 @@
 {
-  "intro": "Compartimos encuentros y retiros presenciales, con círculos online para integrar lo vivido en la vida cotidiana.",
+  "intro": "En SOMA compartimos encuentros y retiros presenciales. En los círculos online retomamos lo vivido para llevarlo a la vida cotidiana.",
   "offers": [
     {
       "slug": "encuentro-enero",
-      "title": "Encuentro presencial de enero",
-      "when": "15–16 de enero de 2027",
-      "description": "Dos días para compartir prácticas, encontrarnos y abrir espacio a lo que vivimos juntos.",
+      "title": "Encuentro de enero",
+      "when": "15 y 16 de enero de 2027",
+      "description": "Dos días para encontrarnos y compartir experiencias en persona.",
       "venue": "Casa Sabia · La Falda, Córdoba",
-      "details": "Incluye un mes de participación en los círculos de integración online.",
+      "details": "Un mes de participación en los círculos de integración online.",
+      "homeNote": "Incluye un mes de círculos de integración online.",
       "action": "Solicitar inscripción",
-      "followUp": "Te contactaremos para compartir los detalles y confirmar tu inscripción.",
-      "url": "https://wa.me/5493533444784?text=Hola%20Yanina%2C%20quiero%20inscribirme%20al%20encuentro%20de%20SOMA%20del%2015%20y%2016%20de%20enero%20de%202027."
+      "followUp": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+      "context": "",
+      "pending": "El detalle suma horarios, precio y condiciones cuando el equipo los confirma.",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20enero."
     },
     {
       "slug": "circulos",
       "title": "Círculo de integración online",
-      "shortTitle": "Círculo de integración",
+      "shortTitle": "Círculo de integración online",
       "when": "Una vez por semana",
-      "description": "Un espacio grupal para volver sobre lo vivido, compartir lo que se va moviendo y darle lugar en lo cotidiano.",
+      "description": "Un espacio grupal para retomar lo vivido y darle lugar en lo cotidiano.",
       "details": "ARS 20.000 por mes",
+      "homeNote": "",
       "action": "Quiero participar",
-      "followUp": "Te enviaremos los horarios y los pasos para sumarte al círculo semanal.",
-      "url": "https://wa.me/5493533444784?text=Hola%20Yanina%2C%20me%20interesa%20participar%20en%20el%20c%C3%ADrculo%20de%20integraci%C3%B3n%20online%20de%20SOMA.%20%C2%BFMe%20compart%C3%ADs%20c%C3%B3mo%20sumarme%3F"
+      "followUp": "Por WhatsApp con Yanina.",
+      "context": "Podés sumarte por tu cuenta. Si participás del encuentro de enero, tenés un mes incluido.",
+      "pending": "El precio corresponde a la participación mensual independiente.",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20saber%20c%C3%B3mo%20sumarme%20al%20c%C3%ADrculo%20semanal%20de%20integraci%C3%B3n."
     },
     {
       "slug": "puerta-abierta",
-      "title": "Puerta Abierta en Casa Sabia",
+      "title": "Puerta Abierta",
       "shortTitle": "Puerta Abierta",
       "when": "Fecha a anunciar",
-      "description": "Un encuentro presencial para conocer a SOMA y compartir un rato en Casa Sabia.",
+      "description": "Una invitación a conocernos en Casa Sabia.",
       "venue": "Casa Sabia",
       "details": "La Falda, Córdoba",
+      "homeNote": "",
       "action": "Avisame la fecha",
-      "followUp": "Te avisaremos cuando se confirme la fecha de Puerta Abierta en Casa Sabia.",
-      "url": "https://wa.me/5493533444784?text=Hola%20Yanina%2C%20%C2%BFme%20avis%C3%A1s%20cuando%20se%20confirme%20la%20fecha%20de%20Puerta%20Abierta%20en%20Casa%20Sabia%3F"
+      "followUp": "Abre WhatsApp con Yanina para pedir novedades sobre la fecha.",
+      "context": "",
+      "pending": "La solicitud es para recibir la fecha cuando esté definida.",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20%C2%BFMe%20avis%C3%A1s%20cuando%20haya%20fecha%20para%20Puerta%20Abierta%3F"
     },
     {
       "slug": "grupo-whatsapp",
-      "title": "Grupo gratuito de WhatsApp",
+      "title": "SOMA en WhatsApp",
       "when": "",
-      "description": "Un espacio para estar en contacto con la comunidad de SOMA y enterarte de los próximos encuentros.",
-      "details": "",
-      "action": "Pedir el enlace",
-      "followUp": "Te enviaremos el enlace para que puedas sumarte al grupo gratuito.",
+      "description": "En el grupo general podés presentarte, hacer preguntas y compartir lo que te quedó resonando.",
+      "details": "Comunidad gratuita",
+      "homeNote": "",
+      "action": "Unirme al grupo",
+      "followUp": "El enlace lleva directo a la invitación de WhatsApp.",
+      "context": "",
+      "pending": "",
       "url": "https://chat.whatsapp.com/ChxlvWZHbR28tlMI08V8mN"
     }
   ]

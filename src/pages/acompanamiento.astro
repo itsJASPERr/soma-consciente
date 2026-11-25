@@ -3,20 +3,24 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import Offerings from '../components/Offerings.astro';
 import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
 
 const integration = offerings.filter(({ slug }) => slug === 'circulos' || slug === 'grupo-whatsapp');
+const home = await loadHomepage();
+const journal = mediaUrl(home.onlineImage);
+const pictures = journal ? { circulos: { src: journal, alt: home.onlineAlt } } : {};
 ---
-<SiteLayout title="Integración online" description="Acompañamiento para integrar las vivencias presenciales de SOMA. Participá en el círculo online semanal o pedí acceso al grupo gratuito de WhatsApp.">
+<SiteLayout title="Integración online" description="Círculo de integración online, una vez por semana, ARS 20.000 por mes. También podés entrar al grupo gratuito de WhatsApp.">
   <section class="page-hero">
     <div class="container">
       <h1>Integración online</h1>
-      <p>El encuentro presencial tiene un después. Los círculos online ofrecen un espacio grupal para compartir lo que quedó resonando y llevar lo vivido a la vida cotidiana.</p>
+      <p>Un espacio grupal para retomar lo vivido y darle lugar en lo cotidiano.</p>
     </div>
   </section>
   <section class="section">
     <div class="container">
-      <h2 class="section-heading">Círculos y comunidad</h2>
-      <Offerings offers={integration} />
+      <Offerings offers={integration} pictures={pictures} />
     </div>
   </section>
   <section class="section--tight digital-band">

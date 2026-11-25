@@ -23,7 +23,7 @@ const countries = getCountries()
         <legend>¿Cómo querés que te avisemos?</legend>
         <div class="program-signup__channels">
           <label><input type="radio" name="channel" value="whatsapp" checked required autofocus /> WhatsApp</label>
-          <label><input type="radio" name="channel" value="email" required /> Correo electrónico</label>
+          <label><input type="radio" name="channel" value="email" required /> Email</label>
         </div>
       </fieldset>
       <div id="program-launch-contact-field" class="program-signup__contact" hidden>
@@ -76,8 +76,8 @@ const countries = getCountries()
         </div>
       </div>
       <div class="program-signup__name">
-        <label for="program-launch-name">Tu nombre</label>
-        <input id="program-launch-name" name="name" autocomplete="name" required maxlength="120" />
+        <label for="program-launch-name">Nombre</label>
+        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Tu nombre" required maxlength="120" />
       </div>
       <label id="program-launch-contact-consent" class="program-signup__contact-consent" hidden>
         <input type="checkbox" name="contact-consent" value="yes" required disabled />
@@ -256,20 +256,28 @@ const countries = getCountries()
       if (option) acceptCountry(option);
     });
 
+    const refreshSubmit = () => {
+      submit.disabled = !(
+        contactConsent.checked
+        && nameInput.value.trim().length > 0
+        && contact.value.trim().length > 0
+      );
+    };
+
     const setChannel = (channel: string) => {
       const isWhatsApp = channel === 'whatsapp';
       contact.value = '';
       contact.setCustomValidity('');
       contact.type = isWhatsApp ? 'tel' : 'email';
       contact.autocomplete = isWhatsApp ? 'tel-national' : 'email';
-      contact.placeholder = isWhatsApp ? '' : 'tu@correo.com';
-      label.textContent = isWhatsApp ? 'Tu número de WhatsApp' : 'Tu correo electrónico';
+      label.textContent = isWhatsApp ? 'Número de WhatsApp' : 'Email';
+      contact.placeholder = isWhatsApp ? 'Tu número' : 'tu@correo.com';
       closeCountryPicker();
       countryField.hidden = !isWhatsApp;
       field.dataset.channel = channel;
       contactConsent.checked = false;
-      submit.disabled = true;
       result.hidden = true;
+      refreshSubmit();
     };
 
     const resetForm = () => {
@@ -283,8 +291,15 @@ const countries = getCountries()
       trigger.addEventListener('click', () => {
         opener = trigger;
         const isProgramWaitlist = trigger.hasAttribute('data-program-waitlist');
-        title.textContent = trigger.dataset.signupAction || 'Participar en SOMA';
-        offeringLabel.textContent = trigger.dataset.signupTitle || '';
+        title.textContent = isProgramWaitlist
+          ? (trigger.dataset.signupTitle || 'Nuestro programa online')
+          : (trigger.dataset.signupAction || 'Participar en SOMA');
+        offeringLabel.textContent = isProgramWaitlist
+          ? (trigger.dataset.signupIntro || '')
+          : (trigger.dataset.signupTitle || '');
+        submit.textContent = isProgramWaitlist
+          ? (trigger.dataset.signupAction || 'Avisame cuando esté listo')
+          : 'Enviar solicitud';
         consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
         dialog.showModal();
         if (form.dataset.collect === 'true' && isProgramWaitlist) {
@@ -307,11 +322,15 @@ const countries = getCountries()
       setChannel(option.value);
     });
 
-    nameInput.addEventListener('input', () => nameInput.setCustomValidity(''));
-    contact.addEventListener('input', () => contact.setCustomValidity(''));
-    contactConsent.addEventListener('change', () => {
-      submit.disabled = !contactConsent.checked;
+    nameInput.addEventListener('input', () => {
+      nameInput.setCustomValidity('');
+      refreshSubmit();
     });
+    contact.addEventListener('input', () => {
+      contact.setCustomValidity('');
+      refreshSubmit();
+    });
+    contactConsent.addEventListener('change', refreshSubmit);
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -381,7 +400,7 @@ const countries = getCountries()
         if (isProgramWaitlist) void trackWaitlist('waitlist_submitted', { channel });
       } catch {
         if (currentSubmission.signal.aborted) return;
-        submit.disabled = !contactConsent.checked;
+        refreshSubmit();
         showResult('No pudimos guardar tu solicitud. Probá de nuevo en unos minutos.');
       } finally {
         if (submission === currentSubmission) {

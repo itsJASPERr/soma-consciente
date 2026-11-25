@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 export async function checkWaitlistTracking(page, baseURL, { required }) {
   await page.addInitScript(() => {
@@ -16,7 +17,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
     assert.equal(route.request().method(), 'POST');
     const payload = route.request().postDataJSON();
     assert.equal(payload.offering, undefined);
-    assert.equal(payload.consent, '2');
+    assert.equal(payload.consent, waitlistConsentVersion);
     programSubmissions += 1;
     await route.fulfill({ status: programSubmissions === 1 ? 503 : 204 });
   });
@@ -30,14 +31,14 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
 
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
-  const submit = form.getByRole('button', { name: 'Enviar solicitud' });
+  const submit = form.getByRole('button', { name: 'Avisame cuando esté listo' });
   assert.deepEqual(await events(), []);
   await page.locator('#programa-online #program-launch-open').click();
-  await form.getByText(/para informarme sobre el programa y sus productos/).waitFor();
+  await form.getByText(/guarde mis datos y me contacte por este canal/).waitFor();
   assert.deepEqual(await events(), [opened]);
-  await form.getByRole('radio', { name: 'Correo electrónico' }).check();
-  await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
-  await form.getByLabel('Tu nombre').fill('Participante de prueba');
+  await form.getByRole('radio', { name: 'Email' }).check();
+  await form.getByRole('textbox', { name: 'Email' }).fill('prueba@example.com');
+  await form.getByLabel('Nombre').fill('Participante de prueba');
   assert.ok(await submit.isDisabled());
   await form.getByRole('checkbox').check();
 

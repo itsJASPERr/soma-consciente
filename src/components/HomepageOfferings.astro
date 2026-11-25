@@ -1,6 +1,6 @@
 ---
 import OfferingAction from './OfferingAction.astro';
-import { offerings } from '../lib/offerings';
+import { offeringIntro, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 interface Props {
@@ -18,12 +18,13 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   <div class:list={['container', 'participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
     <div class="participation-hero__copy">
       <h1 id="participation-heading">Encuentros presenciales. <em>Integración online.</em></h1>
+      <p class="participation-hero__lede">{offeringIntro}</p>
       {encounter && (
         <div class="participation-feature" id={encounter.slug}>
           <p class="participation-label">Próximo encuentro</p>
           <h2 class="participation-feature__date">{encounter.when || encounter.title}</h2>
           {encounter.venue && <p class="participation-feature__venue">{encounter.venue}</p>}
-          {encounter.details && <p class="participation-feature__included">{encounter.details}</p>}
+          {(encounter.homeNote || encounter.details) && <p class="participation-feature__included">{encounter.homeNote || encounter.details}</p>}
           <a class="btn" href={path('/encuentros/#' + encounter.slug)}>Ver el encuentro <span aria-hidden="true">↗</span></a>
         </div>
       )}
@@ -39,7 +40,10 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 {circles && (
   <section id={circles.slug} class="participation-row participation-row--circles" aria-labelledby="participation-circles">
     <div class="container participation-row__layout">
-      <h2 id="participation-circles">{circles.shortTitle || circles.title}</h2>
+      <div class="participation-row__lead">
+        <h2 id="participation-circles">{circles.shortTitle || circles.title}</h2>
+        {circles.context && <p class="participation-row__context">{circles.context}</p>}
+      </div>
       {(circles.details || circles.when) && (
         <div class="participation-row__details">
           {circles.details && <p class="participation-row__price">{circles.details}</p>}
@@ -48,6 +52,7 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
       )}
       <div class="participation-row__action">
         <OfferingAction offer={circles} requestsEnabled={requestsEnabled} class="btn btn--outline" showArrow />
+        {circles.followUp && <p class="participation-row__handoff">{circles.followUp}</p>}
       </div>
     </div>
   </section>
@@ -56,7 +61,10 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 {openDoor && (
   <section id={openDoor.slug} class="participation-row participation-row--door" aria-labelledby="participation-door">
     <div class="container participation-row__layout">
-      <h2 id="participation-door">{openDoor.shortTitle || openDoor.title}</h2>
+      <div class="participation-row__lead">
+        <h2 id="participation-door">{openDoor.shortTitle || openDoor.title}</h2>
+        {openDoor.description && <p class="participation-row__summary">{openDoor.description}</p>}
+      </div>
       {(openDoor.when || openDoor.venue || openDoor.details) && (
         <div class="participation-row__details">
           {openDoor.when && <p class="participation-row__date">{openDoor.when}</p>}
@@ -65,6 +73,7 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
       )}
       <div class="participation-row__action">
         <OfferingAction offer={openDoor} requestsEnabled={requestsEnabled} class="text-link" showArrow />
+        {openDoor.followUp && <p class="participation-row__handoff">{openDoor.followUp}</p>}
       </div>
     </div>
   </section>
@@ -73,9 +82,14 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 {community && (
   <section id={community.slug} class="participation-row participation-row--community" aria-labelledby="participation-community">
     <div class="container participation-row__layout">
-      <h2 id="participation-community">{community.title}</h2>
+      <div class="participation-row__lead">
+        {community.details && <p class="participation-kicker">{community.details}</p>}
+        <h2 id="participation-community">{community.title}</h2>
+        {community.description && <p class="participation-row__invite">{community.description}</p>}
+      </div>
       <div class="participation-row__action">
         <OfferingAction offer={community} requestsEnabled={requestsEnabled} class="btn btn--light" showArrow />
+        {community.followUp && <p class="participation-row__handoff">{community.followUp}</p>}
       </div>
     </div>
   </section>
@@ -108,6 +122,14 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     display: block;
     color: var(--pine);
     font-weight: 400;
+  }
+  .participation-hero__lede {
+    max-inline-size: 42rem;
+    margin: .9rem 0 0;
+    color: var(--ink);
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.5;
+    text-wrap: pretty;
   }
   .participation-hero__frame {
     position: relative;
@@ -176,6 +198,12 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
     background: var(--pine-dark);
     color: var(--cream);
   }
+  .participation-row--community .participation-row__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(11.5rem, 16rem);
+  }
+  .participation-row--community .participation-row__action {
+    grid-column: 2;
+  }
   .participation-row__layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(13rem, 15rem) minmax(11.5rem, 12.5rem);
@@ -212,6 +240,32 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   .participation-row__secondary {
     color: var(--pine);
   }
+  .participation-row__lead {
+    min-inline-size: 0;
+  }
+  .participation-row__context,
+  .participation-row__summary,
+  .participation-row__invite,
+  .participation-row__handoff {
+    margin-top: .35rem;
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+  .participation-row__handoff {
+    max-inline-size: 100%;
+    font-size: .82rem;
+  }
+  .participation-feature__date {
+    text-wrap: balance;
+  }
+  .participation-kicker {
+    margin: 0 0 .2rem;
+    color: inherit;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
   @media (max-width: 850px) {
     .participation-row__layout {
       grid-template-columns: minmax(0, 1fr) minmax(10rem, 12.5rem);
@@ -222,7 +276,10 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
       grid-column: 2;
       grid-row: 1 / span 2;
     }
-    .participation-row--community .participation-row__action { grid-row: 1; }
+    .participation-row--community .participation-row__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(10rem, 14rem);
+    }
+    .participation-row--community .participation-row__action { grid-column: 2; grid-row: 1; }
   }
   @media (max-width: 680px) {
     .participation-hero__layout--with-image { grid-template-columns: minmax(0, 1fr); }

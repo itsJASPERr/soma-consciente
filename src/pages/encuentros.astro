@@ -1,31 +1,26 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Offerings from '../components/Offerings.astro';
-import { offerings } from '../lib/offerings';
+import { offeringIntro, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
-import { loadHomepage } from '../lib/home';
-import { mediaUrl } from '../lib/media';
-
-const home = await loadHomepage();
 const events = offerings.filter(({ slug }) => slug === 'encuentro-enero' || slug === 'puerta-abierta');
 ---
-<SiteLayout title="Encuentros presenciales" description="Vivencias y retiros presenciales de SOMA. Conocé el encuentro del 15 y 16 de enero de 2027, con un mes de integración online incluido, y Puerta Abierta en La Falda.">
+<SiteLayout title="Encuentro de enero" description="Encuentro presencial del 15 y 16 de enero de 2027 en Casa Sabia, La Falda. Incluye un mes de círculos de integración online. La inscripción se consulta con Yanina y el equipo confirma si hay lugar.">
   <section class="page-hero">
     <div class="container">
       <h1>Encuentros presenciales</h1>
-      <p>Vivencias y retiros para compartir prácticas y encontrarnos. Después del encuentro, los círculos online nos dan un espacio para integrar lo vivido.</p>
+      <p>{offeringIntro}</p>
     </div>
   </section>
   <section class="section">
     <div class="container">
-      <h2 class="section-heading">Próximos encuentros</h2>
-      <Offerings offers={events} image={{ src: mediaUrl(home.encountersImage) || '', alt: home.encountersAlt }} />
+      <Offerings offers={events} />
     </div>
   </section>
   <section class="section--tight digital-band">
     <div class="container">
       <h2>Integrar después del encuentro</h2>
-      <p class="section-intro">En los círculos online seguimos conversando sobre lo vivido y exploramos cómo llevarlo a lo cotidiano.</p>
+      <p class="section-intro">En los círculos online retomamos lo vivido para llevarlo a la vida cotidiana. El encuentro de enero incluye un mes.</p>
       <a class="btn" href={path('/acompanamiento/#circulos')}>Conocer los círculos ↗</a>
     </div>
   </section>
