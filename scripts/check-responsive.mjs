@@ -16,7 +16,7 @@ const paths=[
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
 ];
 const widths=[320,375,480,768,1024];
-const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
+const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',d=>{output+=String(d).slice(-4000);});
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -119,8 +119,7 @@ try{
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {
   if(browser) await browser.close().catch(()=>{});
-  // Kill the npm wrapper AND close its inherited stdio pipes. Otherwise
-  // the CI job can remain running after Chromium has completed.
+  // Stop Astro and close its output pipes so the CI job can exit.
   server.kill('SIGKILL');
   server.stdout?.destroy();
   server.stderr?.destroy();

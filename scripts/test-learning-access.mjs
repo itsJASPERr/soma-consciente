@@ -28,7 +28,7 @@ const files = fixtures.map(x=>join(folder,x.key+'.json'));
 try {
   for (const file of files) if(existsSync(file))throw Error('Refusing to overwrite '+file);
   fixtures.forEach((f,i)=>writeFileSync(files[i],JSON.stringify(f,null,2)+'\n'));
-  const build=spawnSync('npm',['run','build'],{stdio:'inherit',encoding:'utf8'});
+  const build=spawnSync('pnpm',['run','build'],{stdio:'inherit',encoding:'utf8'});
   if(build.status!==0)throw Error('Temporary access-gating build failed');
   const courseHtml = readFileSync(join(root,'index.html'),'utf8');
   for(const f of fixtures){

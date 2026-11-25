@@ -85,7 +85,12 @@ export const secciones = defineCollection({
   })
 });
 export const lecciones = defineCollection({
-  loader: glob({ pattern: '**/*.json', base: './src/content/lecciones' }),
+  loader: glob({
+    pattern: '**/*.json',
+    base: './src/content/lecciones',
+    // Sections can reuse a lesson's URL slug. Collection IDs must be unique.
+    generateId: ({ entry }) => entry.replace(/\.json$/, ''),
+  }),
   schema: z.object({
     key: z.string().regex(/^[a-z0-9-]+$/),
     slug: z.string().regex(/^[a-z0-9-]+$/),

@@ -50,7 +50,7 @@ Cada curso/sección/lección tiene un campo `key` estable y único, usado por la
 - `order` determina el orden dentro del nivel correspondiente.
 - `slug` determina el segmento URL de ese contenido.
 
-La web construye las rutas como `/aulas/{aula}/{curso}/{seccion}/{leccion}/` y las valida antes de publicar con `npm run content:check`.
+La web construye las rutas como `/aulas/{aula}/{curso}/{seccion}/{leccion}/` y las valida antes de publicar con `pnpm run content:check`.
 
 ### Estados editoriales de las lecciones
 
@@ -137,7 +137,7 @@ En el catálogo, los títulos de los elementos bloqueados aparecen con el tipo d
 
 ### Advertencia crítica de seguridad
 
-**Este repositorio GitHub y GitHub Pages son públicos.** Ni `status=draft` ni `accessLevel=paid` protegen información confidencial que ya esté guardada en archivos JSON. Nunca agregar audios, videos, textos, notas personales, respuestas de alumnos ni enlaces privados de acceso aquí. El verificador `npm run content:check` falla si detecta `blocks` en lecciones que no están publicadas gratis, pero la revisión editorial también debe evitar secretos en textos del resumen, `publicPreview` o metadatos.
+**Este repositorio GitHub y GitHub Pages son públicos.** Ni `status=draft` ni `accessLevel=paid` protegen información confidencial que ya esté guardada en archivos JSON. Nunca agregar audios, videos, textos, notas personales, respuestas de alumnos ni enlaces privados de acceso aquí. El verificador `pnpm run content:check` falla si detecta `blocks` en lecciones que no están publicadas gratis, pero la revisión editorial también debe evitar secretos en textos del resumen, `publicPreview` o metadatos.
 
 Para ofrecer contenido pago real necesitamos Mágico OS (o un backend equivalente) con identidad, pago verificado y autorización del lado del servidor. El checkout y el desbloqueo permanecen deshabilitados hasta entonces. Los futuros productos y precios no se inventan aquí. Esta versión prepara exclusivamente la interfaz de catálogo.
 

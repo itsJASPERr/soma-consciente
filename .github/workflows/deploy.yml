@@ -21,24 +21,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: pnpm/action-setup@v6
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: pnpm install --frozen-lockfile
       - name: Validate learning content
-        run: npm run content:check
+        run: pnpm run content:check
       - name: Diagnose editorial photo links
         continue-on-error: true
         run: node scripts/check-media-links.mjs
       - name: Verify free/preview/locked static exports
-        run: npm run test:access
+        run: pnpm run test:access
       - name: Build static site
-        run: npm run build
+        run: pnpm run build
       - name: Verify www domain and root-relative URLs
-        run: npm run test:domain
+        run: pnpm run test:domain
       - name: Verify social link previews
-        run: npm run test:og
+        run: pnpm run test:og
       - name: Responsive browser verification
         timeout-minutes: 3
-        run: npm run test:responsive
+        run: pnpm run test:responsive
       - name: Save mobile screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -86,6 +87,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: pnpm/action-setup@v6
+        with:
+          version: '12.23.0'
       - uses: actions/download-artifact@v4
         with:
           name: cloudflare-preview-dist
@@ -97,5 +101,5 @@ jobs:
           PREVIEW_BRANCH: pr-${{ github.event.pull_request.number }}
           WRANGLER_SEND_METRICS: 'false'
         run: |
-          npx --yes wrangler@4.160.1 pages deploy dist --project-name=soma-consciente-preview \
+          pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1 pages deploy dist --project-name=soma-consciente-preview \
             --branch="$PREVIEW_BRANCH" --commit-hash="$GITHUB_SHA" --commit-dirty=false
