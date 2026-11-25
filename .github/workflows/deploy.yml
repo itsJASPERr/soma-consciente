@@ -97,5 +97,6 @@ jobs:
           PREVIEW_BRANCH: pr-${{ github.event.pull_request.number }}
           WRANGLER_SEND_METRICS: 'false'
         run: |
+          npx --yes wrangler@4.160.1 pages project create soma-consciente-preview --production-branch main --force
           npx --yes wrangler@4.160.1 pages deploy dist --project-name=soma-consciente-preview \
             --branch="$PREVIEW_BRANCH" --commit-hash="$GITHUB_SHA" --commit-dirty=false
