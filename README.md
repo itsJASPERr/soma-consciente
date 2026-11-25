@@ -25,11 +25,11 @@ pnpm run build
 
 ## Despliegue
 
-En GitHub: **Settings → Pages → Source: GitHub Actions** y **Custom domain: `www.soma-consciente.com`**. El dominio se configura en *Settings → Pages* (el workflow no usa un `CNAME` como fuente de verdad). DNS en Porkbun: `www` CNAME → `itsjasperr.github.io`; el dominio raíz utiliza registros A/AAAA de GitHub Pages y puede redirigir a www. El archivo `public/CNAME` se incluye como metadato coherente del sitio; GitHub Actions ignora su contenido para configurar el dominio.
+En GitHub: **Settings → Pages → Source: GitHub Actions** y **Custom domain: soma-consciente.com**. Cloudflare administra el DNS y www redirige al dominio raíz.
 
 En GitHub: **Settings → Pages → Source: GitHub Actions**. El workflow `.github/workflows/deploy.yml` valida PRs y despliega automáticamente los cambios de `main`.
 
-Dirección prevista: https://www.soma-consciente.com/
+Sitio público en https://soma-consciente.com/. Astro genera el sitemap en https://soma-consciente.com/sitemap-index.xml y lo anuncia en robots.txt.
 
 Si Pages aún no está habilitado, el build puede finalizar correctamente pero la publicación fallará. Habilitá GitHub Actions como fuente y volvé a ejecutar el workflow.
 
@@ -84,7 +84,7 @@ the **original SOMA emblem** at build time:
 - Source: `public/media/soma-original-emblem.png` (unchanged).
 - Generator: `scripts/generate-social-image.mjs`, run automatically by pnpm's
   `prebuild` and `predev` hooks.
-- Output: `https://www.soma-consciente.com/og/soma-consciente.png` (1200 × 630).
+- Output: `https://soma-consciente.com/og/soma-consciente.png` (1200 × 630).
 - Verification: `pnpm run test:og` after `pnpm run build`.
 
 The common image can later be overridden in `SiteLayout` with `ogImage` and
