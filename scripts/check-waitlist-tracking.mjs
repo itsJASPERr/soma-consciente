@@ -11,12 +11,21 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   });
 
   const endpoint = new URL('/api/waitlist', baseURL).href;
-  let submissions = 0;
+  let circleSubmissions = 0;
+  let programSubmissions = 0;
   await page.route(endpoint, async route => {
     assert.equal(route.request().method(), 'POST');
-    assert.equal(route.request().postDataJSON().offering, 'circulos');
-    submissions += 1;
-    await route.fulfill({ status: submissions === 1 ? 503 : 204 });
+    const payload = route.request().postDataJSON();
+    if (payload.offering === 'circulos') {
+      assert.equal(payload.consent, 'offering-1');
+      circleSubmissions += 1;
+      await route.fulfill({ status: 204 });
+      return;
+    }
+    assert.equal(payload.offering, undefined);
+    assert.equal(payload.consent, '2');
+    programSubmissions += 1;
+    await route.fulfill({ status: programSubmissions === 1 ? 503 : 204 });
   });
 
   await page.goto(new URL('/', baseURL).href, { waitUntil: 'load' });
@@ -28,34 +37,42 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
 
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
-  assert.deepEqual(await events(), []);
-  const otherOffering = page.locator('button[data-offering-signup="puerta-abierta"]');
-  if (await otherOffering.count()) {
-    await otherOffering.click();
-    assert.deepEqual(await events(), [], 'The in-person offering must stay outside the online funnel.');
-    await page.getByRole('button', { name: 'Cerrar' }).click();
-    await form.waitFor({ state: 'hidden' });
-  }
-  await page.locator('button[data-offering-signup="circulos"]').click();
-  assert.deepEqual(await events(), [opened]);
-
-  await form.getByRole('radio', { name: 'Correo electrónico' }).check();
-  await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
-  await form.getByLabel('Tu nombre').fill('Participante de prueba');
-  await form.getByRole('checkbox').check();
   const submit = form.getByRole('button', { name: 'Enviar solicitud' });
+  const fillEmailContact = async () => {
+    await form.getByRole('radio', { name: 'Correo electrónico' }).check();
+    await form.getByLabel('Tu correo electrónico').fill('prueba@example.com');
+    await form.getByLabel('Tu nombre').fill('Participante de prueba');
+    assert.ok(await submit.isDisabled());
+    await form.getByRole('checkbox').check();
+  };
+
+  assert.deepEqual(await events(), []);
+  await page.locator('#circulos button[data-offering-signup="circulos"]').click();
+  await form.getByText(/para responder a esta solicitud/).waitFor();
+  await fillEmailContact();
+  await submit.click();
+  await page.getByText('Recibimos tu solicitud. Te enviaremos los horarios y los pasos para sumarte al círculo semanal.').waitFor();
+  assert.equal(circleSubmissions, 1);
+  assert.deepEqual(await events(), [], 'A circle request must stay outside the program funnel.');
+  await page.getByRole('button', { name: 'Cerrar' }).click();
+  await form.waitFor({ state: 'hidden' });
+
+  await page.locator('#programa-online #program-launch-open').click();
+  await form.getByText(/para informarme sobre el programa y sus productos/).waitFor();
+  assert.deepEqual(await events(), [opened]);
+  await fillEmailContact();
 
   await submit.click();
   await page.getByText('No pudimos guardar tu solicitud.').waitFor();
-  assert.equal(submissions, 1);
+  assert.equal(programSubmissions, 1);
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
-  await page.getByText('Recibimos tu solicitud. Te enviaremos los horarios y los pasos para sumarte al círculo semanal.').waitFor();
-  assert.equal(submissions, 2);
+  await page.getByText('Gracias. Te avisaremos por el medio que elegiste.').waitFor();
+  assert.equal(programSubmissions, 2);
   assert.deepEqual(await events(), [
     opened,
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
-  console.log('Waitlist analytics verified with intercepted failure and success responses.');
+  console.log('Program waitlist and circle requests use distinct consent, payloads and analytics.');
 }

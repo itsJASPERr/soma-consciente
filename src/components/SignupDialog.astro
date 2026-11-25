@@ -92,7 +92,12 @@ const countries = getCountries()
 
 <script>
   import { parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
-  import { offeringConsentVersion } from '../lib/waitlist-consent';
+  import {
+    offeringConsentText,
+    offeringConsentVersion,
+    waitlistConsentText,
+    waitlistConsentVersion,
+  } from '../lib/waitlist-consent';
 
   type SignupChannel = 'whatsapp' | 'email';
   type WaitlistEvent = 'waitlist_opened' | 'waitlist_submitted';
@@ -108,7 +113,7 @@ const countries = getCountries()
     }
   }
 
-  const triggers = document.querySelectorAll<HTMLButtonElement>('button[data-offering-signup]');
+  const triggers = document.querySelectorAll<HTMLButtonElement>('button[data-offering-signup], button[data-program-waitlist]');
   const title = document.querySelector<HTMLElement>('#program-launch-title');
   const offeringLabel = document.querySelector<HTMLElement>('#program-launch-offering');
   const dialog = document.querySelector<HTMLDialogElement>('#program-launch-dialog');
@@ -129,13 +134,14 @@ const countries = getCountries()
   const defaultOption = countryOptions?.querySelector<HTMLElement>('[aria-selected="true"]');
   const consentField = document.querySelector<HTMLLabelElement>('#program-launch-contact-consent');
   const contactConsent = consentField?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+  const consentCopy = consentField?.querySelector('span');
   const submit = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
   const result = document.querySelector<HTMLElement>('#program-launch-result');
 
   if (
     triggers.length && title && offeringLabel && dialog && close && form && defaultChannel && field && contact && nameInput && label && submit && result &&
     countryField && countryToggle && countryCode && countryPicker && countrySearch &&
-    countryOptions && countryEmpty && defaultOption && consentField && contactConsent
+    countryOptions && countryEmpty && defaultOption && consentField && contactConsent && consentCopy
   ) {
     const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase();
     const options = [...countryOptions.querySelectorAll<HTMLElement>('[data-country]')];
@@ -276,10 +282,12 @@ const countries = getCountries()
     for (const trigger of triggers) {
       trigger.addEventListener('click', () => {
         opener = trigger;
-        title.textContent = trigger.dataset.offeringAction || 'Participar en SOMA';
-        offeringLabel.textContent = trigger.dataset.offeringTitle || '';
+        const isProgramWaitlist = trigger.hasAttribute('data-program-waitlist');
+        title.textContent = trigger.dataset.signupAction || 'Participar en SOMA';
+        offeringLabel.textContent = trigger.dataset.signupTitle || '';
+        consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
         dialog.showModal();
-        if (form.dataset.collect === 'true' && trigger.dataset.offeringSignup === 'circulos') {
+        if (form.dataset.collect === 'true' && isProgramWaitlist) {
           void trackWaitlist('waitlist_opened');
         }
       });
@@ -308,8 +316,9 @@ const countries = getCountries()
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const offering = opener?.dataset.offeringSignup;
-      const followUp = opener?.dataset.offeringFollowUp || 'Te contactaremos por el medio que elegiste.';
-      if (submission || !offering || !contactConsent.checked) return;
+      const isProgramWaitlist = opener?.hasAttribute('data-program-waitlist') === true;
+      const followUp = opener?.dataset.signupFollowUp || 'Te contactaremos por el medio que elegiste.';
+      if (submission || (!isProgramWaitlist && !offering) || !contactConsent.checked) return;
 
       const name = nameInput.value.trim();
       if (!name) {
@@ -359,15 +368,17 @@ const countries = getCountries()
             channel,
             contact: contact.value,
             country: channel === 'whatsapp' ? selectedOption.dataset.country : undefined,
-            consent: offeringConsentVersion,
+            consent: isProgramWaitlist ? waitlistConsentVersion : offeringConsentVersion,
           }),
           signal: currentSubmission.signal,
         });
         if (!response.ok) throw new Error('Waitlist signup failed');
         if (currentSubmission.signal.aborted) return;
         resetForm();
-        showResult('Recibimos tu solicitud. ' + followUp);
-        if (offering === 'circulos') void trackWaitlist('waitlist_submitted', { channel });
+        showResult(isProgramWaitlist
+          ? 'Gracias. Te avisaremos por el medio que elegiste.'
+          : 'Recibimos tu solicitud. ' + followUp);
+        if (isProgramWaitlist) void trackWaitlist('waitlist_submitted', { channel });
       } catch {
         if (currentSubmission.signal.aborted) return;
         submit.disabled = !contactConsent.checked;

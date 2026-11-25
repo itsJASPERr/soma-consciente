@@ -1,20 +1,18 @@
 ---
 import OfferingAction from './OfferingAction.astro';
-import OfferingSignup from './OfferingSignup.astro';
-import { offeringUrl, offerings } from '../lib/offerings';
+import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 interface Props {
   image?: { src: string; alt: string; position?: string };
+  requestsEnabled: boolean;
 }
 
-const { image } = Astro.props;
+const { image, requestsEnabled } = Astro.props;
 const encounter = offerings.find(({ slug }) => slug === 'encuentro-enero');
 const circles = offerings.find(({ slug }) => slug === 'circulos');
 const openDoor = offerings.find(({ slug }) => slug === 'puerta-abierta');
 const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
-const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
-const hasRequests = requestsEnabled && [circles, openDoor, community].some(offer => offer && !offeringUrl(offer));
 ---
 <section class="participation-hero" aria-labelledby="participation-heading">
   <div class:list={['container', 'participation-hero__layout', { 'participation-hero__layout--with-image': image?.src }]}>
@@ -67,8 +65,6 @@ const hasRequests = requestsEnabled && [circles, openDoor, community].some(offer
     </div>
   </section>
 )}
-
-{hasRequests && <OfferingSignup />}
 
 <style>
   .participation-hero {

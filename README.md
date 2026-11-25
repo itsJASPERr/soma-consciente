@@ -91,20 +91,22 @@ inscripción y cupos con Reservas se sigue en #34.
 
 ### Medición del programa online
 
-En Umami, medí el embudo desde la portada hasta la solicitud para los círculos de integración online. Usá los eventos
-`waitlist_opened` y `waitlist_submitted`. El segundo se registra cuando
-la API confirma el envío y lleva solo el canal elegido. D1 mantiene el
-conteo de solicitudes deduplicadas en la tabla `offering_requests`. La
-verificación del despliegue comprueba ambos rastreadores en las páginas
-públicas. Umami se incluye solo en el build de producción de Cloudflare y su
-lista de dominios limita el envío de eventos. CI comprueba que las vistas
-previas no sirvan Umami ni el beacon de Cloudflare Web Analytics.
+En Umami, medí el embudo desde la portada hasta la lista de espera del
+programa online. Usá los eventos `waitlist_opened` y `waitlist_submitted`. El
+segundo se registra cuando la API confirma el envío y lleva solo el canal
+elegido. D1 guarda las inscripciones deduplicadas en `waitlist_signups`.
+Las solicitudes para cada encuentro, círculo o comunidad se guardan en
+`offering_requests`.
+
+Umami se incluye solo en el build de producción de Cloudflare y su lista de
+dominios limita el envío de eventos. CI comprueba que las vistas previas no
+sirvan Umami ni el beacon de Cloudflare Web Analytics.
 
 Etiquetá los enlaces de campaña en minúsculas. Usá `programa_online`
 como campaña y elegí `utm_source`, `utm_medium` y `utm_content`
 según el canal y la ubicación del enlace.
 
-[Enlace para la bio de Instagram](https://soma-consciente.com/?utm_source=instagram&utm_medium=social&utm_campaign=programa_online&utm_content=bio#circulos)
+[Enlace para la bio de Instagram](https://soma-consciente.com/?utm_source=instagram&utm_medium=social&utm_campaign=programa_online&utm_content=bio#programa-online)
 
 ## Edición de contenido
 

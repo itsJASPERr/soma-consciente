@@ -2,7 +2,7 @@
 import { offeringUrl, type Offering } from '../lib/offerings';
 import OfferingAction from './OfferingAction.astro';
 import { path } from '../lib/paths';
-import OfferingSignup from './OfferingSignup.astro';
+import SignupDialog from './SignupDialog.astro';
 
 interface Props {
   offers: Offering[];
@@ -35,7 +35,7 @@ const hasRequests = requestsEnabled && offers.some(offer => !offeringUrl(offer))
     );
   })}
 </div>
-{hasRequests && <OfferingSignup />}
+{hasRequests && <SignupDialog />}
 
 <style>
   .offerings-grid {

@@ -2,6 +2,8 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import OrbitArt from '../components/OrbitArt.astro';
 import HomepageOfferings from '../components/HomepageOfferings.astro';
+import ProgramWaitlist from '../components/ProgramWaitlist.astro';
+import SignupDialog from '../components/SignupDialog.astro';
 import { offeringIntro } from '../lib/offerings';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
@@ -10,6 +12,7 @@ import ResourceCard from '../components/ResourceCard.astro';
 const programThemes = (await loadAulas()).map(({ name }) => name);
 const resources = await loadResources();
 const homeImages = await loadHomepage();
+const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const encountersPhoto = mediaUrl(homeImages.encountersImage);
 const heroPhoto = encountersPhoto
   ? { src: encountersPhoto, alt: homeImages.encountersAlt }
@@ -17,7 +20,7 @@ const heroPhoto = encountersPhoto
 import { path } from '../lib/paths';
 ---
 <SiteLayout description={offeringIntro + ' Conocé el próximo encuentro, los círculos semanales y la comunidad de SOMA.'}>
-  <HomepageOfferings image={heroPhoto} />
+  <HomepageOfferings image={heroPhoto} requestsEnabled={signupEnabled} />
   <div class="values-strip"><div class="container values-list"><span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span></div></div>
   <section class="section">
     <div class="container intro-grid">
@@ -52,6 +55,7 @@ import { path } from '../lib/paths';
       </div>
     </div>
   </section>
+  <ProgramWaitlist signupEnabled={signupEnabled} />
   <section class="section nucleo-section">
     <div class="container nucleo-grid">
       <div>
@@ -83,6 +87,7 @@ import { path } from '../lib/paths';
       </div>
     </div>
   </section>
+  {signupEnabled && <SignupDialog />}
 </SiteLayout>
 
 <style>
