@@ -16,7 +16,7 @@ const artifact=readFileSync('dist/CNAME','utf8').trim();
 
 assert.equal(artifact,domain,'The deployed public/CNAME must contain the canonical host.');
 assert.match(html,new RegExp('rel="canonical" href="'+site.replaceAll('.','\\.')+'/"'));
-assert.match(html, /href="#programa-online"/, 'The homepage CTA must link to the online program announcement.');
+assert.match(html, /href="#encuentro-enero"/, 'The homepage CTA must link to the January encounter.');
 assert.ok(aulas.includes(`rel="canonical" href="${site}/aulas/"`), 'The Aula directory must retain its canonical URL.');
 assert.match(html,/href="\/biblioteca\/"/,'Biblioteca link must start at the root.');
 assert.match(html,/href="\/_astro\//,'Generated Astro assets must be root-relative.');
