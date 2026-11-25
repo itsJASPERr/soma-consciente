@@ -6,7 +6,7 @@ import {readFileSync,existsSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 
-const site='https://www.soma-consciente.com';
+const site='https://soma-consciente.com';
 const expectedImage=site+'/og/soma-consciente.png';
 const imageFile=join('dist','og','soma-consciente.png');
 assert.ok(existsSync(imageFile),'OG image not included in GitHub Pages build output');
