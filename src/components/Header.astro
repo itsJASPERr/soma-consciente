@@ -2,7 +2,7 @@
 import Brand from './Brand.astro';
 import { Icon } from 'astro-icon/components';
 import { path } from '../lib/paths';
-const { action } = Astro.props as { action?: { label: string; href: string } };
+const { action, reveal = false } = Astro.props as { action?: { label: string; href: string }; reveal?: boolean };
 const links = [
   { label: 'Encuentros', href: '/encuentros/' },
   { label: 'Círculos', href: '/acompanamiento/#circulos' },
@@ -13,7 +13,7 @@ const links = [
   { label: 'Equipo', href: '/equipo/' }
 ];
 ---
-<header class="site-header">
+<header class="site-header" data-reveal-header={reveal || undefined}>
   <div class="container header-inner">
     <Brand />
     <nav class="desktop-nav" aria-label="Navegación principal">
@@ -28,3 +28,22 @@ const links = [
     </details>
   </div>
 </header>
+{reveal && (
+  <script is:inline>
+    (() => {
+      const header = document.querySelector('[data-reveal-header]');
+      if (!header) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const update = () => {
+        const show = reduce || window.scrollY > 8 || header.querySelector('details[open]') || header.matches(':focus-within');
+        header.classList.add('site-header--reveal');
+        header.classList.toggle('is-visible', show);
+      };
+      update();
+      window.addEventListener('scroll', update, { passive: true });
+      header.addEventListener('toggle', update, true);
+      header.addEventListener('focusin', update);
+      header.addEventListener('focusout', () => requestAnimationFrame(update));
+    })();
+  </script>
+)}

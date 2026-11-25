@@ -73,7 +73,7 @@ try {
           const title = section.querySelector('h2');
           const logo = section.querySelector('.program-preview__mark img');
           const themes = [...section.querySelectorAll('.program-preview__themes li')];
-          if (title?.textContent.trim() !== 'Cuatro miradas, un mismo núcleo') problems.push('incorrect methodology title');
+          if (title?.textContent.trim() !== 'Cuatro miradas, un núcleo') problems.push('incorrect methodology title');
           if (themes.map(theme => theme.textContent.trim()).join('|') !== names.join('|')) {
             problems.push('methodology keywords differ from the four titles');
           }

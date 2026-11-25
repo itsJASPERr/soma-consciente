@@ -1,6 +1,6 @@
 ---
+import { Icon } from 'astro-icon/components';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import HomepageOfferings from '../components/HomepageOfferings.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
 import ResourceList from '../components/ResourceList.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
@@ -8,6 +8,7 @@ import SignupDialog from '../components/SignupDialog.astro';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
+import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 const aulas = await loadAulas();
@@ -19,19 +20,60 @@ const home = await loadHomepage();
 const sunrise = mediaUrl(home.heroImage);
 const landscape = mediaUrl(home.nucleoImage);
 const heroPhoto = sunrise
-  ? { src: sunrise, alt: home.heroAlt, position: home.heroPosition }
-  : { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
-const circlePhoto = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
+  ? { src: sunrise, alt: home.heroAlt, position: home.heroPosition || 'center' }
+  : { src: mediaUrl(home.encountersImage), alt: home.encountersAlt, position: 'center' };
 const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+const nucleusStatements = [
+  'Prácticas y herramientas compartidas',
+  'Prácticas interdisciplinarias',
+  'Acompañamiento e integración',
+  'Encuentros y experiencias',
+];
+const retreat = offerings.find(offer => offer.slug === 'encuentro-enero');
+const door = offerings.find(offer => offer.slug === 'puerta-abierta');
+const retreatDates = retreat && 'dates' in retreat && retreat.dates?.length ? retreat.dates : [];
+const calendar = [
+  ...(retreat ? (retreatDates.length ? retreatDates : [{ when: retreat.when, venue: retreat.venue }]).map((date, index) => ({
+    title: retreat.title,
+    when: date.when,
+    venue: date.venue,
+    href: path('/encuentros/#' + (index === 0 ? retreat.slug : retreat.slug + '-' + (index + 1))),
+  })) : []),
+  ...(door ? [{
+    title: door.title,
+    when: door.when,
+    venue: [door.venue, door.details].filter(Boolean).join(' · '),
+    href: path('/encuentros/#puerta-abierta'),
+  }] : []),
+];
 ---
-<SiteLayout openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
-  <HomepageOfferings image={heroPhoto} circleImage={circlePhoto} requestsEnabled={signupEnabled} />
+<SiteLayout revealHeader openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
+  <section class="home-hero" aria-labelledby="participation-heading">
+    {heroPhoto.src && (
+      <img
+        class="home-hero__photo"
+        src={heroPhoto.src}
+        alt={heroPhoto.alt}
+        style={`object-position: ${heroPhoto.position}`}
+        width="1600"
+        height="1000"
+        fetchpriority="high"
+        decoding="async"
+      />
+    )}
+    <div class="home-hero__copy">
+      <h1 id="participation-heading">La consciencia se vive.</h1>
+      <p>Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.</p>
+    </div>
+  </section>
+
   <section class="program-section" id="metodologia" aria-labelledby="metodologia-title">
     {signupEnabled && landscape && <img class="program-overlay-art" src={landscape} alt="" width="1100" height="780" loading="lazy" decoding="async" />}
     <div class="container program-preview">
-      <h2 id="metodologia-title">Cuatro miradas, un mismo núcleo</h2>
-      <p class="program-preview__intro">Estas perspectivas se encuentran en nuestras vivencias presenciales y en la integración de lo que compartimos.</p>
-      <div class="program-preview__composition">
+      <p class="eyebrow">Un camino integrado</p>
+      <h2 id="metodologia-title">Cuatro miradas, un núcleo</h2>
+      <p class="program-preview__intro">Donde las distintas miradas se encuentran hay un espacio para cocrear propuestas que conectan cuerpo, emoción, consciencia y naturaleza sin perder la singularidad de cada disciplina. Compartimos desde el lugar de nuestra propia práctica.</p>
+      <div class="program-preview__composition" style={landscape ? `--nucleus-image: url("${landscape}")` : undefined}>
         <div class="program-preview__mark">
           <img src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
         </div>
@@ -41,19 +83,24 @@ const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENA
           ))}
         </ul>
       </div>
+      <ol class="nucleus-points">
+        {nucleusStatements.map((statement, index) => (
+          <li><span>{String(index + 1).padStart(2, '0')}</span>{statement}</li>
+        ))}
+      </ol>
       <ProgramWaitlist signupEnabled={signupEnabled} />
     </div>
   </section>
-  <section class="container journey-row">
-    <div>
-      <h2>Nuestra mirada</h2>
-      <p>Creamos espacios para estar presentes, disfrutar y compartir lo que nos pasa, con respeto por el ritmo de cada persona.</p>
-    </div>
-    <div class="journey-actions">
-      <a class="journey-link" href={path('/enfoque/')}>Conocer el enfoque <span aria-hidden="true">↗</span></a>
-      <a class="journey-link" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
+
+  <section class="home-active" aria-labelledby="programas-activos-title">
+    <div class="container home-active__inner">
+      <p class="eyebrow">Programas activos</p>
+      <h2 id="programas-activos-title">Encuentros presenciales. Integración online.</h2>
+      <p>Reunimos las cuatro miradas en el encuentro presencial y las seguimos en los círculos de integración online.</p>
+      <a class="btn btn--outline" href={path('/encuentros/')}>Ver encuentros <span aria-hidden="true">↗</span></a>
     </div>
   </section>
+
   <section class="container home-library">
     <div class="journey-row">
       <div><h2>Biblioteca abierta</h2><p>Recursos gratuitos para explorar y practicar a tu propio ritmo.</p></div>
@@ -61,13 +108,84 @@ const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENA
     </div>
     <ResourceList resources={resources} />
   </section>
+
+  {calendar.length > 0 && (
+    <section class="container home-calendar" aria-labelledby="proximos-encuentros">
+      <div class="journey-row">
+        <div>
+          <h2 id="proximos-encuentros">Próximos encuentros</h2>
+          <p>Fechas para encontrarnos en persona y seguir lo vivido en la integración.</p>
+        </div>
+      </div>
+      <ul class="home-calendar__list">
+        {calendar.map((event) => (
+          <li>
+            <div>
+              <h3><a href={event.href}>{event.title}</a></h3>
+              <p>
+                {event.when && <span><Icon name="iconoir:calendar" size={18} aria-hidden="true" />{event.when}</span>}
+                {event.venue && <span><Icon name="iconoir:map-pin" size={18} aria-hidden="true" />{event.venue}</span>}
+              </p>
+            </div>
+            <a class="journey-link" href={event.href}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
   {signupEnabled && <SignupDialog />}
 </SiteLayout>
 
 <style>
+  .home-hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-block-size: 100vh;
+    min-block-size: 100dvh;
+    padding: clamp(5.5rem, 14vh, 8rem) 1.25rem;
+    overflow: hidden;
+    text-align: center;
+    color: var(--pine-dark);
+  }
+  .home-hero__photo {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .home-hero::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgba(246, 239, 227, .28), transparent 58%),
+      linear-gradient(180deg, rgba(246, 239, 227, .72) 0%, rgba(246, 239, 227, .38) 38%, rgba(246, 239, 227, .66) 100%);
+  }
+  .home-hero__copy { max-inline-size: 40rem; }
+  .home-hero h1 {
+    margin: 0 auto;
+    max-inline-size: 11ch;
+    color: var(--pine-dark);
+    font-size: clamp(3.4rem, 8vw, 7rem);
+    line-height: .92;
+    text-wrap: balance;
+  }
+  .home-hero p {
+    max-inline-size: 34ch;
+    margin: clamp(1.4rem, 3vh, 2.2rem) auto 0;
+    color: #314038;
+    font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
   .program-section {
-    padding-block: var(--journey-spacing);
-    scroll-margin-top: 1.5rem;
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    scroll-margin-top: 6.5rem;
     position: relative;
     isolation: isolate;
     overflow: clip;
@@ -84,73 +202,168 @@ const signupEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENA
   }
   :global(html:has(#program-launch-dialog[open][data-program-open])) .program-overlay-art { visibility: visible; opacity: .45; }
   .program-preview { text-align: center; }
+  .program-preview .eyebrow { margin-bottom: .45rem; }
   .program-preview h2 {
     margin: 0 auto .85rem;
     color: var(--pine-dark);
-    font-size: clamp(2.1rem, 4.4vw, 4rem);
+    font-size: clamp(2.2rem, 4.6vw, 4.2rem);
     text-wrap: balance;
   }
-  .program-preview__intro { max-inline-size: 57ch; margin: 0 auto; text-wrap: pretty; }
+  .program-preview__intro {
+    max-inline-size: 62ch;
+    margin: 0 auto;
+    text-wrap: pretty;
+  }
   .program-preview__composition {
-    --method-center: clamp(9rem, 22vw, 16rem);
+    --orbit: min(22rem, 46vw);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--method-center) minmax(0, 1fr);
+    grid-template-columns: minmax(8.5rem, 1fr) var(--orbit) minmax(8.5rem, 1fr);
+    grid-template-rows: auto var(--orbit) auto;
     align-items: center;
-    max-inline-size: 64rem;
-    margin: 1.35rem auto;
+    justify-items: center;
+    gap: .85rem clamp(.6rem, 2vw, 1.4rem);
+    max-inline-size: 62rem;
+    margin: clamp(1.8rem, 4vw, 3rem) auto 1.2rem;
   }
   .program-preview__mark {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
     display: grid;
     place-items: center;
+    inline-size: 100%;
     aspect-ratio: 1;
-    padding: clamp(.6rem, 2vw, 1.4rem);
-    border: 1px solid #a77d473f;
+    padding: clamp(.7rem, 2vw, 1.3rem);
+    border: 1px solid #a77d47;
     border-radius: 50%;
-    background: radial-gradient(circle, #fffaf0 15%, transparent 70%);
+    background:
+      radial-gradient(circle, rgba(251, 248, 241, .18) 0 34%, rgba(23, 56, 47, .16) 100%),
+      var(--nucleus-image) center / cover no-repeat,
+      #f6efe3;
+    box-shadow: 0 0 0 .7rem rgba(255, 250, 240, .55);
   }
-  .program-preview__mark img { display: block; inline-size: 100%; block-size: auto; }
+  .program-preview__mark img {
+    display: block;
+    inline-size: 68%;
+    block-size: auto;
+    padding: .45rem;
+    border-radius: 50%;
+    background: rgba(251, 248, 241, .94);
+  }
   .program-preview__themes {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    display: grid;
-    grid-template-columns: minmax(0,1fr) var(--method-center) minmax(0,1fr);
-    grid-template-rows: auto auto;
-    grid-auto-flow: column;
-    gap: .7rem clamp(.75rem, 2vw, 1.7rem);
-    padding: 0;
+    display: contents;
     margin: 0;
+    padding: 0;
     list-style: none;
-    color: var(--pine-dark);
-    font-size: clamp(.88rem, 1.35vw, 1rem);
-    font-weight: 700;
-    line-height: 1.4;
   }
   .program-preview__themes li {
-    display: flex;
-    align-items: center;
-    gap: .55rem;
-    text-align: start;
+    display: grid;
+    justify-items: center;
+    gap: .35rem;
     min-inline-size: 0;
+    max-inline-size: 11rem;
+    color: var(--pine-dark);
+    font-size: clamp(.82rem, 1.2vw, .98rem);
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    text-wrap: balance;
   }
-  .program-preview__themes li:nth-child(-n + 2) { justify-content: flex-end; }
-  .program-preview__themes li:nth-child(n + 3) { grid-column: 3; }
-  .program-preview__themes li span { flex: 0 0 1.5rem; }
+  .program-preview__themes li:nth-child(1) { grid-column: 2; grid-row: 1; }
+  .program-preview__themes li:nth-child(2) { grid-column: 3; grid-row: 2; }
+  .program-preview__themes li:nth-child(3) { grid-column: 2; grid-row: 3; }
+  .program-preview__themes li:nth-child(4) { grid-column: 1; grid-row: 2; }
+  .program-preview__themes li span { inline-size: 2.6rem; }
   .program-preview__themes li :global(img) { display: block; inline-size: 100%; block-size: auto; }
-  .home-library { margin-block-end: var(--journey-spacing); }
-  @media (max-width: 710px) {
-    .program-preview__composition { display: block; }
-    .program-preview__mark { inline-size: min(70%, 13rem); margin: 0 auto 1.2rem; }
-    .program-preview__themes {
-      max-inline-size: 32rem;
-      margin-inline: auto;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      grid-auto-flow: row;
-    }
-    .program-preview__themes li:nth-child(n) { grid-column: auto; justify-content: start; }
+  .nucleus-points {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem clamp(.8rem, 2vw, 1.6rem);
+    max-inline-size: 62rem;
+    margin: clamp(1.2rem, 3vw, 2rem) auto 0;
+    padding: 0;
+    list-style: none;
+    text-align: start;
   }
-  @media (max-width: 360px) {
-    .program-preview__themes { grid-template-columns: minmax(0,1fr); }
+  .nucleus-points li {
+    min-inline-size: 0;
+    color: var(--pine-dark);
+    font-weight: 700;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+  .nucleus-points span {
+    display: block;
+    margin-bottom: .25rem;
+    color: var(--journey-clay, var(--terra));
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 400;
+  }
+  .home-active {
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+    background: #efe4d2;
+  }
+  .home-active__inner {
+    max-inline-size: 40rem;
+    text-align: center;
+  }
+  .home-active h2 {
+    margin: .2rem auto .7rem;
+    color: var(--pine-dark);
+    font-size: clamp(2rem, 4vw, 3.3rem);
+    text-wrap: balance;
+  }
+  .home-active p:not(.eyebrow) {
+    max-inline-size: 46ch;
+    margin: 0 auto;
+    text-wrap: pretty;
+  }
+  .home-active .btn { margin-top: 1.15rem; }
+  .home-library { margin-block: var(--journey-spacing); }
+  .home-calendar { margin-block-end: var(--journey-spacing); }
+  .home-calendar__list {
+    margin: .4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-calendar__list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem 1.4rem;
+    padding-block: 1rem;
+    border-block-start: 1px solid var(--journey-rule);
+  }
+  .home-calendar__list h3 { margin: 0 0 .3rem; color: var(--pine-dark); font-size: clamp(1.35rem, 2vw, 1.8rem); }
+  .home-calendar__list h3 a:hover { text-decoration: underline; }
+  .home-calendar__list p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1rem;
+    margin: 0;
+    color: #4d564a;
+  }
+  .home-calendar__list p span { display: inline-flex; align-items: center; gap: .4rem; }
+  .home-calendar__list :global(svg) { color: var(--terra); }
+  @media (max-width: 760px) {
+    .program-preview__composition {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .program-preview__mark { inline-size: min(78%, 16rem); }
+    .program-preview__themes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .9rem .7rem;
+      inline-size: min(100%, 28rem);
+      margin-top: 1.1rem;
+    }
+    .program-preview__themes li:nth-child(n) { grid-column: auto; grid-row: auto; max-inline-size: none; }
+    .nucleus-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 420px) {
+    .nucleus-points { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

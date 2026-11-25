@@ -6,6 +6,31 @@
   background: #f6efe3;
 }
 .journey-page .site-header { background: transparent; }
+.site-header--reveal {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 30;
+  transition: opacity .55s ease, transform .55s ease, background-color .55s ease;
+}
+.site-header--reveal:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(-.7rem);
+  pointer-events: none;
+  border-bottom-color: transparent;
+}
+.site-header--reveal.is-visible,
+.site-header--reveal:focus-within,
+.site-header--reveal:has(details[open]) {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  background: rgba(246, 239, 227, .97);
+  border-bottom: 1px solid #e9dfd3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header--reveal { transition: none; }
+}
 .journey-page .btn:not(.btn--outline, .btn--light, :disabled) {
   background: var(--journey-clay);
 }

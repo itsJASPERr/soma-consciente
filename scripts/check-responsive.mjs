@@ -64,8 +64,8 @@ try{
         const interesting=[
           '.site-header .brand',
           '.site-header .mobile-nav summary',
-          '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
-          '.participation-row h3','.participation-row .btn','.participation-row .journey-link',
+          '.home-hero h1','.home-calendar h3','.home-calendar .journey-link',
+          '.home-active h2',
           '.journey-hero h1','.journey-row h2','.journey-resource-list a',
           '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
@@ -127,6 +127,7 @@ try{
     }
     if(width<=1150){
       await page.goto(HOST+BASE+'/',{waitUntil:'load'});
+      await page.evaluate(() => window.scrollTo(0, 48));
       await page.locator('.mobile-nav summary').click();
       const nav=page.locator('.mobile-nav nav');
       if(!await nav.isVisible()) errors.push(width+' hamburger menu does not open');
@@ -139,7 +140,7 @@ try{
   }
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
-  await page.locator('.participation-feature').getByRole('link', { name: 'Ver el encuentro' }).click();
+  await page.locator('.home-calendar').getByRole('link', { name: 'Ver el encuentro' }).click();
   assert.equal(new URL(page.url()).hash, '#encuentro-enero');
   const encounter = page.locator('article#encuentro-enero');
   await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();
