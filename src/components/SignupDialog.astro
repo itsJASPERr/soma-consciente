@@ -24,7 +24,7 @@ const countries = getCountries()
     <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}>
       <div class="program-signup__name">
         <label for="program-launch-name">Tu nombre</label>
-        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Nombre y apellido" required maxlength="120" autofocus />
+        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Tu nombre" required maxlength="120" autofocus />
       </div>
       <fieldset>
         <legend>¿Cómo querés que te avisemos?</legend>
@@ -153,6 +153,7 @@ const countries = getCountries()
     let activeOption: HTMLElement | undefined;
     let submission: AbortController | undefined;
     let opener: HTMLButtonElement | undefined;
+    let restoreScroll: number | undefined;
 
     const selectCountry = (option: HTMLElement) => {
       selectedOption.setAttribute('aria-selected', 'false');
@@ -303,6 +304,11 @@ const countries = getCountries()
           ? trigger.dataset.signupAction || 'Avisame cuando esté listo'
           : 'Enviar solicitud';
         consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
+        const methodology = isProgramWaitlist && trigger.closest('#metodologia');
+        if (methodology) {
+          restoreScroll = window.scrollY;
+          methodology.scrollIntoView({ block: 'start', behavior: 'instant' });
+        }
         dialog.showModal();
         if (form.dataset.collect === 'true' && isProgramWaitlist) {
           void trackWaitlist('waitlist_opened');
@@ -316,6 +322,10 @@ const countries = getCountries()
       submission = undefined;
       form.inert = false;
       resetForm();
+      if (restoreScroll !== undefined) {
+        window.scrollTo({ top: restoreScroll, behavior: 'instant' });
+        restoreScroll = undefined;
+      }
       opener?.focus({ preventScroll: true });
     });
     form.addEventListener('change', (event) => {
@@ -461,6 +471,7 @@ const countries = getCountries()
   @media (max-width: 650px) {
     .program-signup__dialog[data-program-open] {
       inline-size: calc(100% - 1rem);
+      max-inline-size: none;
       max-block-size: calc(100dvh - 1.15rem);
       margin: auto .5rem .5rem;
       border-radius: 1.3rem;

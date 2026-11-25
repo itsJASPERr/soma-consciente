@@ -79,7 +79,11 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
 )}
 
 <style>
-  .participation-hero h1 { max-inline-size: none; text-wrap: initial; }
+  .participation-hero h1 {
+    max-inline-size: none;
+    font-size: clamp(2.55rem, 4.65vw, 4.25rem);
+    text-wrap: initial;
+  }
   .participation-hero em { color: var(--journey-clay); font-style: normal; }
   .participation-feature {
     max-inline-size: 33rem;
@@ -126,6 +130,7 @@ const community = offerings.find(({ slug }) => slug === 'grupo-whatsapp');
   .participation-row__action :global(.offering-action-hint) { margin-block-start: .15rem; }
   .participation-row--community { scroll-margin-top: .5rem; }
   @media (max-width: 740px) {
+    .participation-hero h1 { font-size: clamp(2.45rem, 9vw, 4.5rem); }
     .participation-options--photo { grid-template-columns: minmax(0,1fr); }
     .participation-options__copy { grid-row: 1; }
     .participation-options :global(.journey-photo) { inline-size: min(100%, 29rem); }
