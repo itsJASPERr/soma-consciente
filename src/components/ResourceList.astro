@@ -8,7 +8,7 @@ const { resources } = Astro.props as { resources: Resource[] };
   {resources.map((resource) => (
     <li>
       <div>
-        <h3>{resource.title}</h3>
+        <h3><a href={path('/biblioteca/' + resource.slug + '/')}>{resource.title}</a></h3>
         <p>{resource.summary}</p>
       </div>
       <span>{resource.duration}</span>
