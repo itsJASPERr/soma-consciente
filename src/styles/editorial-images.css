@@ -61,7 +61,7 @@
   filter:saturate(.80) sepia(.075);
   transition:transform .45s ease, filter .35s;
 }
-.aula-card:hover .aula-card__photo {filter:saturate(.97);transform:scale(1.025);}
+.aula-card:where([href]):hover .aula-card__photo {filter:saturate(.97);transform:scale(1.025);}
 .aula-card__art--photo::after {
   content:'';position:absolute;inset:0 0 0;
   background:linear-gradient(180deg,transparent 40%,#1e1e1938 100%);

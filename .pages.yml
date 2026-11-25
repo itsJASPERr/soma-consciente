@@ -57,7 +57,7 @@ content:
       rename: false
       delete: false
     view:
-      fields: [name, guide, published, order]
+      fields: [name, guide, launchStatus, published, order]
       primary: name
       sort: [order, name]
       default:
@@ -155,6 +155,17 @@ content:
         label: Orden de navegación
         type: number
         readonly: true
+      - name: launchStatus
+        label: Estado de lanzamiento del Aula
+        type: select
+        required: true
+        description: "«Próximamente» desactiva el enlace de la tarjeta en el directorio. La publicación del Aula se gestiona por separado."
+        options:
+          values:
+            - name: upcoming
+              label: Próximamente
+            - name: available
+              label: Disponible
       - name: published
         label: Publicado
         type: boolean

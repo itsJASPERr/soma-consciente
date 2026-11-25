@@ -9,13 +9,15 @@ import { join } from 'node:path';
 const domain='www.soma-consciente.com';
 const site='https://'+domain;
 const html=readFileSync('dist/index.html','utf8');
+const aulas=readFileSync(join('dist','aulas','index.html'),'utf8');
 const lesson=readFileSync(join('dist','aulas','jasper','musica-medicina','escuchar','que-es-la-musica','index.html'),'utf8');
 const cms=readFileSync('.pages.yml','utf8');
 const artifact=readFileSync('dist/CNAME','utf8').trim();
 
 assert.equal(artifact,domain,'The deployed public/CNAME must contain the chosen www host.');
 assert.match(html,new RegExp('rel="canonical" href="'+site.replaceAll('.','\\.')+'/"'));
-assert.match(html,/href="\/aulas\/"/,'Homepage links must start at the domain root.');
+assert.match(html, /href="#programa-online"/, 'The homepage CTA must link to the online program announcement.');
+assert.ok(aulas.includes(`rel="canonical" href="${site}/aulas/"`), 'The Aula directory must retain its canonical URL.');
 assert.match(html,/href="\/biblioteca\/"/,'Biblioteca link must start at the root.');
 assert.match(html,/href="\/_astro\//,'Generated Astro assets must be root-relative.');
 assert.match(html,/\/media\/soma-original-emblem\.png/,'Brand mark must resolve at /media.');

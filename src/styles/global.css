@@ -85,10 +85,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .intro-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:100px;align-items:center}
 .intro-grid blockquote{margin:0;font-family:var(--font-display);font-style:italic;font-size:clamp(2rem,3.1vw,3.3rem);line-height:1.24;color:var(--pine);padding:35px 45px;border-left:2px solid var(--terra);background:#f3e9dc88}
 .intro-grid .section-intro{max-width:590px}
-.aulas-section{padding-top:35px}
 .aula-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .aula-card{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:20px;overflow:hidden;isolation:isolate;transition:transform .2s,box-shadow .2s}
-.aula-card:hover{transform:translateY(-7px);box-shadow:0 24px 45px #54453a22}
+.aula-card:where([href]):hover{transform:translateY(-7px);box-shadow:0 24px 45px #54453a22}
 .aula-card--terra{--aula:#b56e55;--aula-pale:#f6e7dc}
 .aula-card--azul{--aula:#547582;--aula-pale:#dce8e8}
 .aula-card--oro{--aula:#bd914b;--aula-pale:#f5ead1}

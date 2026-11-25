@@ -4,12 +4,20 @@
  * Runs against the built static site, avoiding third-party requests.
  */
 import { spawn } from 'node:child_process';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile, readdir } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 
 const ROOT='http://127.0.0.1:4321';
 const WIDTHS=[320,375,430,599,600,650,680,681,767,879,880,900,1024,1149,1150,1151,1280];
 const PAGES=['/','/aulas/'];
+const aulaDirectory = new URL('../src/content/aulas/', import.meta.url);
+const aulaFiles = (await readdir(aulaDirectory)).filter(file => file.endsWith('.json'));
+const aulas = await Promise.all(aulaFiles.map(async file => (
+  JSON.parse(await readFile(new URL(file, aulaDirectory), 'utf8'))
+)));
+const expectedAulas = aulas.filter(aula => aula.published)
+  .sort((a, b) => a.order - b.order)
+  .map(aula => ({ href: `/aulas/${aula.slug}/`, name: aula.name, upcoming: aula.launchStatus === 'upcoming' }));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // Spawn Astro directly so cleanup can terminate the server itself.
 const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{
@@ -49,7 +57,51 @@ try {
       const resp=await page.goto(ROOT+route,{waitUntil:'domcontentloaded',timeout:10000});
       if(!resp?.ok()){failures.push(width+' '+route+' returned '+resp?.status());continue;}
       await page.waitForLoadState('load',{timeout:4500}).catch(()=>{});
-      if(width===WIDTHS[0] && route===PAGES[0]){
+      const directoryLink = page.locator('.site-header nav a[href="/aulas/"], .site-footer nav a[href="/aulas/"]');
+      if (await directoryLink.count()) failures.push(width+'px '+route+': site navigation still links to the Aula directory');
+      if (route === '/') {
+        const program = page.locator('#programa-online');
+        if (await page.locator('.aula-card').count()) failures.push(width+'px /: homepage shows Aula cards');
+        await program.scrollIntoViewIfNeeded();
+        const programIssues = await program.evaluate(async (section, names) => {
+          const problems = [];
+          const status = section.querySelector('.program-preview__status');
+          const title = section.querySelector('h2');
+          const logo = section.querySelector('.program-preview__mark img');
+          const themes = [...section.querySelectorAll('.program-preview__themes li')];
+          if (status?.textContent.trim() !== 'Próximamente') problems.push('missing program launch status');
+          if (title?.textContent.trim() !== 'Programa de acompañamiento online') problems.push('incorrect program title');
+          if (themes.map(theme => theme.textContent.trim()).join('|') !== names.join('|')) {
+            problems.push('methodology keywords differ from the four titles');
+          }
+          if (logo) await logo.decode().catch(() => {});
+          if (!logo?.naturalWidth || !logo.getAttribute('src').endsWith('/media/soma-original-emblem.png')) {
+            problems.push('original SOMA logo is missing or did not load');
+          }
+          for (const element of [title, logo, ...themes]) {
+            if (!element) continue;
+            const { left, right, width } = element.getBoundingClientRect();
+            if (!width || element.scrollWidth > element.clientWidth + 2 ||
+                left < -2 || right > document.documentElement.clientWidth + 2) {
+              problems.push('program content is clipped: '+element.tagName);
+            }
+          }
+          if (logo) {
+            const logoBounds = logo.getBoundingClientRect();
+            const panelBounds = section.querySelector('.program-preview').getBoundingClientRect();
+            if (Math.abs((logoBounds.left + logoBounds.right) - (panelBounds.left + panelBounds.right)) > 2) {
+              problems.push('SOMA logo is not centered in the program announcement');
+            }
+          }
+          return problems;
+        }, expectedAulas.map(aula => aula.name));
+        failures.push(...programIssues.map(issue => width+'px /: '+issue));
+        if (width === 430 || width === 900 || width === 1151) {
+          await program.locator('.program-preview').screenshot({ path: 'test-results/program-'+width+'.png', timeout: 10000 });
+        }
+        continue;
+      }
+      if(width===WIDTHS[0]){
         const styles=await page.evaluate(()=>({
           hrefs:[...document.querySelectorAll('link[rel="stylesheet"]')].map(el=>el.href),
           stylesheets:document.styleSheets.length,
@@ -59,10 +111,12 @@ try {
         if(styles.cardPhotoFit!=='cover')
           throw new Error('Local CSS did not load: '+JSON.stringify(styles));
       }
-      const issues=await page.evaluate(()=>{
+      const issues=await page.evaluate(expectedAulas=>{
         const problems=[];
         const cards=[...document.querySelectorAll('.aula-grid .aula-card')];
-        if(cards.length!==4)problems.push('Expected 4 cards, found '+cards.length);
+        if (cards.length !== expectedAulas.length) {
+          problems.push('Aula card count differs from published Aulas: '+cards.length);
+        }
         for(let i=0;i<cards.length;i++){
           const card=cards[i];
           const art=card.querySelector('.aula-card__art');
@@ -76,6 +130,18 @@ try {
           if(Math.abs(im.height-a.height)>2)problems.push('card '+i+' photo escapes media height');
           if(co.top<a.bottom-2)problems.push('card '+i+' text overlaps media');
           if(getComputedStyle(image).objectFit!=='cover')problems.push('card '+i+' lacks object-fit cover');
+          const expectedAula = expectedAulas[i];
+          if (!expectedAula) continue;
+          if (expectedAula.upcoming) {
+            const isInteractive = card.hasAttribute('href') || card.tabIndex >= 0;
+            const isDisabled = card.getAttribute('role') === 'link' && card.getAttribute('aria-disabled') === 'true';
+            const isGreyedOut = getComputedStyle(card).filter === 'grayscale(1)';
+            if (isInteractive || !isDisabled || !isGreyedOut) {
+              problems.push('card '+i+' has invalid disabled state: '+JSON.stringify({ isInteractive, isDisabled, isGreyedOut }));
+            }
+          } else if (card.getAttribute('href') !== expectedAula.href || card.hasAttribute('aria-disabled')) {
+            problems.push('card '+i+' does not link to its available Aula');
+          }
           // The emblem straddles the image/copy boundary. Test its lower half,
           // which previously disappeared behind the copy stacking context.
           const emblem=card.querySelector('.aula-icon');
@@ -100,14 +166,33 @@ try {
         const expected=window.innerWidth<=680?1:window.innerWidth<=1150?2:4;
         if(columns!==expected)problems.push('grid has '+columns+' columns, expected '+expected);
         return problems;
-      });
+      }, expectedAulas);
       failures.push(...issues.map(issue=>width+'px '+route+': '+issue));
-      if(route==='/' && (width===430||width===680||width===900||width===1151)){
+      if (width === 375) {
+        const availableCard = page.locator('.aula-card[href]').first();
+        if (await availableCard.count()) {
+          await availableCard.focus();
+          const hasFocusOutline = await availableCard.evaluate(card => (
+            card.matches(':focus-visible') &&
+            getComputedStyle(card).outlineStyle !== 'none' &&
+            parseFloat(getComputedStyle(card).outlineWidth) > 0
+          ));
+          if (!hasFocusOutline) failures.push('375px /aulas/: available card has no visible keyboard focus indicator');
+          await availableCard.blur();
+        }
+        const upcomingCard = page.locator('.aula-card[aria-disabled="true"]').first();
+        if (await upcomingCard.count()) {
+          const directoryUrl = page.url();
+          await upcomingCard.click({ force: true });
+          if (page.url() !== directoryUrl) failures.push('375px /aulas/: upcoming card navigated when clicked');
+        }
+      }
+      if(width===430||width===680||width===900||width===1151){
         const first=page.locator('.aula-card').first();
         await first.screenshot({path:'test-results/card-'+width+'.png',timeout:10000});
       }
     }
-    console.log('Aula cards checked at '+width+'px');
+    console.log('Program announcement and Aula cards checked at '+width+'px');
   }
 } catch(err){
   failures.push(err instanceof Error?err.stack:String(err));
@@ -118,4 +203,4 @@ try {
   server.stderr.destroy();
 }
 if(failures.length){console.error(failures.join('\n'));process.exitCode=1;}
-else console.log('PASS: Aula media bounds at '+WIDTHS.length+' widths and '+PAGES.length+' page types.');
+else console.log('PASS: Program and Aula layouts at '+WIDTHS.length+' widths and '+PAGES.length+' page types.');
