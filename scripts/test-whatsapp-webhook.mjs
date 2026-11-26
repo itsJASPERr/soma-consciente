@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequestGet, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
+import { onRequestGet as listMessages } from '../functions/api/whatsapp/messages.ts';
 
 const origin = 'https://soma-consciente.com';
 const path = '/api/whatsapp/webhook';
@@ -27,7 +28,10 @@ const env = {
   WAITLIST_DB: {
     prepare(sql) {
       const statement = database.prepare(sql);
-      return { bind: (...values) => ({ run: () => statement.run(...values) }) };
+      return {
+        bind: (...values) => ({ run: () => statement.run(...values) }),
+        all: () => ({ results: statement.all().map(row => ({ ...row })) }),
+      };
     },
   },
 };
@@ -98,7 +102,13 @@ try {
   assert.equal(columns.filter(column => column.name !== 'text_body').every(column => column.notnull === 1), true);
 
   const routes = JSON.parse(readFileSync(new URL('../public/_routes.json', import.meta.url), 'utf8'));
-  for (const route of ['/api/waitlist', '/api/whatsapp/webhook', '/api/whatsapp/webhook/']) {
+  for (const route of [
+    '/api/waitlist',
+    '/api/whatsapp/webhook',
+    '/api/whatsapp/webhook/',
+    '/api/whatsapp/messages',
+    '/api/whatsapp/messages/',
+  ]) {
     assert.ok(routes.include.includes(route), route);
   }
   const example = readFileSync(new URL('../.env.example', import.meta.url), 'utf8');
@@ -180,6 +190,30 @@ try {
     },
   };
   assert.equal((await post(envelope([textMessage]), {}, failing)).status, 503);
+
+  database.exec('DELETE FROM whatsapp_inbound_messages');
+  const insert = database.prepare(`INSERT INTO whatsapp_inbound_messages (
+    wa_message_id, from_wa_id, wa_timestamp, message_type, text_body, raw_json, received_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+  insert.run('older', '5491100000001', '100', 'text', 'primero', '{"id":"older"}', '2026-11-26T12:00:00.000Z');
+  insert.run('newer-same-second', '5491100000002', '300', 'text', '  después  ', '{"id":"newer"}', '2026-11-26T12:00:02.000Z');
+  insert.run('same-second-early', '5491100000003', '300', 'image', null, '{"id":"early"}', '2026-11-26T12:00:01.000Z');
+  const listed = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env });
+  assert.equal(listed.status, 200);
+  assert.equal(listed.headers.get('Cache-Control'), 'no-store');
+  assert.deepEqual(await listed.json(), {
+    messages: [
+      { from_wa_id: '5491100000002', wa_timestamp: '300', text_body: '  después  ' },
+      { from_wa_id: '5491100000003', wa_timestamp: '300', text_body: null },
+      { from_wa_id: '5491100000001', wa_timestamp: '100', text_body: 'primero' },
+    ],
+  });
+  database.exec('DELETE FROM whatsapp_inbound_messages');
+  const empty = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env });
+  assert.equal(empty.status, 200);
+  assert.deepEqual(await empty.json(), { messages: [] });
+  const unavailable = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env: {} });
+  assert.equal(unavailable.status, 503);
   console.log('PASS: WhatsApp webhook verifies the hub challenge and stores inbound messages once.');
 } finally {
   database.close();

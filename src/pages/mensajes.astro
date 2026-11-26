@@ -1,0 +1,172 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { path } from '../lib/paths';
+---
+<SiteLayout
+  title="Mensajes de WhatsApp"
+  description="Mensajes de WhatsApp recibidos por SOMA, del más reciente al más antiguo."
+  noIndex
+>
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">WhatsApp</span>
+      <h1>Mensajes recibidos</h1>
+      <p>Del más reciente al más antiguo.</p>
+    </div>
+  </section>
+  <section class="section section--tight">
+    <div class="container">
+      <div class="wa-inbox">
+        <p class="message-status" data-status role="status">Cargando mensajes…</p>
+        <p class="message-empty" data-empty role="status" hidden>Todavía no hay mensajes.</p>
+        <div class="message-list" data-messages></div>
+        <template id="message-template">
+          <details class="message">
+            <summary>
+              <span class="message__meta">
+                <time></time>
+                <span class="message__sender"></span>
+              </span>
+            </summary>
+            <p class="message__text"></p>
+          </details>
+        </template>
+      </div>
+    </div>
+  </section>
+</SiteLayout>
+
+<script>
+  import { path } from '../lib/paths';
+
+  const status = document.querySelector('[data-status]');
+  const empty = document.querySelector('[data-empty]');
+  const list = document.querySelector('[data-messages]');
+  const template = document.querySelector('#message-template');
+  const formatter = new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
+
+  function showStatus(text: string) {
+    if (!(status instanceof HTMLElement)) return;
+    status.hidden = false;
+    status.textContent = text;
+  }
+
+  if (status instanceof HTMLElement && empty instanceof HTMLElement && list && template instanceof HTMLTemplateElement) {
+    try {
+      const response = await fetch(path('/api/whatsapp/messages'), { cache: 'no-store' });
+      if (!response.ok) throw new Error('unavailable');
+      const payload: { messages?: unknown } = await response.json();
+      const messages = Array.isArray(payload.messages) ? payload.messages : [];
+      status.hidden = true;
+      if (messages.length === 0) {
+        empty.hidden = false;
+      } else {
+        for (const message of messages) {
+          if (!message || typeof message !== 'object') continue;
+          const record = message as { from_wa_id?: unknown; wa_timestamp?: unknown; text_body?: unknown };
+          const view = template.content.cloneNode(true) as DocumentFragment;
+          const time = view.querySelector('time');
+          const sender = view.querySelector('.message__sender');
+          const body = view.querySelector('.message__text');
+          const seconds = typeof record.wa_timestamp === 'string' ? Number(record.wa_timestamp) : Number.NaN;
+          const date = Number.isFinite(seconds) ? new Date(seconds * 1000) : null;
+          if (time) {
+            if (date && !Number.isNaN(date.getTime())) {
+              time.dateTime = date.toISOString();
+              time.textContent = formatter.format(date);
+            } else {
+              time.textContent = typeof record.wa_timestamp === 'string' ? record.wa_timestamp : '';
+            }
+          }
+          if (sender) sender.textContent = typeof record.from_wa_id === 'string' ? record.from_wa_id : '';
+          if (body) {
+            if (typeof record.text_body === 'string' && record.text_body.length > 0) {
+              body.textContent = record.text_body;
+            } else {
+              body.textContent = 'Sin texto';
+              body.classList.add('message__text--empty');
+            }
+          }
+          list.append(view);
+        }
+      }
+    } catch {
+      showStatus('No pudimos leer los mensajes.');
+    }
+  }
+</script>
+
+<style is:global>
+  .wa-inbox {
+    display: grid;
+    gap: 14px;
+    max-width: 720px;
+  }
+  .wa-inbox .message-status,
+  .wa-inbox .message-empty {
+    margin: 0;
+    color: var(--muted);
+  }
+  .wa-inbox .message {
+    background: #fffaf2;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .wa-inbox .message summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+  }
+  .wa-inbox .message summary::-webkit-details-marker { display: none; }
+  .wa-inbox .message summary:hover { background: #f8f1e6; }
+  .wa-inbox .message__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 18px;
+    min-width: 0;
+  }
+  .wa-inbox .message time {
+    font-weight: 700;
+    color: var(--pine);
+  }
+  .wa-inbox .message__sender {
+    color: var(--muted);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .wa-inbox .message summary::after {
+    content: '';
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid var(--terra);
+    border-bottom: 2px solid var(--terra);
+    transform: translateY(-2px) rotate(45deg);
+    flex: none;
+  }
+  .wa-inbox .message[open] summary::after {
+    transform: translateY(2px) rotate(225deg);
+  }
+  .wa-inbox .message__text {
+    margin: 0;
+    padding: 0 20px 18px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .wa-inbox .message__text--empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>
