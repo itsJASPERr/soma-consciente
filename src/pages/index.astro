@@ -37,7 +37,7 @@ const calendar = [
     title: retreat.title,
     when: date.when,
     venue: date.venue,
-    href: path('/encuentros/#' + (index === 0 ? retreat.slug : retreat.slug + '-' + (index + 1))),
+    href: index === 0 ? path('/encuentros/retiro-enero-2027/') : path('/encuentros/#' + retreat.slug + '-' + (index + 1)),
   })) : []),
   ...(door ? [{
     title: door.title,

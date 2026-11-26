@@ -48,7 +48,7 @@ const action = encounter && link ? { label: encounter.action, href: link } : und
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas y, en cada fecha, incluye un mes de círculos de integración online. La próxima fecha es el 15 y 16 de enero de 2027 en Casa Sabia, La Falda." openJourney journeyAction={action}>
+<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 16 y 17 de enero de 2027 en Casa Sabia, La Falda, e incluye cuatro encuentros grupales de integración online." openJourney journeyAction={action}>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
@@ -79,6 +79,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
         <div class="event-grid">
           {retreatEvents.map((event, index) => (
             <section class="event-card" aria-labelledby={event.slug + '-when'}>
+              {index === 0 && <a class="event-card__open" href={path('/encuentros/retiro-enero-2027/')}>Ver el recorrido del 16 y 17 de enero</a>}
               <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{retreatDates[index]?.language || 'Español'}</span></p>
               <p class="event-meta"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong id={event.slug + '-when'}>{event.when}</strong></p>
               {event.venue && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{event.venue}</span></p>}
@@ -125,7 +126,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
       <EditorialPhoto image={journal} class="journey-photo--wide" />
       <div>
         <h2>Después del encuentro</h2>
-        <p>El encuentro de enero incluye un mes de círculos online. Después del encuentro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
+        <p>El encuentro de enero incluye cuatro encuentros grupales de integración online. Después del retiro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
         <a class="btn btn--light" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
       </div>
     </div>
@@ -164,6 +165,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     gap: 1.15rem;
   }
   .event-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -174,6 +176,15 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     border-radius: 22px;
     background: color-mix(in srgb, var(--cream) 78%, white);
   }
+  .event-card__open {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    color: transparent;
+  }
+  .event-card__open:focus-visible { outline: 2px solid var(--pine-dark); outline-offset: 3px; }
+  .event-card .offering__action,
+  .event-card .event-benefit a { position: relative; z-index: 1; }
   .event-card h3 { margin: 0 0 .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
   .event-meta {
     display: flex;

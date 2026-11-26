@@ -1,0 +1,323 @@
+---
+import { Icon } from 'astro-icon/components';
+import OfferingAction from '../../components/OfferingAction.astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { loadAulas } from '../../lib/content';
+import { loadHomepage } from '../../lib/home';
+import { mediaUrl } from '../../lib/media';
+import { offerings } from '../../lib/offerings';
+import { path } from '../../lib/paths';
+
+const home = await loadHomepage();
+const aulas = await loadAulas();
+const guide = (slug: string) => aulas.find((aula) => aula.slug === slug);
+const yani = guide('yanina');
+const jasper = guide('jasper');
+const nico = guide('nico');
+const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
+const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+
+const place = mediaUrl('/media/photography/casa-sabia.jpg');
+const morning = mediaUrl(home.heroImage);
+const hills = mediaUrl(home.nucleoImage);
+const fire = mediaUrl(home.encountersImage);
+const journal = mediaUrl(home.onlineImage);
+const body = mediaUrl(yani?.coverImage);
+const sound = mediaUrl(jasper?.coverImage);
+const horses = mediaUrl(nico?.coverImage);
+
+const payments = [
+  { label: 'Un pago', amount: '$610.000', note: 'El total del retiro.' },
+  { label: '2 cuotas', amount: '$330.000', note: 'Total $660.000.' },
+  { label: '3 cuotas', amount: '$230.000', note: 'Total $690.000.' },
+  { label: '4 cuotas', amount: '$185.000', note: 'Total $740.000.' },
+];
+---
+<SiteLayout
+  title="Retiro de enero en Casa Sabia"
+  description="Retiro SOMA Consciente, sábado 16 y domingo 17 de enero de 2027 en Casa Sabia, La Falda. El precio incluye los dos días y cuatro encuentros grupales de integración online."
+  openJourney
+>
+  <article class="retreat-day">
+    <header class="container retreat-open">
+      <div>
+        <p class="eyebrow">Enero 2027 · Casa Sabia · La Falda</p>
+        <h1>16 y 17 de enero</h1>
+        <p class="retreat-open__lead">Dos días en la casa, el campo y el corral. El precio incluye el encuentro y cuatro reuniones grupales de integración online después del retiro.</p>
+        <p class="retreat-open__place"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /> Casa Sabia, La Falda, Córdoba</p>
+      </div>
+      {place && <img src={place} alt="Casa de piedra con pileta y jardín en Casa Sabia, La Falda" width="1570" height="1001" />}
+    </header>
+
+    <section class="retreat-chapter" aria-labelledby="sabado-title">
+      <div class="container retreat-chapter__head">
+        <p class="eyebrow">Sábado</p>
+        <h2 id="sabado-title">16 de enero</h2>
+        <p>El día se abre en la casa y se cierra en el fogón.</p>
+      </div>
+
+      <section class="moment">
+        <div class="container moment__grid">
+          <div>
+            <p class="moment__time">09:00</p>
+            <h3>Ingreso</h3>
+            <p>Llegada, y una caminata de reconocimiento con Nicky. El cuerpo se mueve mientras el grupo empieza a habitar el lugar.</p>
+          </div>
+          {morning && <img src={morning} alt="Luz de amanecer sobre las montañas" width="1600" height="1000" />}
+        </div>
+      </section>
+
+      <section class="moment moment--quiet">
+        <div class="container moment__copy">
+          <h3>Cómo respiramos</h3>
+          <p>Yani propone una pregunta directa: cómo respiramos, y si lo hacemos bien. Hay charla, demostración y un test del grupo.</p>
+        </div>
+        {body && <img class="moment__wide" src={body} alt={yani?.coverAlt || 'Trabajo corporal'} width="1200" height="800" />}
+      </section>
+
+      <section class="moment">
+        <div class="container moment__copy">
+          <p class="moment__time">13:30</p>
+          <h3>Almuerzo</h3>
+          <p>Un almuerzo liviano, antes de la tarde con el sonido y los caballos.</p>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__grid moment__grid--swap">
+          <div>
+            <p class="moment__time">16:00–19:00</p>
+            <h3>Baño de sonido y caballos</h3>
+            <p>La tarde sigue en Casa Sabia. Baño de sonido y una vivencia con caballos, hasta las 19:00.</p>
+          </div>
+          <div class="moment__pair">
+            {sound && <img src={sound} alt={jasper?.coverAlt || 'Práctica de sonido'} width="1200" height="800" />}
+            {horses && <img src={horses} alt={nico?.coverAlt || 'Encuentro con un caballo'} width="1200" height="800" />}
+          </div>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__copy">
+          <p class="moment__time">20:00</p>
+          <h3>Merienda</h3>
+          <p>Una pausa antes de la noche.</p>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__grid">
+          <div>
+            <p class="moment__time">22:30</p>
+            <h3>Cena al disco</h3>
+            <p>Risotto de hongos y verduras, en el fogón. Después, guitarra de Pedro y baile, tipo peña.</p>
+          </div>
+          {fire && <img src={fire} alt="Encuentro alrededor del fuego" width="1600" height="1000" />}
+        </div>
+      </section>
+    </section>
+
+    <section class="retreat-chapter" aria-labelledby="domingo-title">
+      <div class="container retreat-chapter__head">
+        <p class="eyebrow">Domingo</p>
+        <h2 id="domingo-title">17 de enero</h2>
+        <p>El segundo día sale de la casa hacia el campo y vuelve para el cierre.</p>
+      </div>
+
+      <section class="moment">
+        <div class="container moment__copy">
+          <p class="moment__time">08:00</p>
+          <h3>Desayuno</h3>
+          <p>La mañana empieza en la mesa.</p>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__grid">
+          <div>
+            <p class="moment__time">09:30</p>
+            <h3>Salida al campo</h3>
+            <p>Salimos al campo. Hay una casilla en el lugar.</p>
+          </div>
+          {hills && <img src={hills} alt="Montañas y bosques entre la bruma" width="1100" height="733" />}
+        </div>
+      </section>
+
+      <section class="moment moment--quiet">
+        <div class="container moment__copy">
+          <p class="moment__time">10:30</p>
+          <h3>Caballos en el corral</h3>
+          <p>El encuentro con los caballos sigue en el corral.</p>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__copy">
+          <p class="moment__time">13:30</p>
+          <h3>Almuerzo en el arroyo</h3>
+          <p>Comemos junto al arroyo. Después, un círculo de palabra.</p>
+        </div>
+      </section>
+
+      <section class="moment">
+        <div class="container moment__grid moment__grid--swap">
+          <div>
+            <p class="moment__time">19:00</p>
+            <h3>Cierre</h3>
+            <p>Merienda libre en la mesa, y el cierre del encuentro.</p>
+          </div>
+          {journal && <img src={journal} alt="Cuaderno sobre una mesa, para lo que queda del encuentro" width="1600" height="1000" />}
+        </div>
+      </section>
+    </section>
+
+    <section class="retreat-price" aria-labelledby="precio-title">
+      <div class="container">
+        <p class="eyebrow">Inversión</p>
+        <h2 id="precio-title">El lugar se reserva con el primer pago</h2>
+        <p class="retreat-price__lead">El resto es mensual y tiene que estar pago antes del retiro. El precio incluye los dos días y cuatro encuentros grupales de integración online.</p>
+        <ul>
+          {payments.map((payment) => (
+            <li>
+              <span>{payment.label}</span>
+              <strong>{payment.amount}</strong>
+              <small>{payment.note}</small>
+            </li>
+          ))}
+        </ul>
+        {encounter && (
+          <div class="retreat-price__action">
+            <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} showArrow />
+            <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+          </div>
+        )}
+      </div>
+    </section>
+  </article>
+</SiteLayout>
+
+<style>
+  .retreat-open {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: clamp(1.4rem, 4vw, 3.5rem);
+    align-items: end;
+    padding-block: clamp(2.2rem, 6vw, 4.5rem) clamp(1.5rem, 4vw, 3rem);
+  }
+  .retreat-open h1 {
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(3.2rem, 7vw, 6.4rem);
+    line-height: .92;
+  }
+  .retreat-open__lead {
+    max-inline-size: 36ch;
+    margin: 1rem 0 0;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.5;
+  }
+  .retreat-open__place {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin: 1.1rem 0 0;
+    color: var(--pine-dark);
+    font-weight: 700;
+  }
+  .retreat-open img,
+  .moment img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    object-fit: cover;
+    border-radius: 1.4rem;
+  }
+  .retreat-open img { aspect-ratio: 1.45; max-block-size: 34rem; }
+  .retreat-chapter { padding-block: clamp(1rem, 3vw, 2rem); }
+  .retreat-chapter__head { max-inline-size: 40rem; padding-block: clamp(1.5rem, 4vw, 3rem) .4rem; }
+  .retreat-chapter__head h2 {
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+  }
+  .retreat-chapter__head p:not(.eyebrow) { max-inline-size: 36ch; margin: .7rem 0 0; }
+  .moment { padding-block: clamp(1.3rem, 3vw, 2.4rem); }
+  .moment--quiet { background: #efe4d2; }
+  .moment__grid {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: clamp(1.2rem, 4vw, 3rem);
+    align-items: center;
+  }
+  .moment__grid--swap { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+  .moment__grid--swap > div:first-child { order: 2; }
+  .moment__copy { max-inline-size: 38rem; }
+  .moment__time {
+    margin: 0 0 .35rem;
+    color: var(--journey-clay, var(--terra));
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+  }
+  .moment h3 {
+    margin: 0 0 .55rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+  }
+  .moment p:not(.moment__time) { margin: 0; max-inline-size: 42ch; }
+  .moment img { aspect-ratio: 1.45; }
+  .moment__wide {
+    inline-size: min(100% - 2rem, 68rem);
+    margin: 1.3rem auto 0;
+    aspect-ratio: 1.8;
+  }
+  .moment__pair { display: grid; gap: .8rem; }
+  .moment__pair img { aspect-ratio: 1.5; }
+  .retreat-price {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(3rem, 7vw, 5.5rem);
+  }
+  .retreat-price h2 {
+    max-inline-size: 16ch;
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+  }
+  .retreat-price__lead { max-inline-size: 46ch; }
+  .retreat-price ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .8rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .retreat-price li {
+    display: grid;
+    gap: .2rem;
+    min-inline-size: 0;
+    padding: 1rem;
+    border-top: 1px solid var(--journey-rule, #cabdac);
+  }
+  .retreat-price li span { color: var(--pine-dark); font-size: .82rem; font-weight: 700; }
+  .retreat-price strong {
+    color: var(--pine-dark);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 500;
+  }
+  .retreat-price small { color: #4d564a; }
+  .retreat-price__action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .9rem 1.2rem;
+    margin-top: 1.4rem;
+  }
+  @media (max-width: 860px) {
+    .retreat-open,
+    .moment__grid,
+    .moment__grid--swap,
+    .retreat-price ul { grid-template-columns: minmax(0, 1fr); }
+    .moment__grid--swap > div:first-child { order: 0; }
+    .retreat-open img { max-block-size: none; }
+  }
+</style>
