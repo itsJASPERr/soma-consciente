@@ -40,6 +40,8 @@ jobs:
         run: pnpm run test:access
       - name: Verify waitlist API and database schema
         run: pnpm run test:waitlist
+      - name: Verify WhatsApp webhook and database schema
+        run: pnpm run test:whatsapp
       - name: Build static site
         env:
           PUBLIC_WAITLIST_ENABLED: ${{ env.BUILD_WITH_WAITLIST }}
