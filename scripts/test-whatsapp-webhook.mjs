@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import { onRequestGet, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
+import { onRequestGet, onRequestHead, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
 import { onRequestGet as listMessages } from '../functions/api/whatsapp/messages.ts';
 
 const origin = 'https://soma-consciente.com';
@@ -147,6 +147,27 @@ try {
   assert.equal(challenge.status, 200);
   assert.equal(challenge.headers.get('Content-Type'), 'text/plain; charset=utf-8');
   assert.equal(await challenge.text(), '1158201444');
+  const head = await onRequestHead({
+    request: new Request(challengeUrl({
+      'hub.mode': 'subscribe',
+      'hub.verify_token': verifyToken,
+      'hub.challenge': '1158201444',
+    })),
+    env,
+  });
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get('Content-Type'), 'text/plain; charset=utf-8');
+  assert.equal(await head.text(), '');
+  const deniedHead = await onRequestHead({
+    request: new Request(challengeUrl({
+      'hub.mode': 'subscribe',
+      'hub.verify_token': 'wrong-token',
+      'hub.challenge': '1158201444',
+    })),
+    env,
+  });
+  assert.equal(deniedHead.status, 403);
+  assert.equal(await deniedHead.text(), '');
 
   const statuses = envelope(undefined, {
     statuses: [{ id: 'wamid.STATUS', status: 'delivered', timestamp: '1710000002', recipient_id: '5491112345678' }],

@@ -151,6 +151,13 @@ export async function onRequestGet({ request, env }: Context) {
   });
 }
 
+export async function onRequestHead(context: Context) {
+  const response = await onRequestGet(context);
+  const headHeaders = new Headers(response.headers);
+  headHeaders.delete('content-length');
+  return new Response(null, { status: response.status, headers: headHeaders });
+}
+
 export async function onRequestPost({ request, env }: Context) {
   const contentType = request.headers.get('Content-Type')?.split(';')[0]?.trim().toLowerCase();
   if (contentType !== 'application/json') return empty(415);
