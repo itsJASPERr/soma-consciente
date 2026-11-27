@@ -69,9 +69,14 @@ const heroPhoto = {
             <h2 id="team-retreat-title">Encontrémonos en La Falda.</h2>
             <p>Retiro SOMA · {retreat.when} · Casa Sabia</p>
           </div>
-          <a class="btn btn--light" href={retreatPage} {...retreatCta('details', 'team_footer')}>
-            Conocé el retiro <span aria-hidden="true">↗</span>
-          </a>
+          <div class="team-retreat__actions">
+            <a class="team-retreat__nucleus" href={path('/nucleo/')}>
+              Descubrir el Núcleo <span aria-hidden="true">↗</span>
+            </a>
+            <a class="btn btn--light" href={retreatPage} {...retreatCta('details', 'team_footer')}>
+              Conocé el retiro <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
       </section>
     )}
@@ -182,7 +187,18 @@ const heroPhoto = {
     padding-block: clamp(2.3rem, 5.7vw, 4.25rem);
   }
   .team-retreat h2 { margin-bottom: .55rem; color: inherit; font-size: clamp(2rem, 4.1vw, 3.4rem); }
-  .team-retreat a { min-height: 44px; }
+  .team-retreat__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1.1rem; }
+  .team-retreat__actions a { min-height: 44px; }
+  .team-retreat__nucleus {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    color: inherit;
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .25rem;
+  }
 
   @media (max-width: 780px) {
     .team-hero__layout, .team-profile { grid-template-columns: minmax(0, 1fr); }
