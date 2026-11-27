@@ -91,7 +91,7 @@ La jerarquía de entidades, sus claves y relaciones deben poder migrar a la inst
 ## Consultas y seguimiento del encuentro de enero
 
 - El botón de inscripción abre un mensaje preparado para Yanina. La persona decide cuándo enviarlo.
-- Cuando el equipo verifica que la inscripción quedó confirmada, Yanina puede responder: «Tu lugar para el encuentro del 16 y 17 de enero está confirmado. Nos vemos en Casa Sabia.» Agregá los datos de llegada acordados con el equipo.
+- Cuando el equipo verifica que la inscripción quedó confirmada, Yanina puede responder: «Tu lugar para el encuentro del 23 y 24 de enero está confirmado. Nos vemos en Casa Sabia.» Agregá los datos de llegada acordados con el equipo.
 - Después del encuentro: «Gracias por compartir estos días. Tu mes de círculos de integración está incluido. Te compartimos por acá los horarios y cómo sumarte.» Agregá el acceso, los horarios y el período incluido acordado.
 - En Pages CMS, actualizá **Qué pasa al abrir el enlace directo** junto con el botón y su URL cuando cambie el destino. El enlace de comunidad lleva directamente a la invitación pública. La confirmación mediante Reservas corresponde a [#34](https://github.com/itsJASPERr/soma-consciente/issues/34).
 

@@ -143,14 +143,14 @@ try{
   await page.goto(HOST+BASE+'/');
   await page.locator('.home-calendar').getByRole('link', { name: 'Ver el encuentro' }).click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/');
-  await page.getByRole('heading', { name: '16 de enero' }).waitFor();
+  await page.getByRole('heading', { name: 'Sábado 23' }).waitFor();
   await page.goto(HOST+BASE+'/encuentros/');
   const encounter = page.locator('article#encuentro-enero');
   await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();
   await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
   const encounterLink = new URL(await encounter.getByRole('link', { name: 'Solicitar inscripción' }).getAttribute('href'));
   assert.equal(encounterLink.origin, 'https://wa.me');
-  assert.match(encounterLink.searchParams.get('text'), /16 y 17 de enero/);
+  assert.match(encounterLink.searchParams.get('text'), /23 y 24 de enero/);
   const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
   assert.equal(doorLink.pathname, encounterLink.pathname);
   assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
