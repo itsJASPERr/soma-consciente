@@ -1,7 +1,10 @@
+type BoundStatement = { run(): Promise<unknown> };
+
 type Database = {
   prepare(sql: string): {
-    bind(...values: Array<string | null>): { run(): Promise<unknown> };
+    bind(...values: Array<string | null>): BoundStatement;
   };
+  batch(statements: BoundStatement[]): Promise<unknown>;
 };
 
 type Context = {
@@ -9,6 +12,7 @@ type Context = {
   env: {
     WAITLIST_DB?: Database;
     WHATSAPP_VERIFY_TOKEN?: string;
+    WHATSAPP_APP_SECRET?: string;
   };
 };
 
@@ -44,91 +48,104 @@ function tokensMatch(provided: string, expected: string) {
   return mismatch === 0;
 }
 
+function record(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
 function requiredString(value: unknown) {
   return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
 }
 
 function timestampValue(value: unknown) {
-  if (typeof value === 'string' && value.trim().length > 0) return value;
+  if (typeof value === 'string' && /^\d+$/.test(value) && Number.isSafeInteger(Number(value))) return value;
   if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) return String(value);
   return undefined;
 }
 
-function textBody(message: Record<string, unknown>) {
-  const text = message.text;
-  if (!text || typeof text !== 'object' || Array.isArray(text)) return null;
-  const body = (text as { body?: unknown }).body;
-  return typeof body === 'string' ? body : null;
+function messageText(message: Record<string, unknown>, type: string) {
+  const content = record(message[type]);
+  const text = type === 'text' ? content?.body : content?.caption;
+  return typeof text === 'string' ? text : null;
 }
 
-function parseMessage(message: unknown): StoredMessage | undefined {
-  if (!message || typeof message !== 'object' || Array.isArray(message)) return undefined;
-  const record = message as Record<string, unknown>;
-  const id = requiredString(record.id);
-  const from = requiredString(record.from);
-  const timestamp = timestampValue(record.timestamp);
-  const type = requiredString(record.type);
-  if (!id || !from || !timestamp || !type) return undefined;
-  let rawJson: string;
-  try {
-    rawJson = JSON.stringify(message);
-  } catch {
-    return undefined;
-  }
-  return { id, from, timestamp, type, textBody: textBody(record), rawJson };
+function parseMessage(value: unknown): StoredMessage | undefined {
+  const message = record(value);
+  if (!message) return undefined;
+  const id = requiredString(message.id);
+  const from = requiredString(message.from) ?? requiredString(message.from_user_id);
+  const timestamp = timestampValue(message.timestamp);
+  const type = requiredString(message.type);
+  if (!id || !from || timestamp === undefined || !type) return undefined;
+  return { id, from, timestamp, type, textBody: messageText(message, type), rawJson: JSON.stringify(message) };
 }
 
-function collectMessages(payload: unknown): StoredMessage[] | undefined {
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined;
-  const entries = (payload as { entry?: unknown }).entry;
-  if (entries === undefined) return [];
-  if (!Array.isArray(entries)) return undefined;
+function collectMessages(payload: unknown) {
+  const envelope = record(payload);
+  if (envelope?.object !== 'whatsapp_business_account' || !Array.isArray(envelope.entry)) return undefined;
   const messages: StoredMessage[] = [];
-  for (const entry of entries) {
-    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return undefined;
-    const changes = (entry as { changes?: unknown }).changes;
-    if (changes === undefined) continue;
-    if (!Array.isArray(changes)) return undefined;
+  let skipped = 0;
+  for (const entry of envelope.entry) {
+    const changes = record(entry)?.changes;
+    if (!Array.isArray(changes)) continue;
     for (const change of changes) {
-      if (!change || typeof change !== 'object' || Array.isArray(change)) return undefined;
-      const value = (change as { value?: unknown }).value;
-      if (value === undefined || value === null) continue;
-      if (typeof value !== 'object' || Array.isArray(value)) return undefined;
-      const rawMessages = (value as { messages?: unknown }).messages;
-      if (rawMessages === undefined || rawMessages === null) continue;
-      if (!Array.isArray(rawMessages)) return undefined;
-      for (const rawMessage of rawMessages) {
-        const parsed = parseMessage(rawMessage);
-        if (!parsed) return undefined;
-        messages.push(parsed);
+      const event = record(change);
+      if (event?.field !== 'messages') continue;
+      const batch = record(event.value)?.messages;
+      if (batch == null) continue; // Delivery statuses have no inbound messages.
+      if (!Array.isArray(batch)) {
+        skipped++;
+        continue;
+      }
+      for (const value of batch) {
+        const message = parseMessage(value);
+        if (message) messages.push(message);
+        else skipped++;
       }
     }
   }
-  return messages;
+  return { messages, skipped };
 }
 
-async function readBody(request: Request) {
+async function readBody(request: Request): Promise<{ error: 400 | 413 } | { bytes: Uint8Array<ArrayBuffer> }> {
   const reader = request.body?.getReader();
-  if (!reader) return { error: 400 as const };
-  const decoder = new TextDecoder();
-  let bytes = 0;
-  let body = '';
+  if (!reader) return { error: 400 };
+  const chunks: Uint8Array[] = [];
+  let length = 0;
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      bytes += value.byteLength;
-      if (bytes > maxBodyBytes) {
+      length += value.byteLength;
+      if (length > maxBodyBytes) {
         await reader.cancel();
-        return { error: 413 as const };
+        return { error: 413 };
       }
-      body += decoder.decode(value, { stream: true });
+      chunks.push(value);
     }
-    body += decoder.decode();
   } catch {
-    return { error: 400 as const };
+    return { error: 400 };
+  } finally {
+    reader.releaseLock();
   }
-  return { body };
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { bytes };
+}
+
+async function isMetaSignature(signature: string | null, secret: string, body: Uint8Array<ArrayBuffer>) {
+  const hex = /^sha256=([0-9a-f]{64})$/i.exec(signature ?? '')?.[1];
+  if (!hex) return false;
+  const digest = Uint8Array.from(hex.match(/.{2}/g) ?? [], pair => Number.parseInt(pair, 16));
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'],
+  );
+  return crypto.subtle.verify('HMAC', key, digest, body);
 }
 
 export async function onRequestGet({ request, env }: Context) {
@@ -161,26 +178,45 @@ export async function onRequestHead(context: Context) {
 export async function onRequestPost({ request, env }: Context) {
   const contentType = request.headers.get('Content-Type')?.split(';')[0]?.trim().toLowerCase();
   if (contentType !== 'application/json') return empty(415);
+
+  const secret = requiredString(env.WHATSAPP_APP_SECRET);
+  if (!secret) {
+    console.error('WhatsApp webhook: missing app secret');
+    return empty(503);
+  }
   const body = await readBody(request);
   if ('error' in body) return empty(body.error);
+  if (!(await isMetaSignature(request.headers.get('X-Hub-Signature-256'), secret, body.bytes))) {
+    return empty(401);
+  }
+
   let payload: unknown;
   try {
-    payload = JSON.parse(body.body);
+    payload = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(body.bytes));
   } catch {
     return empty(400);
   }
-  const messages = collectMessages(payload);
-  if (!messages) return empty(400);
+
+  const delivery = collectMessages(payload);
+  if (!delivery) return empty(400);
+  const { messages, skipped } = delivery;
+  if (skipped) console.warn('WhatsApp webhook: skipped malformed messages', { count: skipped });
   if (messages.length === 0) return empty(200);
-  if (!env.WAITLIST_DB) return empty(503);
-  try {
-    for (const message of messages) {
-      await env.WAITLIST_DB.prepare(insertSql)
-        .bind(message.id, message.from, message.timestamp, message.type, message.textBody, message.rawJson)
-        .run();
-    }
-  } catch {
+  if (!env.WAITLIST_DB) {
+    console.error('WhatsApp webhook: missing D1 binding');
     return empty(503);
   }
+
+  try {
+    const insert = env.WAITLIST_DB.prepare(insertSql);
+    await env.WAITLIST_DB.batch(messages.map(message =>
+      insert.bind(message.id, message.from, message.timestamp, message.type, message.textBody, message.rawJson),
+    ));
+  } catch {
+    console.error('WhatsApp webhook: D1 batch failed', { count: messages.length });
+    return empty(503);
+  }
+
+  console.info('WhatsApp webhook: delivery accepted', { count: messages.length });
   return empty(200);
 }
