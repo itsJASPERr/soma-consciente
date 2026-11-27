@@ -47,7 +47,12 @@ const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer
     font-size: .85rem;
     line-height: 1.4;
   }
-  button.text-link { appearance: none; }
+  button.text-link, button.journey-link {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
   .text-link {
     background: transparent;
     border: 0;
