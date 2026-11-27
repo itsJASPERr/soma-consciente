@@ -8,7 +8,7 @@ interface Props {
 
 const { reel } = Astro.props;
 const media = path('/media/retreat/reels/' + reel.id);
-const file = media + '.mp4';
+const file = path('/media/retreat/reels/video/' + reel.id + '.mp4');
 ---
 <figure class="retreat-reel">
   <div class="retreat-reel__player">

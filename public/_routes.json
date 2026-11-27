@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "include": ["/api/waitlist", "/api/waitlist/"],
+  "include": ["/api/waitlist", "/api/waitlist/", "/media/retreat/reels/video/*"],
   "exclude": []
 }
