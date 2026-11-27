@@ -14,6 +14,7 @@ const BASE='';
 const paths=[
  '/',
  '/encuentros/',
+ '/mensajes/',
  '/acompanamiento/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',

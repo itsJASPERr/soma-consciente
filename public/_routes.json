@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "include": ["/api/waitlist", "/api/waitlist/"],
+  "include": ["/api/waitlist", "/api/waitlist/", "/api/whatsapp/webhook", "/api/whatsapp/webhook/", "/api/whatsapp/messages", "/api/whatsapp/messages/"],
   "exclude": []
 }
