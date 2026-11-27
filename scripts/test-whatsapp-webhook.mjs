@@ -18,6 +18,7 @@ for (const file of [
   '0003_offering_requests.sql',
   '0004_whatsapp_inbound_messages.sql',
   '0005_whatsapp_outbound_replies.sql',
+  '0006_whatsapp_reply_diagnostics.sql',
 ]) {
   database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
 }
@@ -371,17 +372,35 @@ try {
   let outcome = 'accepted';
   let hold;
   globalThis.fetch = async (url, init) => {
-    assert.equal(url, 'https://graph.facebook.com/v27.0/123456/messages');
     assert.equal(init.headers.Authorization, 'Bearer token-fixture');
     assert.equal(init.redirect, 'manual');
+    if (url === 'https://graph.facebook.com/v27.0/123456?fields=id') {
+      assert.equal(init.method, undefined);
+      if (outcome === 'failed') return Response.json({
+        error: { code: 190, error_subcode: 463, message: 'private fixture' },
+      }, { status: 401 });
+      return Response.json({ id: '123456' });
+    }
+    assert.equal(url, 'https://graph.facebook.com/v27.0/123456/messages');
     calls.push(JSON.parse(init.body));
     if (hold) await hold;
-    if (outcome === 'failed') return new Response(null, { status:400 });
+    if (outcome === 'failed') return Response.json({
+      error: { code: 190, error_subcode: 463, message: 'private fixture' },
+    }, { status: 401 });
     if (outcome === 'unknown') throw new Error('simulated timeout');
     if (outcome === 'redirect') return Response.redirect('https://redirect.invalid/', 307);
     return Response.json({ messages:[{ id:'wamid.OUTBOUND_' + calls.length }] });
   };
   try {
+    const checkUrl = origin + '/api/whatsapp/messages?check=connection';
+    const checkConnection = configured => listMessages({
+      request: new Request(checkUrl, { headers: configured ? { Cookie: cookie } : {} }),
+      env: allowed,
+    });
+    assert.equal((await checkConnection(false)).status, 401);
+    assert.deepEqual(await (await checkConnection(true)).json(), {
+      connected: true, meta: { httpStatus: 200, errorCode: null, errorSubcode: null },
+    });
     const request = input(fresh.id);
     assert.equal((await submit(request, allowed, 'https://another.invalid')).status, 403);
     assert.equal((await submit(request, allowed, origin, null)).status, 401);
@@ -416,7 +435,16 @@ try {
     });
 
     outcome = 'failed';
-    assert.equal((await (await submit(input(freshIdOnly.id))).json()).reply.status, 'failed');
+    assert.deepEqual(await (await checkConnection(true)).json(), {
+      connected: false, meta: { httpStatus: 401, errorCode: 190, errorSubcode: 463 },
+    });
+    const failed = input(freshIdOnly.id);
+    const failedResponse = await (await submit(failed)).json();
+    assert.equal(failedResponse.reply.status, 'failed');
+    assert.equal(JSON.stringify(failedResponse).includes('private fixture'), false);
+    assert.deepEqual({ ...database.prepare(
+      'SELECT meta_http_status, meta_error_code, meta_error_subcode FROM whatsapp_outbound_replies WHERE request_id = ?',
+    ).get(failed.request_id) }, { meta_http_status: 401, meta_error_code: 190, meta_error_subcode: 463 });
     assert.equal(calls[1].recipient, freshIdOnly.from_user_id);
     assert.equal(calls[1].to, undefined);
     outcome = 'unknown';
