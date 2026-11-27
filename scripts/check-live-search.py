@@ -17,6 +17,7 @@ ORIGIN = 'https://soma-consciente.com'
 SITEMAP_INDEX = ORIGIN + '/sitemap-index.xml'
 NAMESPACE = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
 USER_AGENT = 'SOMA Deployment Check/1.0 (+https://soma-consciente.com/)'
+GOOGLE_TAG_MANAGER_ID = 'GTM-NWH9TMKN'
 NOINDEX = re.compile(r'\bnoindex\b', re.IGNORECASE)
 
 
@@ -28,6 +29,7 @@ class SearchMetadata(HTMLParser):
         self.robots = []
         self.umami = 0
         self.cloudflare = 0
+        self.google_tag_manager = 0
         self.analytics_scripts = set()
 
     def handle_starttag(self, tag, attrs):
@@ -38,18 +40,28 @@ class SearchMetadata(HTMLParser):
             self.og_urls.append(attrs.get('content'))
         if tag == 'meta' and attrs.get('name', '').lower() in ('robots', 'googlebot'):
             self.robots.append(attrs.get('content', ''))
-        if tag == 'script':
-            src = urlsplit(attrs.get('src') or '')
-            hostname = src.hostname or ''
-            if hostname.endswith('.umami.is') or 'data-website-id' in attrs:
-                self.analytics_scripts.add('Umami')
-            if 'data-cf-beacon' in attrs or hostname.endswith('.cloudflareinsights.com'):
-                self.analytics_scripts.add('Cloudflare Web Analytics')
-            if (hostname == 'cloud.umami.is' and src.path == '/script.js'
-                    and attrs.get('data-website-id') == '41a6c926-f20e-4490-80f4-fc75e59ddfa3'):
-                self.umami += 1
-            if hostname == 'static.cloudflareinsights.com' and src.path.startswith('/beacon.min.js'):
-                self.cloudflare += 1
+        if tag not in ('script', 'iframe'):
+            return
+
+        src = urlsplit(attrs.get('src') or '')
+        hostname = src.hostname or ''
+        if hostname == 'googletagmanager.com' or hostname.endswith('.googletagmanager.com'):
+            self.analytics_scripts.add('Google Tag Manager')
+            if (tag == 'script' and src.scheme == 'https' and src.path == '/gtm.js'
+                    and src.query == 'id=' + GOOGLE_TAG_MANAGER_ID):
+                self.google_tag_manager += 1
+        if tag != 'script':
+            return
+
+        if hostname.endswith('.umami.is') or 'data-website-id' in attrs:
+            self.analytics_scripts.add('Umami')
+        if 'data-cf-beacon' in attrs or hostname.endswith('.cloudflareinsights.com'):
+            self.analytics_scripts.add('Cloudflare Web Analytics')
+        if (hostname == 'cloud.umami.is' and src.path == '/script.js'
+                and attrs.get('data-website-id') == '41a6c926-f20e-4490-80f4-fc75e59ddfa3'):
+            self.umami += 1
+        if hostname == 'static.cloudflareinsights.com' and src.path.startswith('/beacon.min.js'):
+            self.cloudflare += 1
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -94,6 +106,7 @@ def check_page(url):
     assert metadata.og_urls == [url], f'{url} declares Open Graph URLs {metadata.og_urls}.'
     assert metadata.umami == 1, f'{url} serves {metadata.umami} SOMA Umami trackers.'
     assert metadata.cloudflare == 1, f'{url} serves {metadata.cloudflare} Cloudflare Web Analytics beacons.'
+    assert metadata.google_tag_manager == 1, f'{url} serves {metadata.google_tag_manager} SOMA Google Tag Manager scripts.'
     directives = metadata.robots + headers.get_all('X-Robots-Tag', [])
     assert not any(NOINDEX.search(rule) for rule in directives), f'{url} is marked noindex.'
 
