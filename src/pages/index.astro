@@ -301,9 +301,11 @@ const calendar = [
     block-size: 105%;
     object-fit: cover;
     border-radius: 54% 43% 41% 53% / 44% 44% 45% 47%;
-    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease;
   }
-  :global(html:has(#program-launch-dialog[open][data-program-open])) .program-overlay-art { visibility: visible; opacity: .45; }
+  :global(html:has(#program-launch-dialog[open][data-program-open]:not([data-closing]))) .program-overlay-art { opacity: .45; }
   .program-preview { text-align: center; }
   .program-preview .eyebrow { margin-bottom: .45rem; }
   .program-preview h2 {

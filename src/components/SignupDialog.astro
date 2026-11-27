@@ -16,7 +16,7 @@ const countries = getCountries()
     <header class="program-signup__header">
       <div>
         <p class="eyebrow program-signup__status">Próximamente</p>
-        <h3 id="program-launch-title">Participar en SOMA</h3>
+        <h3 id="program-launch-title" tabindex="-1" autofocus>Participar en SOMA</h3>
       </div>
       <button id="program-launch-close" class="program-signup__close" type="button" aria-label="Cerrar"><span aria-hidden="true">×</span></button>
     </header>
@@ -24,7 +24,7 @@ const countries = getCountries()
     <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}>
       <div class="program-signup__name">
         <label for="program-launch-name">Tu nombre</label>
-        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Nombre y apellido" required maxlength="120" autofocus />
+        <input id="program-launch-name" name="name" autocomplete="name" placeholder="Nombre y apellido" required maxlength="120" />
       </div>
       <fieldset>
         <legend>¿Cómo querés que te avisemos?</legend>
@@ -153,7 +153,6 @@ const countries = getCountries()
     let activeOption: HTMLElement | undefined;
     let submission: AbortController | undefined;
     let opener: HTMLButtonElement | undefined;
-    let restoreScroll: number | undefined;
 
     const selectCountry = (option: HTMLElement) => {
       selectedOption.setAttribute('aria-selected', 'false');
@@ -291,6 +290,7 @@ const countries = getCountries()
 
     for (const trigger of triggers) {
       trigger.addEventListener('click', () => {
+        if (dialog.open || dialog.hasAttribute('data-closing')) return;
         opener = trigger;
         const isProgramWaitlist = trigger.hasAttribute('data-program-waitlist');
         dialog.toggleAttribute('data-program-open', isProgramWaitlist);
@@ -304,32 +304,40 @@ const countries = getCountries()
           ? trigger.dataset.signupAction || 'Avisame cuando esté listo'
           : 'Enviar solicitud';
         consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
-        const methodology = isProgramWaitlist && trigger.closest('#metodologia');
-        const heading = methodology?.querySelector('#metodologia-title');
-        if (heading instanceof HTMLElement) {
-          restoreScroll = window.scrollY;
-          heading.style.scrollMarginTop = '5.25rem';
-          heading.scrollIntoView({ block: 'start', behavior: 'instant' });
-        }
+        trigger.focus({ preventScroll: true });
         dialog.showModal();
-        if (heading instanceof HTMLElement) heading.scrollIntoView({ block: 'start', behavior: 'instant' });
+        dialog.scrollTop = 0;
         if (form.dataset.collect === 'true' && isProgramWaitlist) {
           void trackWaitlist('waitlist_opened');
         }
       });
       trigger.hidden = false;
     }
-    close.addEventListener('click', () => dialog.close());
+    const closeDialog = () => {
+      if (!dialog.open || dialog.hasAttribute('data-closing')) return;
+      submission?.abort();
+      dialog.setAttribute('data-closing', '');
+      const transitions = dialog.getAnimations();
+      if (transitions.length === 0) {
+        dialog.close();
+        return;
+      }
+      void Promise.allSettled(transitions.map(transition => transition.finished)).then(() => dialog.close());
+    };
+
+    close.addEventListener('click', closeDialog);
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      closeDialog();
+    });
     dialog.addEventListener('close', () => {
       submission?.abort();
       submission = undefined;
       form.inert = false;
       resetForm();
-      if (restoreScroll !== undefined) {
-        window.scrollTo({ top: restoreScroll, behavior: 'instant' });
-        restoreScroll = undefined;
-      }
       opener?.focus({ preventScroll: true });
+      opener = undefined;
+      dialog.removeAttribute('data-closing');
     });
     form.addEventListener('change', (event) => {
       const option = event.target;
@@ -442,10 +450,12 @@ const countries = getCountries()
     cursor: pointer;
     font-family: inherit;
   }
+  :global(html:has(#program-launch-dialog)) { scrollbar-gutter: stable; }
   :global(html:has(#program-launch-dialog[open])) {
     overflow: hidden;
   }
   .program-signup__dialog {
+    --dialog-offset: .65rem;
     inline-size: min(29rem, calc(100% - 2rem));
     max-block-size: calc(100dvh - 2rem);
     margin: auto;
@@ -474,6 +484,7 @@ const countries = getCountries()
   [data-program-open] .program-signup__status { display: block; }
   @media (max-width: 650px) {
     .program-signup__dialog[data-program-open] {
+      --dialog-offset: 1.25rem;
       inline-size: 100%;
       max-inline-size: none;
       max-block-size: min(92dvh, 100%);
@@ -482,12 +493,17 @@ const countries = getCountries()
     }
     .program-signup__dialog[data-program-open] .program-signup__form { gap: .7rem; }
   }
-  @media (max-width: 650px) and (prefers-reduced-motion: no-preference) {
-    .program-signup__dialog[open][data-program-open] { animation: waitlist-enter .18s ease-out; }
-  }
-  @keyframes waitlist-enter {
-    from { opacity: 0; transform: translateY(.85rem); }
-    to { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: no-preference) {
+    .program-signup__dialog {
+      transition: opacity .22s ease, translate .22s ease-out;
+    }
+    .program-signup__dialog::backdrop { transition: opacity .22s ease; }
+    @starting-style {
+      .program-signup__dialog[open] { opacity: 0; translate: 0 var(--dialog-offset); }
+      .program-signup__dialog[open]::backdrop { opacity: 0; }
+    }
+    .program-signup__dialog[data-closing] { opacity: 0; translate: 0 var(--dialog-offset); }
+    .program-signup__dialog[data-closing]::backdrop { opacity: 0; }
   }
   .program-signup__header {
     display: flex;
@@ -497,6 +513,7 @@ const countries = getCountries()
     margin-block-end: 1.1rem;
   }
   .program-signup__header h3 {
+    outline: none;
     margin: 0;
     font-size: clamp(1.6rem, 5vw, 2.1rem);
     text-wrap: balance;

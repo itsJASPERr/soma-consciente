@@ -32,11 +32,24 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
   const submit = form.getByRole('button', { name: 'Avisame cuando esté listo' });
+  const opener = page.locator('#programa-online #program-launch-open');
+  const pagePosition = () => opener.evaluate(button => {
+    const { top, left } = button.closest('#programa-online').getBoundingClientRect();
+    return { scrollY: window.scrollY, width: document.body.clientWidth, top, left };
+  });
+  const positionOpener = async () => {
+    await opener.evaluate(button => button.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    return pagePosition();
+  };
+  const assertFocus = id => page.waitForFunction(target => document.activeElement?.id === target, id);
   assert.deepEqual(await events(), []);
-  await page.locator('#programa-online #program-launch-open').click();
+  const mobilePosition = await positionOpener();
+  await opener.click();
   await form.getByText(waitlistConsentText, { exact: true }).waitFor();
   const dialog = page.getByRole('dialog', { name: 'Nuestro programa online' });
   await dialog.waitFor();
+  await assertFocus('program-launch-title');
+  assert.deepEqual(await pagePosition(), mobilePosition, 'Opening the sheet must leave the page in place.');
   const sheet = await dialog.boundingBox();
   assert.ok(sheet.y + sheet.height >= page.viewportSize().height - 14, 'The mobile program overlay should align to the bottom.');
   assert.ok(await form.getByRole('radio', { name: 'WhatsApp' }).isChecked());
@@ -71,14 +84,21 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
   await dialog.getByRole('button', { name: 'Cerrar' }).click();
+  await dialog.waitFor({ state: 'hidden' });
+  await assertFocus('program-launch-open');
+  assert.deepEqual(await pagePosition(), mobilePosition, 'Closing the sheet must preserve the scroll position.');
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.locator('#program-launch-open').click();
+  const desktopPosition = await positionOpener();
+  await opener.click();
+  await dialog.waitFor();
+  assert.deepEqual(await pagePosition(), desktopPosition, 'Opening the desktop dialog must leave the page in place.');
   const desktopSheet = await dialog.boundingBox();
-  const methodologyTitle = await page.locator('#metodologia-title').boundingBox();
-  assert.ok(methodologyTitle.y >= 0 && methodologyTitle.y < desktopSheet.y, 'The methodology heading should stay in view behind the overlay.');
   const viewport = page.viewportSize();
   const center = desktopSheet.x + desktopSheet.width / 2;
   assert.ok(Math.abs(center - viewport.width / 2) < 80, 'The desktop program overlay should sit in the center.');
-  await dialog.getByRole('button', { name: 'Cerrar' }).click();
-  console.log('Program waitlist overlay, consent, payload and analytics verified.');
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({ state: 'hidden' });
+  await assertFocus('program-launch-open');
+  assert.deepEqual(await pagePosition(), desktopPosition, 'Closing with Escape must preserve the scroll position.');
+  console.log('Program waitlist position, focus, consent, payload and analytics verified.');
 }
