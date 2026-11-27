@@ -30,8 +30,8 @@ export const teamMembers: TeamMember[] = [
     name: 'Nicole Rosignoli Miranda',
     practice: 'Psicología y presencia',
     introduction: 'Aporta una mirada psicológica y corporal para reconocer lo que sentimos y respetar nuestros ritmos.',
-    biography: 'Nicole es licenciada en Psicología. Su práctica con personas adultas se nutre de la Gestalt, la escucha corporal y la salud cíclica. También impulsa Naturaleza Viva, donde explora cómo los ritmos del cuerpo dialogan con la naturaleza.',
-    contribution: 'En SOMA propone espacios para reconocer las emociones y necesidades propias. Además de la conversación, recurre al silencio, la meditación y el movimiento consciente para dar lugar a lo que cada persona está viviendo.',
+    biography: 'Soy licenciada en Psicología y acompaño a personas adultas. Mi práctica se nutre de la Gestalt, la escucha del cuerpo y los ciclos de la naturaleza.',
+    contribution: 'En SOMA comparto prácticas de respiración, movimiento y meditación para hacer una pausa, reconocer lo que sentimos y darle un lugar a lo vivido, cada quien a su ritmo.',
     symbol: 'heart',
     tone: 'sage',
     photo: {
@@ -48,8 +48,8 @@ export const teamMembers: TeamMember[] = [
     name: 'Yanina Noelia Landriel',
     practice: 'Cuerpo, movimiento y respiración',
     introduction: 'Invita a observar la respiración y explorar el movimiento desde su recorrido en kinesiología y osteopatía.',
-    biography: 'Yanina es licenciada en Kinesiología y Fisioterapia y se formó en osteopatía y terapia postural activa. Su recorrido empezó con el estudio del movimiento y se amplió hacia la relación entre el cuerpo, el sistema nervioso y las emociones.',
-    contribution: 'En SOMA diseña propuestas para prestar atención a cómo respiramos, cómo nos movemos y qué señales nos da el cuerpo. Aporta también su interés en reunir saberes de distintas disciplinas y convertirlos en prácticas que podamos explorar juntos.',
+    biography: 'Soy licenciada en Kinesiología y Fisioterapia y me formé en osteopatía. Mi recorrido profesional y mi búsqueda personal me llevaron a explorar cómo se relacionan el movimiento, el sistema nervioso y las emociones.',
+    contribution: 'En SOMA comparto prácticas de movimiento y respiración para escuchar lo que el cuerpo nos pide y encontrar formas de cuidarnos en el día a día.',
     symbol: 'body',
     tone: 'earth',
     photo: {
@@ -66,8 +66,8 @@ export const teamMembers: TeamMember[] = [
     name: 'Nico Pacha',
     practice: 'Caballos y consciencia',
     introduction: 'Propone aprender del encuentro con los caballos, con atención a su lenguaje y al vínculo que se construye.',
-    biography: 'Desde Tierra Pacha Ecocentro, Nico propone experiencias de aprendizaje junto a los caballos. Su punto de partida es observar cómo nos acercamos, qué comunica el animal y cómo cambia la relación cuando hay tiempo para escucharlo.',
-    contribution: 'En SOMA aporta una práctica de presencia y vínculo en la naturaleza. La observación del lenguaje no verbal, la confianza y el respeto por el caballo permiten explorar maneras de relacionarnos que también podemos llevar a lo cotidiano.',
+    biography: 'En el encuentro con los caballos me interesa lo que podemos escuchar más allá de las palabras. Presto atención a cómo nos acercamos, qué expresamos con el cuerpo y cómo se construye la confianza.',
+    contribution: 'En SOMA propongo experiencias para reconocer cómo nos vinculamos y llevar esa escucha a nuestras relaciones y a nuestra manera de estar en la naturaleza.',
     symbol: 'horse',
     tone: 'ochre',
     photo: {
@@ -84,8 +84,8 @@ export const teamMembers: TeamMember[] = [
     name: 'Jasper Meyer',
     practice: 'Música, círculos e integración',
     introduction: 'Comparte música, escucha y círculos de palabra para darle continuidad a lo vivido después del encuentro.',
-    biography: 'Jasper combina la música y la construcción artesanal de tambores con su participación en proyectos de regeneración vinculados a la tierra y la comunidad. En la voz, el ritmo y el silencio encontró maneras de acompañar experiencias que a veces cuesta poner en palabras.',
-    contribution: 'En SOMA propone espacios de escucha a través del sonido y los círculos de palabra. Le interesa que lo vivido en un encuentro tenga continuidad en las conversaciones, los vínculos y las decisiones de todos los días.',
+    biography: 'Construyo tambores y acompaño espacios de escucha e integración con la voz, el ritmo, el silencio y los círculos de palabra. Mi recorrido me acercó a saberes ancestrales y a proyectos de regeneración de la tierra.',
+    contribution: 'En SOMA me interesa que lo que vivimos juntos encuentre un lugar en nuestras decisiones, nuestros vínculos y nuestra vida cotidiana.',
     symbol: 'sound',
     tone: 'clay',
     photo: {
