@@ -28,7 +28,8 @@
   --font-display:'DM Serif Display', Georgia, serif;
   --font-body:'DM Sans', sans-serif;
 }
-:root[data-theme='light'] { color-scheme: light; }
+/* Honor the explicit choice even when Chrome automatically darkens light pages. */
+:root[data-theme='light'] { color-scheme: only light; }
 :root[data-theme='dark'] { color-scheme: dark; }
 ::view-transition { pointer-events: none; }
 ::view-transition-group(root) { animation-duration: .28s; animation-timing-function: ease-in-out; }

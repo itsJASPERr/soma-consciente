@@ -104,6 +104,7 @@ if (breadcrumbs.length) {
         const system = window.matchMedia('(prefers-color-scheme: dark)');
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const key = 'soma-theme';
+        const colorScheme = document.querySelector('meta[name="color-scheme"]');
         const themeColor = document.querySelector('meta[name="theme-color"]');
         let selection;
         let toggle;
@@ -121,6 +122,7 @@ if (breadcrumbs.length) {
           const dark = currentTheme() === 'dark';
           if (selection) root.dataset.theme = selection;
           else delete root.dataset.theme;
+          colorScheme.content = selection === 'light' ? 'only light' : (selection ?? 'light dark');
           themeColor.content = dark ? '#242d25' : '#f7f1e8';
           toggle?.setAttribute('aria-checked', String(dark));
         };
