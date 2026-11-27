@@ -90,6 +90,10 @@ try{
             }
           }
         }
+        const homeHero = document.querySelector('.home-hero');
+        if (homeHero && homeHero.getBoundingClientRect().height < window.innerHeight - 1) {
+          problems.push('homepage hero is shorter than the viewport');
+        }
         const feature = document.querySelector('.participation-feature');
         if (feature && viewport <= 680) {
           const photo = document.querySelector('.participation-hero__frame');
@@ -178,8 +182,7 @@ try{
   await homeLibrary.getByRole('link', { name: /Una pausa de presencia/ }).waitFor();
   await page.getByRole('link', { name: 'Bajar a nuestros valores' }).click();
   await page.waitForURL('**/#nuestros-valores');
-  await page.getByRole('link', { name: 'Ver próximas fechas' }).click();
-  await page.waitForURL('**/#proximos-encuentros');
+  assert.equal(await page.locator('.home-hero a[href="#proximos-encuentros"]').count(), 0);
   const hasUmami = (await page.locator('script[data-website-id]').count()) === 1;
   const verifyRetreatCta = async (link, action, placement) => {
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
