@@ -71,11 +71,11 @@ export const teamMembers: TeamMember[] = [
     symbol: 'horse',
     tone: 'ochre',
     photo: {
-      src: '/media/team/caballo-en-el-campo.webp',
-      alt: 'Caballo en un claro del campo durante una actividad al aire libre.',
-      width: 630,
-      height: 1120,
-      position: '60% center',
+      src: '/media/team/nico-pacha.webp',
+      alt: 'Nico Pacha a caballo bajo la sombra de un árbol.',
+      width: 720,
+      height: 1280,
+      position: 'center 8%',
     },
   },
   {
