@@ -603,6 +603,75 @@ try{
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });
+
+  const inbox = await browser.newPage({ viewport: { width: 1080, height: 780 } });
+  const loadedViews = [];
+  const now = Math.floor(Date.now() / 1000);
+  await inbox.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    if (url.hostname !== '127.0.0.1') return route.abort();
+    if (url.pathname === '/api/whatsapp/messages') {
+      loadedViews.push('whatsapp');
+      return route.fulfill({ json: {
+        messages: [{ wa_message_id: 'wamid.preview', from_wa_id: '5491123456789', wa_timestamp: now, text_body: 'Hola, ¿cómo están?', reply_until: now + 3600 }],
+        replies: [], replies_enabled: true,
+      } });
+    }
+    if (url.pathname === '/api/retreat-requests') {
+      const kind = url.searchParams.get('kind');
+      loadedViews.push(kind);
+      return route.fulfill({ json: { requests: kind === 'circle' ? [{
+        reference: 'SOMA-222233334444', name: 'Noa Pérez', offering: 'circulos', payment_plan: null,
+        rebates: [], channel: 'email', contact: 'circle-test@example.com', whatsapp_received: 0,
+      }] : [{
+        reference: 'SOMA-111122223333', name: 'Ana García', offering: 'encuentro-enero', payment_plan: '2_payments',
+        rebates: ['own_tent'], channel: 'whatsapp', contact: '+5491123456789', whatsapp_received: 1,
+      }] } });
+    }
+    return route.continue();
+  });
+  await inbox.goto(HOST + BASE + '/mensajes/');
+  const whatsappTab = inbox.getByRole('tab', { name: 'WhatsApp' });
+  const requestsTab = inbox.getByRole('tab', { name: 'Solicitudes' });
+  const draft = inbox.getByRole('textbox', { name: 'Responder' });
+  await draft.fill('Borrador de prueba');
+  assert.deepEqual(loadedViews, ['whatsapp']);
+  await whatsappTab.focus();
+  await whatsappTab.press('ArrowRight');
+  await inbox.waitForURL('**/mensajes/#solicitudes');
+  await inbox.getByRole('heading', { name: 'Ana García' }).waitFor();
+  assert.equal(await inbox.locator('#inbox-whatsapp').isHidden(), true);
+  assert.equal(await requestsTab.getAttribute('aria-selected'), 'true');
+  await inbox.getByText('Mensaje de WhatsApp recibido').waitFor();
+  const whatsappMessage = new URL(await inbox.getByRole('link', { name: 'Escribir por WhatsApp' }).getAttribute('href'));
+  const whatsappText = whatsappMessage.searchParams.get('text');
+  for (const text of ['Ana García', '23 y 24 de enero', 'SOMA-111122223333']) assert.ok(whatsappText.includes(text));
+  await whatsappTab.click();
+  assert.equal(await draft.inputValue(), 'Borrador de prueba');
+
+  await requestsTab.click();
+  await inbox.getByRole('tab', { name: 'Círculos online' }).click();
+  await inbox.waitForURL('**/mensajes/#solicitudes-circulos');
+  await inbox.getByRole('heading', { name: 'Noa Pérez' }).waitFor();
+  assert.equal(await inbox.locator('#inbox-retreat').isHidden(), true);
+  const email = new URL(await inbox.getByRole('link', { name: 'Enviar correo' }).getAttribute('href'));
+  assert.equal(email.protocol, 'mailto:');
+  assert.equal(email.pathname, 'circle-test@example.com');
+  assert.equal(email.searchParams.get('subject'), 'Círculo de integración online · SOMA-222233334444');
+  assert.match(email.searchParams.get('body'), /Noa Pérez[\s\S]+horarios[\s\S]+SOMA-222233334444/);
+  assert.deepEqual(loadedViews, ['whatsapp', 'retreat', 'circle']);
+
+  await inbox.setViewportSize({ width: 320, height: 650 });
+  loadedViews.length = 0;
+  await inbox.reload();
+  await inbox.getByRole('heading', { name: 'Noa Pérez' }).waitFor();
+  assert.deepEqual(loadedViews, ['circle']);
+  assert.equal(await inbox.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await inbox.getByRole('button', { name: 'Actualizar', exact: true }).click();
+  await inbox.waitForFunction(() => !document.querySelector('#inbox-circle [data-request-refresh]').disabled);
+  assert.deepEqual(loadedViews, ['circle', 'circle']);
+  await inbox.close();
+  console.log('Verified separate inbox views, keyboard navigation, mobile layout, and prepared follow-up drafts.');
 } catch(e){
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {

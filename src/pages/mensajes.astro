@@ -2,103 +2,205 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 ---
 <SiteLayout
-  title="Mensajes de WhatsApp"
-  description="Conversaciones de WhatsApp de SOMA, agrupadas por remitente."
+  title="Mensajes y solicitudes"
+  description="Bandeja de SOMA para conversaciones de WhatsApp y solicitudes de participación."
   noIndex
   openJourney
 >
-  <section class="section wa-inbox" data-whatsapp-inbox aria-labelledby="inbox-title">
-    <div class="container">
+  <section class="section wa-inbox" aria-labelledby="inbox-title">
+    <div class="container" data-inbox>
       <header class="inbox-heading">
-        <div>
-          <span class="eyebrow">WhatsApp</span>
-          <h1 id="inbox-title">Mensajes</h1>
-        </div>
-        <div class="inbox-actions" data-inbox-actions hidden>
-          <label class="inbox-auto-refresh">
-            <input type="checkbox" role="switch" autocomplete="off" data-auto-refresh />
-            <span class="inbox-switch-track" aria-hidden="true"></span>
-            <span>Autoactualizar</span>
-          </label>
-          <button class="inbox-button" type="button" data-refresh>Actualizar</button>
-        </div>
+        <h1 id="inbox-title">Mensajes y solicitudes</h1>
       </header>
-      {[
-        { kind: 'retreat', title: 'Solicitudes de retiro' },
-        { kind: 'circle', title: 'Solicitudes de círculos' },
-      ].map(({ kind, title }) => (
-        <details class="retreat-request-inbox" data-request-inbox={kind}>
-          <summary>{title}</summary>
-          <p role="status" data-request-status></p>
-          <ul data-requests></ul>
-          <button class="inbox-button" type="button" data-request-refresh>Actualizar solicitudes</button>
-        </details>
-      ))}
-      <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
 
-      <div class="inbox-layout" data-inbox-layout hidden>
-        <aside class="inbox-senders" aria-labelledby="inbox-senders-title">
-          <h2 id="inbox-senders-title">Remitentes</h2>
-          <ul class="sender-list" data-senders></ul>
-        </aside>
-
-        <section class="inbox-conversation" id="whatsapp-conversation" aria-labelledby="chat-title">
-          <header class="chat-heading">
-            <button class="chat-back" type="button" data-back><span aria-hidden="true">←</span> Remitentes</button>
-            <h2 id="chat-title" data-chat-title tabindex="-1"></h2>
-            <a class="inbox-button" target="_blank" rel="noopener noreferrer" data-whatsapp hidden>
-              Responder en WhatsApp <span aria-hidden="true">↗</span>
-            </a>
-          </header>
-
-          <ol class="chat-timeline" aria-label="Mensajes de la conversación" tabindex="0" data-timeline></ol>
-
-          <p class="chat-note" data-reply-note hidden></p>
-          <form class="reply-form" data-reply-form hidden>
-            <label for="chat-reply">Responder</label>
-            <textarea id="chat-reply" name="reply" rows="2" maxlength="4096" required></textarea>
-            <div class="reply-actions">
-              <p data-reply-status role="status"></p>
-              <button class="inbox-button reply-send" type="submit" disabled>Enviar respuesta</button>
-            </div>
-          </form>
-        </section>
+      <div class="inbox-tabs" role="tablist" aria-label="Bandeja">
+        <button id="inbox-whatsapp-tab" type="button" role="tab" aria-controls="inbox-whatsapp" aria-selected="true"
+          data-inbox-route="whatsapp">WhatsApp</button>
+        <button id="inbox-requests-tab" type="button" role="tab" aria-controls="inbox-requests" aria-selected="false" tabindex="-1"
+          data-inbox-route="solicitudes">Solicitudes</button>
       </div>
+
+      <section id="inbox-whatsapp" role="tabpanel" aria-labelledby="inbox-whatsapp-tab" data-whatsapp-inbox>
+        <header class="inbox-view-heading">
+          <h2>Conversaciones</h2>
+          <div class="inbox-actions" data-inbox-actions hidden>
+            <label class="inbox-auto-refresh">
+              <input type="checkbox" role="switch" autocomplete="off" data-auto-refresh />
+              <span class="inbox-switch-track" aria-hidden="true"></span>
+              <span>Autoactualizar</span>
+            </label>
+            <button class="inbox-button" type="button" data-refresh>Actualizar</button>
+          </div>
+        </header>
+        <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
+
+        <div class="inbox-layout" data-inbox-layout hidden>
+          <aside class="inbox-senders" aria-labelledby="inbox-senders-title">
+            <h2 id="inbox-senders-title">Remitentes</h2>
+            <ul class="sender-list" data-senders></ul>
+          </aside>
+
+          <section class="inbox-conversation" id="whatsapp-conversation" aria-labelledby="chat-title">
+            <header class="chat-heading">
+              <button class="chat-back" type="button" data-back><span aria-hidden="true">←</span> Remitentes</button>
+              <h2 id="chat-title" data-chat-title tabindex="-1"></h2>
+              <a class="inbox-button" target="_blank" rel="noopener noreferrer" data-whatsapp hidden>
+                Responder en WhatsApp <span aria-hidden="true">↗</span>
+              </a>
+            </header>
+
+            <ol class="chat-timeline" aria-label="Mensajes de la conversación" tabindex="0" data-timeline></ol>
+
+            <p class="chat-note" data-reply-note hidden></p>
+            <form class="reply-form" data-reply-form hidden>
+              <label for="chat-reply">Responder</label>
+              <textarea id="chat-reply" name="reply" rows="2" maxlength="4096" required></textarea>
+              <div class="reply-actions">
+                <p data-reply-status role="status"></p>
+                <button class="inbox-button reply-send" type="submit" disabled>Enviar respuesta</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section id="inbox-requests" role="tabpanel" aria-labelledby="inbox-requests-tab" hidden>
+        <div class="inbox-view-heading">
+          <h2>Solicitudes de la web</h2>
+          <div class="request-tabs" role="tablist" aria-label="Tipo de solicitud">
+            <button id="inbox-retreat-tab" type="button" role="tab" aria-controls="inbox-retreat" aria-selected="true"
+              data-inbox-route="solicitudes">Retiros</button>
+            <button id="inbox-circle-tab" type="button" role="tab" aria-controls="inbox-circle" aria-selected="false" tabindex="-1"
+              data-inbox-route="solicitudes-circulos">Círculos online</button>
+          </div>
+        </div>
+        {[
+          { kind: 'retreat', title: 'Solicitudes de retiro' },
+          { kind: 'circle', title: 'Solicitudes de círculos' },
+        ].map(({ kind, title }) => (
+          <section class="request-inbox" id={'inbox-' + kind} role="tabpanel"
+            aria-labelledby={'inbox-' + kind + '-tab'} data-request-inbox={kind} hidden={kind === 'circle'}>
+            <header class="request-inbox__heading">
+              <div>
+                <h3>{title}</h3>
+                <p data-request-status role="status"></p>
+              </div>
+              <button class="inbox-button" type="button" data-request-refresh>Actualizar</button>
+            </header>
+            <ul class="request-list" data-requests></ul>
+          </section>
+        ))}
+      </section>
     </div>
   </section>
 </SiteLayout>
 
 <script>
+  import '../lib/inbox-tabs';
   import '../lib/whatsapp-inbox';
   import '../lib/retreat-request-inbox';
 </script>
 
 <style is:global>
-  .wa-inbox { padding-block: var(--journey-spacing); }
-  .wa-inbox .retreat-request-inbox {
-    padding-block: .75rem;
-    margin-block-end: 1.2rem;
-    border-block: 1px solid var(--line);
-  }
-  .wa-inbox .retreat-request-inbox summary { font-weight: 700; cursor: pointer; }
-  .wa-inbox .retreat-request-inbox li { margin-block: .7rem; overflow-wrap: anywhere; }
-  .wa-inbox .retreat-request-inbox li p { margin: .2rem 0; }
-  .wa-inbox .retreat-request-inbox li a { text-decoration: underline; }
+  .wa-inbox { padding-block: clamp(1.75rem, 4vw, 3.7rem) var(--journey-spacing); }
   .wa-inbox [hidden] { display: none !important; }
 
-  .wa-inbox .inbox-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 12px;
-    margin-block-end: clamp(1.15rem, 3vw, 2rem);
+  .wa-inbox .inbox-heading { margin-block-end: clamp(1rem, 2.5vw, 1.7rem); }
+  .wa-inbox .inbox-heading h1 {
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(2.35rem, 5vw, 4.1rem);
+    text-wrap: balance;
   }
 
-  .wa-inbox .inbox-heading h1 {
-    margin: 4px 0 0;
+  .wa-inbox .inbox-tabs,
+  .wa-inbox .request-tabs { display: flex; gap: .35rem; }
+  .wa-inbox .inbox-tabs {
+    border-block-end: 1px solid var(--line);
+    margin-block-end: clamp(1rem, 3vw, 1.7rem);
+  }
+  .wa-inbox :is(.inbox-tabs, .request-tabs) button {
+    min-block-size: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: 700 .94rem/1.3 var(--font-body);
+    cursor: pointer;
+  }
+  .wa-inbox .inbox-tabs button {
+    min-inline-size: 8.25rem;
+    margin-block-end: -1px;
+    padding: .55rem 1rem;
+    border-block-end: 3px solid transparent;
+    border-radius: .65rem .65rem 0 0;
+    text-align: center;
+  }
+  .wa-inbox .inbox-tabs button:is(:hover, [aria-selected="true"]) { background: var(--surface-sage); }
+  .wa-inbox .inbox-tabs button[aria-selected="true"] {
+    border-block-end-color: var(--pine);
     color: var(--pine-dark);
-    font-size: clamp(2.65rem, 5vw, 4.15rem);
-    line-height: 1;
+  }
+  .wa-inbox .request-tabs {
+    padding: .2rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--cream);
+  }
+  .wa-inbox .request-tabs button { padding-inline: .8rem; border-radius: 999px; }
+  .wa-inbox .request-tabs button:hover { background: var(--surface-sage); color: var(--pine-dark); }
+  .wa-inbox .request-tabs button[aria-selected="true"] { background: var(--pine-fill); color: var(--on-pine); }
+
+  .wa-inbox .inbox-view-heading,
+  .wa-inbox .request-inbox__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .55rem 1rem;
+  }
+  .wa-inbox .inbox-view-heading { margin-block-end: .8rem; }
+  .wa-inbox .inbox-view-heading h2 { margin: 0; font-size: clamp(1.55rem, 3vw, 2.3rem); color: var(--pine-dark); }
+
+  .wa-inbox .request-inbox {
+    border: 1px solid var(--line);
+    border-radius: 1.2rem;
+    background: var(--surface-editorial);
+  }
+  .wa-inbox .request-inbox__heading { padding: .85rem clamp(.8rem, 3vw, 1.35rem); }
+  .wa-inbox .request-inbox__heading h3 { margin: 0; font: 700 1rem/1.4 var(--font-body); letter-spacing: 0; }
+  .wa-inbox .request-inbox__heading p { margin: .2rem 0 0; color: var(--muted); font-size: .875rem; }
+  .wa-inbox .request-list { margin: 0; padding: 0; list-style: none; }
+  .wa-inbox .request-row {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.1fr) minmax(0, .95fr);
+    gap: 1rem;
+    align-items: start;
+    border-block-start: 1px solid var(--line);
+    padding: .95rem clamp(.8rem, 3vw, 1.35rem);
+    overflow-wrap: anywhere;
+  }
+  .wa-inbox .request-row h4 { margin: 0; font-size: 1rem; line-height: 1.4; }
+  .wa-inbox .request-row code {
+    display: inline-block;
+    margin-block-start: .2rem;
+    color: var(--muted);
+    font-size: .8rem;
+    letter-spacing: .02em;
+  }
+  .wa-inbox .request-row p { margin: 0; font-size: .875rem; }
+  .wa-inbox .request-row p + p { margin-block-start: .13rem; color: var(--muted); }
+  .wa-inbox .request-activity { font-weight: 700; }
+  .wa-inbox .request-contact { display: grid; justify-items: start; gap: .35rem; min-inline-size: 0; }
+  .wa-inbox .request-contact p { color: var(--muted); }
+  .wa-inbox .request-whatsapp-state {
+    display: inline-block;
+    margin-block-start: .4rem;
+    padding: .12rem .45rem;
+    border-radius: .35rem;
+    background: var(--surface-sage);
+    color: var(--pine-dark);
+    font-size: .75rem;
+    font-weight: 650;
   }
 
   .wa-inbox .inbox-actions,
@@ -357,8 +459,9 @@ import SiteLayout from '../layouts/SiteLayout.astro';
   .wa-inbox .reply-send:hover:not(:disabled) { border-color: transparent; background: var(--pine-fill-hover); }
 
   @media (max-width: 700px) {
-    .wa-inbox .inbox-heading { flex-wrap: wrap; }
-    .wa-inbox .inbox-actions { flex: 1 1 100%; justify-content: space-between; }
+    .wa-inbox .inbox-tabs button { flex: 1; min-inline-size: 0; }
+    .wa-inbox .inbox-actions { flex-wrap: wrap; }
+    .wa-inbox .request-row { grid-template-columns: minmax(0, 1fr); gap: .55rem; }
     .wa-inbox .inbox-layout { grid-template-columns: minmax(0, 1fr); }
     .wa-inbox .inbox-senders { border-inline-end: 0; }
     .wa-inbox .inbox-layout:not([data-viewing-chat]) .inbox-conversation,

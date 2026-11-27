@@ -346,7 +346,7 @@ function mountInbox(inbox: HTMLElement) {
   });
 
   function syncPolling() {
-    if (autoRefresh.checked && document.visibilityState === 'visible') {
+    if (!inbox.hidden && autoRefresh.checked && document.visibilityState === 'visible') {
       pollTimer ??= window.setInterval(() => void loadMessages(), pollIntervalMs);
     } else if (pollTimer !== undefined) {
       window.clearInterval(pollTimer);
@@ -358,15 +358,19 @@ function mountInbox(inbox: HTMLElement) {
   refresh.addEventListener('click', () => void loadMessages());
   autoRefresh.addEventListener('change', () => {
     syncPolling();
-    if (autoRefresh.checked && document.visibilityState === 'visible') void loadMessages();
+    if (!inbox.hidden && autoRefresh.checked && document.visibilityState === 'visible') void loadMessages();
   });
   document.addEventListener('visibilitychange', () => {
     syncPolling();
-    if (document.visibilityState === 'visible' && (autoRefresh.checked || document.activeElement !== textarea)) {
+    if (!inbox.hidden && document.visibilityState === 'visible' && (autoRefresh.checked || document.activeElement !== textarea)) {
       void loadMessages();
     }
   });
-  void loadMessages();
+  inbox.addEventListener('inbox-view-change', () => {
+    syncPolling();
+    if (!inbox.hidden && lastResponse === undefined) void loadMessages();
+  });
+  if (!inbox.hidden) void loadMessages();
 }
 
 const inbox = document.querySelector<HTMLElement>('[data-whatsapp-inbox]');

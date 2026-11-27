@@ -102,7 +102,13 @@ de círculos** dentro de `/mensajes/`. En producción, Umami registra
 `circle_request_submitted` para solicitudes nuevas y mide los pasos
 `/acompanamiento/solicitud/` y `/acompanamiento/solicitud/recibida/`.
 
-### Bandeja de WhatsApp
+### Bandeja de mensajes y solicitudes
+
+En `/mensajes/`, la pestaña **WhatsApp** muestra las conversaciones. La pestaña
+**Solicitudes** separa **Retiros** y **Círculos online**. Cada solicitud muestra
+su referencia y abre un borrador de seguimiento en el canal elegido.
+
+#### Bandeja de WhatsApp
 
 La ruta de producción para Meta es
 `https://soma-consciente.com/api/whatsapp/webhook`. En Cloudflare Pages, configurá
