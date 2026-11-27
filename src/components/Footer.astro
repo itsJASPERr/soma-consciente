@@ -1,13 +1,10 @@
 ---
 import { Icon } from 'astro-icon/components';
 import Brand from './Brand.astro';
-import { offeringUrl, offerings } from '../lib/offerings';
+import { yaninaWhatsApp } from '../lib/offerings';
 import { path } from '../lib/paths';
 import { somaInstagram } from '../lib/site-identity';
 
-const circle = offerings.find(offer => offer.slug === 'circulos');
-const circleLink = circle ? offeringUrl(circle) : undefined;
-const yaninaWhatsApp = circleLink?.match(/^https:\/\/wa\.me\/\d+(?=[?#]|$)/)?.[0];
 ---
 <footer class="site-footer">
   <div class="container footer-main">

@@ -1,4 +1,5 @@
 import type { Aula } from './content';
+import { yaninaWhatsApp } from './offerings';
 
 export type TeamPhoto = {
   src: string;
@@ -14,6 +15,8 @@ type TeamMember = {
   id: string;
   shortName: string;
   name: string;
+  email: string;
+  whatsapp?: string;
   practice: string;
   introduction: string;
   biography: string;
@@ -28,6 +31,8 @@ export const teamMembers: TeamMember[] = [
     id: 'nicole',
     shortName: 'Nicole',
     name: 'Nicole Rosignoli Miranda',
+    email: 'nicole@soma-consciente.com',
+    whatsapp: 'https://wa.me/34621076042',
     practice: 'Psicología y presencia',
     introduction: 'Aporta una mirada psicológica y corporal para reconocer lo que sentimos y respetar nuestros ritmos.',
     biography: 'Soy licenciada en Psicología y acompaño a personas adultas. Mi práctica se nutre de la Gestalt, la escucha del cuerpo y los ciclos de la naturaleza.',
@@ -46,6 +51,8 @@ export const teamMembers: TeamMember[] = [
     id: 'yanina',
     shortName: 'Yanina',
     name: 'Yanina Noelia Landriel',
+    email: 'yanina@soma-consciente.com',
+    whatsapp: yaninaWhatsApp,
     practice: 'Cuerpo, movimiento y respiración',
     introduction: 'Invita a observar la respiración y explorar el movimiento desde su recorrido en kinesiología y osteopatía.',
     biography: 'Soy licenciada en Kinesiología y Fisioterapia y me formé en osteopatía. Mi recorrido profesional y mi búsqueda personal me llevaron a explorar cómo se relacionan el movimiento, el sistema nervioso y las emociones.',
@@ -64,6 +71,7 @@ export const teamMembers: TeamMember[] = [
     id: 'nico-pacha',
     shortName: 'Nico Pacha',
     name: 'Nico Pacha',
+    email: 'nico@soma-consciente.com',
     practice: 'Caballos y consciencia',
     introduction: 'Propone aprender del encuentro con los caballos, con atención a su lenguaje y al vínculo que se construye.',
     biography: 'En el encuentro con los caballos me interesa lo que podemos escuchar más allá de las palabras. Presto atención a cómo nos acercamos, qué expresamos con el cuerpo y cómo se construye la confianza.',
@@ -82,6 +90,8 @@ export const teamMembers: TeamMember[] = [
     id: 'jasper',
     shortName: 'Jasper',
     name: 'Jasper Meyer',
+    email: 'jasper@soma-consciente.com',
+    whatsapp: 'https://wa.me/543536569598',
     practice: 'Música, círculos e integración',
     introduction: 'Comparte música, escucha y círculos de palabra para darle continuidad a lo vivido después del encuentro.',
     biography: 'Construyo tambores y acompaño espacios de escucha e integración con la voz, el ritmo, el silencio y los círculos de palabra. Mi recorrido me acercó a saberes ancestrales y a proyectos de regeneración de la tierra.',

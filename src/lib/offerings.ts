@@ -35,3 +35,6 @@ export function offeringUrl(offer: Offering) {
     return undefined;
   }
 }
+
+const circleUrl = circleOffering ? offeringUrl(circleOffering) : undefined;
+export const yaninaWhatsApp = circleUrl?.match(/^https:\/\/wa\.me\/\d+(?=[?#]|$)/)?.[0];

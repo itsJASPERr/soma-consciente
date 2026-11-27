@@ -574,7 +574,18 @@ try{
   for (const [name, shortName, id] of teamMembers) {
     await teamIndex.getByRole('link', { name: shortName, exact: true }).click();
     await page.waitForURL('**/equipo/#' + id);
-    await page.locator('#' + id + ':target').getByRole('heading', { name }).waitFor();
+    const profile = page.locator('#' + id + ':target');
+    await profile.getByRole('heading', { name }).waitFor();
+    const email = shortName.split(' ')[0].toLowerCase() + '@soma-consciente.com';
+    assert.equal(await profile.getByRole('link', { name: 'Correo electrónico de ' + shortName }).getAttribute('href'), 'mailto:' + email);
+    const whatsapp = profile.getByRole('link', { name: 'WhatsApp con ' + shortName });
+    const whatsappLinks = {
+      nicole: 'https://wa.me/34621076042',
+      yanina: await page.getByRole('contentinfo').getByRole('link', { name: 'WhatsApp con Yanina' }).getAttribute('href'),
+      jasper: 'https://wa.me/543536569598',
+    };
+    if (whatsappLinks[id]) assert.equal(await whatsapp.getAttribute('href'), whatsappLinks[id]);
+    else assert.equal(await whatsapp.count(), 0);
   }
   const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
   await verifyHeaderCta();
