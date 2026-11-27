@@ -1,5 +1,6 @@
 ---
 import OfferingAction from '../../components/OfferingAction.astro';
+import RetreatTeam from '../../components/RetreatTeam.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { offeringUrl, offerings } from '../../lib/offerings';
@@ -144,6 +145,8 @@ const registrationSteps = [
         </div>
       </div>
     </section>
+
+    <RetreatTeam />
 
     <section class="retreat-integration" aria-labelledby="integracion-title">
       <div class="retreat-inner retreat-integration__layout">

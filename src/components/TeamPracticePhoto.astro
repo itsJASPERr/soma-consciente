@@ -1,0 +1,93 @@
+---
+import SomaAulaSymbol from './SomaAulaSymbol.astro';
+import type { Aula } from '../lib/content';
+import { path } from '../lib/paths';
+import type { TeamPhoto, TeamTone } from '../lib/team';
+
+interface Props {
+  photo: TeamPhoto;
+  symbol?: Aula['symbol'];
+  tone?: TeamTone;
+  priority?: boolean;
+}
+
+const { photo, symbol, tone = 'sage', priority = false } = Astro.props;
+---
+<figure class="practice-photo" data-tone={tone}>
+  <img
+    class="practice-photo__image"
+    src={path(photo.src)}
+    alt={photo.alt}
+    width={photo.width}
+    height={photo.height}
+    style={photo.position ? { objectPosition: photo.position } : undefined}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+  />
+  <span class="practice-photo__dot" aria-hidden="true"></span>
+  {symbol && <span class="practice-photo__symbol" aria-hidden="true"><SomaAulaSymbol symbol={symbol} /></span>}
+</figure>
+
+<style>
+  .practice-photo {
+    --frame-line: #7d9483;
+    --frame-fill: #dce4d6;
+    --frame-shape: 49% 51% 49% 47% / 53% 46% 54% 47%;
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    margin: 0;
+    padding: var(--practice-photo-inset, .7rem);
+  }
+  .practice-photo[data-tone='earth'] { --frame-line: #a78971; --frame-fill: #eadccf; }
+  .practice-photo[data-tone='ochre'] { --frame-line: #ab833e; --frame-fill: #eadbb8; }
+  .practice-photo[data-tone='clay'] { --frame-line: #b47660; --frame-fill: #edd8cc; }
+  .practice-photo::before,
+  .practice-photo::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: var(--frame-shape);
+  }
+  .practice-photo::before {
+    inset: 6% 0 -1% 5%;
+    background: var(--frame-fill);
+    transform: rotate(5deg);
+  }
+  .practice-photo::after {
+    inset: 0 0 -2% 0;
+    border: 1px solid var(--frame-line);
+    transform: rotate(-6deg);
+  }
+  .practice-photo__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--practice-photo-ratio, 1.32);
+    border-radius: var(--frame-shape);
+    object-fit: cover;
+  }
+  .practice-photo__dot {
+    position: absolute;
+    inset: 25% 1% auto auto;
+    width: var(--practice-photo-dot, .8rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--frame-line);
+  }
+  .practice-photo__symbol {
+    position: absolute;
+    inset: auto 6% 2% auto;
+    display: grid;
+    place-items: center;
+    width: var(--practice-photo-symbol, 3.55rem);
+    aspect-ratio: 1;
+    padding: min(16%, calc(var(--practice-photo-symbol, 3.55rem) * .14));
+    border-radius: 50%;
+    background: #f6f1e7;
+    box-shadow: 0 3px 10px #30271915;
+  }
+  .practice-photo__symbol :global(img) { display: block; width: 100%; height: auto; }
+</style>

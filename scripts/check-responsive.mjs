@@ -207,6 +207,32 @@ try{
   assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
   const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
   assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
+  const teamMembers = [
+    ['Nicole Rosignoli Miranda', 'Nicole', 'nicole'],
+    ['Yanina Noelia Landriel', 'Yanina', 'yanina'],
+    ['Nico Pacha', 'Nico Pacha', 'nico-pacha'],
+    ['Jasper Meyer', 'Jasper', 'jasper'],
+  ];
+  await page.goto(HOST+BASE+'/encuentros/retiro-enero-2027/');
+  const retreatTeam = page.getByRole('region', { name: 'Quiénes te acompañan.' });
+  for (const [name, , id] of teamMembers) {
+    assert.equal(await retreatTeam.getByRole('link', { name }).getAttribute('href'), '/equipo/#' + id);
+  }
+  await retreatTeam.getByRole('link', { name: 'Nicole Rosignoli Miranda' }).click();
+  await page.waitForURL('**/equipo/#nicole');
+  await page.locator('#nicole:target').getByRole('heading', { name: 'Nicole Rosignoli Miranda' }).waitFor();
+  const teamIndex = page.getByRole('navigation', { name: 'Integrantes de SOMA' });
+  for (const [name, shortName, id] of teamMembers) {
+    await teamIndex.getByRole('link', { name: shortName, exact: true }).click();
+    await page.waitForURL('**/equipo/#' + id);
+    await page.locator('#' + id + ':target').getByRole('heading', { name }).waitFor();
+  }
+  const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
+  await verifyRetreatCta(page.locator('.header-cta'), 'details', 'team_header');
+  await verifyRetreatCta(teamRetreat, 'details', 'team_footer');
+  await teamRetreat.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/');
+
   await page.goto(HOST+BASE+'/enfoque/');
   const content = page.locator('main');
   await content.getByRole('link', { name: 'Ir a la Biblioteca' }).click();

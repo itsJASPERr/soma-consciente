@@ -1,70 +1,201 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
-import { loadAulas } from '../lib/content';
-import { mediaUrl } from '../lib/media';
+import TeamPracticePhoto from '../components/TeamPracticePhoto.astro';
+import { retreatCta } from '../lib/analytics';
+import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { teamMembers } from '../lib/team';
 
-const aulas = await loadAulas();
+const retreat = offerings.find((offer) => offer.slug === 'encuentro-enero');
+const retreatPage = path('/encuentros/retiro-enero-2027/');
+const heroPhoto = {
+  src: '/media/retreat/caminata-en-el-campo.webp',
+  alt: 'Personas reunidas a la sombra de los árboles al borde del campo.',
+  width: 840,
+  height: 471,
+};
 ---
-<SiteLayout title="El equipo" openJourney>
-  <section class="container journey-hero journey-hero--photo journey-hero--profile">
-    <div class="journey-hero__copy">
-      <span class="eyebrow">Equipo</span>
-      <h1>Cuatro historias. Una construcción compartida.</h1>
-      <p class="journey-lead">Cada integrante aporta su forma de mirar, escuchar y acompañar. El Núcleo es donde esas perspectivas trabajan juntas.</p>
-    </div>
-    <img class="journey-emblem" src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" />
-  </section>
-  <section class="container team-list" aria-label="Integrantes de SOMA">
-    {aulas.map((aula) => {
-      const portrait = mediaUrl(aula.portraitImage);
-      return (
-        <article class="team-profile">
-          <span class="team-profile__symbol" aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} /></span>
-          <div>
-            <h2>{aula.guide}</h2>
-            <p class="team-profile__perspective">{aula.name}</p>
-            <p>{aula.approach}</p>
-            <details>
-              <summary>Trayectoria y perspectiva</summary>
-              {portrait && <img class="team-profile__portrait" src={portrait} alt={aula.portraitAlt || 'Retrato de ' + aula.guide} loading="lazy" width="336" height="420" />}
-              {aula.qualification && <p>{aula.qualification}</p>}
-              {aula.credentials?.length > 0 && <ul class="team-credentials">{aula.credentials.map(credential => <li>{credential}</li>)}</ul>}
-              <a class="journey-link" href={path('/aulas/' + aula.slug + '/')}>Conocer su perspectiva <span aria-hidden="true">↗</span></a>
-            </details>
+<SiteLayout
+  title="Equipo SOMA"
+  description="Conocé a Nicole Rosignoli Miranda, Yanina Noelia Landriel, Nico Pacha y Jasper Meyer, las cuatro personas que acompañan los encuentros y círculos de SOMA Consciente."
+  openJourney
+  journeyAction={{ label: 'Ver el retiro', href: retreatPage, analytics: retreatCta('details', 'team_header') }}
+>
+  <div class="team-page">
+    <section class="team-hero" aria-labelledby="team-title">
+      <div class="team-container">
+        <div class="team-hero__layout">
+          <div class="team-hero__copy">
+            <p class="team-label">Equipo SOMA</p>
+            <h1 id="team-title">Cuatro miradas, <em>un mismo núcleo.</em></h1>
+            <p>Somos cuatro personas con recorridos distintos. En SOMA los ponemos en diálogo para acompañar los encuentros presenciales y darle continuidad a lo vivido en los círculos de integración online.</p>
+          </div>
+          <TeamPracticePhoto photo={heroPhoto} priority />
+        </div>
+        <nav class="team-index" aria-label="Integrantes de SOMA">
+          {teamMembers.map((member) => (
+            <a href={'#' + member.id}>
+              <SomaAulaSymbol symbol={member.symbol} />
+              <span>{member.shortName}</span>
+              <span class="team-index__arrow" aria-hidden="true">↓</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+    </section>
+
+    <section class="team-container team-profiles" aria-label="Presentaciones del equipo">
+      {teamMembers.map((member) => (
+        <article class="team-profile" id={member.id} data-tone={member.tone} aria-labelledby={member.id + '-name'}>
+          <div class="team-profile__media">
+            <TeamPracticePhoto photo={member.photo} symbol={member.symbol} tone={member.tone} />
+          </div>
+          <div class="team-profile__copy">
+            <p class="team-profile__practice">{member.practice}</p>
+            <h2 id={member.id + '-name'}>{member.name}</h2>
+            <p>{member.biography}</p>
+            <h3 class="team-label">En SOMA</h3>
+            <p>{member.contribution}</p>
           </div>
         </article>
-      );
-    })}
-  </section>
-  <section class="container journey-row">
-    <div><h2>El Núcleo es lo que construimos juntos.</h2></div>
-    <a class="btn btn--outline" href={path('/nucleo/')}>Descubrir el Núcleo <span aria-hidden="true">↗</span></a>
-  </section>
+      ))}
+    </section>
+
+    {retreat && (
+      <section class="team-retreat" aria-labelledby="team-retreat-title">
+        <div class="team-container team-retreat__layout">
+          <div>
+            <h2 id="team-retreat-title">Encontrémonos en La Falda.</h2>
+            <p>Retiro SOMA · {retreat.when} · Casa Sabia</p>
+          </div>
+          <a class="btn btn--light" href={retreatPage} {...retreatCta('details', 'team_footer')}>
+            Conocé el retiro <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
+    )}
+  </div>
 </SiteLayout>
 
 <style>
-  .team-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    column-gap: clamp(1.4rem, 4.5vw, 4rem);
+  .team-page { overflow: clip; background: #f6f1e7; color: #263a31; }
+  .team-container { width: min(1190px, calc(100% - clamp(2rem, 7vw, 6rem))); margin-inline: auto; }
+  .team-page :is(h1, h2, h3, p) { margin: 0; }
+  .team-page :is(h1, h2) { color: #203b31; line-height: 1.02; }
+  .team-page em { color: #944a36; }
+  .team-page .team-label {
+    color: #944a36;
+    font: 700 .73rem/1.4 var(--font-body, sans-serif);
+    letter-spacing: .15em;
+    text-transform: uppercase;
   }
+  .team-hero { background: radial-gradient(ellipse at 92% 4%, #f0e5d4, transparent 55%); }
+  .team-hero__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    align-items: center;
+    gap: clamp(1.5rem, 6vw, 6rem);
+    padding-block: clamp(2.65rem, 7vw, 6.5rem);
+    --practice-photo-ratio: 1.44;
+    --practice-photo-dot: 1rem;
+  }
+  .team-hero__copy h1 { margin-block: .75rem 1.15rem; font-size: clamp(2.6rem, 5.6vw, 5.15rem); }
+  .team-hero__copy h1 em { display: block; }
+  .team-hero__copy > p:last-child { max-width: 48ch; font-size: clamp(1rem, 1.38vw, 1.13rem); line-height: 1.65; }
+  .team-index {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-block: 1px solid #d9c7a9;
+  }
+  .team-index a {
+    display: grid;
+    grid-template-columns: 1.9rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .6rem;
+    min-height: 3.55rem;
+    padding: .55rem clamp(.4rem, 2vw, 1.3rem);
+    color: #203b31;
+    font-size: .92rem;
+    font-weight: 700;
+  }
+  .team-index a + a { border-inline-start: 1px solid #d9c7a9; }
+  .team-index a:hover { background: #efe4cf; }
+  .team-index :global(img) { width: 100%; height: auto; }
+  .team-index__arrow { color: #944a36; }
+
   .team-profile {
+    --team-accent: #315d49;
+    --team-tint: #e4e8db;
+    --practice-photo-ratio: 1.28;
+    position: relative;
+    isolation: isolate;
     display: grid;
-    grid-template-columns: 2.9rem minmax(0,1fr);
-    align-content: start;
-    gap: .8rem;
-    padding-block: 1.15rem;
-    border-block-start: 1px solid var(--journey-rule);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: clamp(1.5rem, 7vw, 6.8rem);
+    padding-block: clamp(2.85rem, 7.5vw, 6.5rem);
+    scroll-margin-top: 4rem;
   }
-  .team-profile h2 { margin-block-end: .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.35vw, 2.35rem); }
-  .team-profile p { margin-block-end: .55rem; }
-  .team-profile__perspective { color: var(--journey-clay); font-weight: 700; }
-  .team-profile__symbol :global(img) { display: block; inline-size: 100%; block-size: auto; }
-  .team-profile__portrait { display: block; max-inline-size: min(13rem,100%); block-size: auto; margin-block-end: .55rem; }
-  .team-profile summary { cursor: pointer; min-block-size: 44px; align-content: center; font-weight: 700; font-size: .9rem; }
-  @media (max-width: 720px) {
-    .team-list { grid-template-columns: minmax(0,1fr); }
+  .team-profile + .team-profile { border-top: 1px solid #d9c7a9; }
+  .team-profile[data-tone='earth'] { --team-accent: #704735; --team-tint: #eee1d6; }
+  .team-profile[data-tone='ochre'] { --team-accent: #79551a; --team-tint: #f1e6cf; }
+  .team-profile[data-tone='clay'] { --team-accent: #944a36; --team-tint: #efe0d4; }
+  .team-profile::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 12% auto auto -15%;
+    width: 37%;
+    height: 68%;
+    border-radius: 52% 48% 58% 43%;
+    background: var(--team-tint);
+    transform: rotate(-14deg);
+  }
+  .team-profile:nth-child(even)::before { inset-inline: auto -15%; transform: rotate(14deg); }
+  .team-profile:nth-child(even) .team-profile__media { grid-column: 2; grid-row: 1; }
+  .team-profile:nth-child(even) .team-profile__copy { grid-column: 1; grid-row: 1; }
+  .team-profile__copy { max-width: 52ch; }
+  .team-profile__copy .team-profile__practice { color: var(--team-accent); font-size: .94rem; font-weight: 700; }
+  .team-profile__copy h2 { margin-block: .38rem 1rem; font-size: clamp(2.25rem, 4.35vw, 3.95rem); }
+  .team-profile__copy .team-label { margin-block: 1.25rem .45rem; color: var(--team-accent); }
+  .team-profile__copy p { line-height: 1.64; }
+
+  .team-retreat { position: relative; isolation: isolate; overflow: clip; background: #203b31; color: #f6f1e7; }
+  .team-retreat::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 24% 4% auto auto;
+    width: min(26rem, 69%);
+    height: 140%;
+    border: 1px solid #a89161;
+    border-radius: 50%;
+    transform: rotate(-15deg);
+  }
+  .team-retreat__layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    padding-block: clamp(2.3rem, 5.7vw, 4.25rem);
+  }
+  .team-retreat h2 { margin-bottom: .55rem; color: inherit; font-size: clamp(2rem, 4.1vw, 3.4rem); }
+  .team-retreat a { min-height: 44px; }
+
+  @media (max-width: 780px) {
+    .team-hero__layout, .team-profile { grid-template-columns: minmax(0, 1fr); }
+    .team-hero__layout { --practice-photo-dot: .75rem; }
+    .team-hero__layout > :global(figure), .team-profile__media { width: min(100%, 30rem); justify-self: center; }
+    .team-profile { --practice-photo-symbol: 2.8rem; gap: 1.55rem; }
+    .team-profile:nth-child(even) :is(.team-profile__media, .team-profile__copy) { grid-area: auto; }
+    .team-profile::before { width: 56%; height: min(12rem, 45%); }
+  }
+  @media (max-width: 560px) {
+    .team-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .team-index a:nth-child(n) { border-inline-start: 0; }
+    .team-index a:nth-child(even) { border-inline-start: 1px solid #d9c7a9; }
+    .team-index a:nth-child(n + 3) { border-top: 1px solid #d9c7a9; }
   }
 </style>

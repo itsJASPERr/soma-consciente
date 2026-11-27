@@ -120,7 +120,7 @@ suceden fuera del sitio.
 | Evento | Qué registra | `placement` |
 | --- | --- | --- |
 | `retreat_listing_clicked` | Clic en «Ver el encuentro» del encabezado que abre el listado | `site_header` |
-| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `integration_page` |
+| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `integration_page`, `team_header`, `team_footer` |
 | `retreat_registration_clicked` | Clic en «Consultar por un lugar» que lleva a la sección de inscripción | `retreat_header`, `retreat_hero` |
 | `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `events_header`, `event_card_registration`, `retreat_registration` |
 | `retreat_schedule_clicked` | Clic en «Ver el cronograma» | `retreat_hero` |
