@@ -1,0 +1,361 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+<SiteLayout
+  title="Mensajes de WhatsApp"
+  description="Conversaciones de WhatsApp de SOMA, agrupadas por remitente."
+  noIndex
+  openJourney
+>
+  <section class="section wa-inbox" data-whatsapp-inbox aria-labelledby="inbox-title">
+    <div class="container">
+      <header class="inbox-heading">
+        <div>
+          <span class="eyebrow">WhatsApp</span>
+          <h1 id="inbox-title">Mensajes</h1>
+        </div>
+        <div class="inbox-actions" data-inbox-actions hidden>
+          <label class="inbox-auto-refresh">
+            <input type="checkbox" role="switch" autocomplete="off" data-auto-refresh />
+            <span class="inbox-switch-track" aria-hidden="true"></span>
+            <span>Autoactualizar</span>
+          </label>
+          <button class="inbox-button" type="button" data-refresh>Actualizar</button>
+        </div>
+      </header>
+      <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
+
+      <div class="inbox-layout" data-inbox-layout hidden>
+        <aside class="inbox-senders" aria-labelledby="inbox-senders-title">
+          <h2 id="inbox-senders-title">Remitentes</h2>
+          <ul class="sender-list" data-senders></ul>
+        </aside>
+
+        <section class="inbox-conversation" id="whatsapp-conversation" aria-labelledby="chat-title">
+          <header class="chat-heading">
+            <button class="chat-back" type="button" data-back><span aria-hidden="true">←</span> Remitentes</button>
+            <h2 id="chat-title" data-chat-title tabindex="-1"></h2>
+            <a class="inbox-button" target="_blank" rel="noopener noreferrer" data-whatsapp hidden>
+              Responder en WhatsApp <span aria-hidden="true">↗</span>
+            </a>
+          </header>
+
+          <ol class="chat-timeline" aria-label="Mensajes de la conversación" tabindex="0" data-timeline></ol>
+
+          <p class="chat-note" data-reply-note hidden></p>
+          <form class="reply-form" data-reply-form hidden>
+            <label for="chat-reply">Responder</label>
+            <textarea id="chat-reply" name="reply" rows="2" maxlength="4096" required></textarea>
+            <div class="reply-actions">
+              <p data-reply-status role="status"></p>
+              <button class="inbox-button reply-send" type="submit" disabled>Enviar respuesta</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </section>
+</SiteLayout>
+
+<script>
+  import '../lib/whatsapp-inbox';
+</script>
+
+<style is:global>
+  .wa-inbox { padding-block: var(--journey-spacing); }
+  .wa-inbox [hidden] { display: none !important; }
+
+  .wa-inbox .inbox-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+    margin-block-end: clamp(1.15rem, 3vw, 2rem);
+  }
+
+  .wa-inbox .inbox-heading h1 {
+    margin: 4px 0 0;
+    color: var(--pine-dark);
+    font-size: clamp(2.65rem, 5vw, 4.15rem);
+    line-height: 1;
+  }
+
+  .wa-inbox .inbox-actions,
+  .wa-inbox .inbox-auto-refresh {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wa-inbox .inbox-auto-refresh {
+    position: relative;
+    min-block-size: 44px;
+    color: var(--ink);
+    font: 650 .875rem/1.3 var(--font-body);
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-auto-refresh input {
+    position: absolute;
+    inset: 0 auto 0 0;
+    inline-size: 36px;
+    block-size: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-switch-track {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 36px;
+    block-size: 22px;
+    padding: 2px;
+    border: 1px solid var(--sage);
+    border-radius: 999px;
+    background: var(--paper);
+  }
+
+  .wa-inbox .inbox-switch-track::before {
+    content: '';
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track {
+    border-color: var(--pine-fill);
+    background: var(--pine-fill);
+  }
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track::before {
+    margin-inline-start: auto;
+    background: var(--on-pine);
+  }
+  .wa-inbox .inbox-auto-refresh input:focus-visible + .inbox-switch-track {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .wa-inbox .inbox-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-block-size: 44px;
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--cream);
+    color: var(--pine-dark);
+    font: 700 .875rem/1.3 var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-button:hover:not(:disabled) {
+    border-color: var(--sage);
+    background: var(--surface-sage);
+  }
+  .wa-inbox .inbox-button:disabled { opacity: .6; cursor: default; }
+  .wa-inbox :is(button, a, textarea, ol):focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .wa-inbox .inbox-status { margin: 0 0 12px; color: var(--muted); }
+
+  .wa-inbox .inbox-layout {
+    display: grid;
+    grid-template-columns: minmax(218px, .8fr) minmax(0, 2fr);
+    min-block-size: 480px;
+    block-size: clamp(480px, 69svh, 750px);
+    border: 1px solid var(--line);
+    border-radius: 1.35rem;
+    overflow: hidden;
+    background: var(--surface-editorial);
+  }
+
+  .wa-inbox .inbox-senders,
+  .wa-inbox .inbox-conversation {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .wa-inbox .inbox-senders { border-inline-end: 1px solid var(--line); }
+
+  .wa-inbox .inbox-senders h2 {
+    margin: 0;
+    padding: 15px 18px;
+    border-block-end: 1px solid var(--line);
+    color: var(--ink);
+    font: 700 1rem/1.35 var(--font-body);
+  }
+
+  .wa-inbox .sender-list,
+  .wa-inbox .chat-timeline {
+    flex: 1;
+    min-block-size: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .wa-inbox .sender-list button {
+    display: grid;
+    gap: 3px;
+    inline-size: 100%;
+    padding: 12px 16px 12px 15px;
+    border: 0;
+    border-block-end: 1px solid var(--line);
+    border-inline-start: 3px solid transparent;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.35;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .wa-inbox .sender-list button:hover,
+  .wa-inbox .sender-list button[aria-pressed="true"] {
+    background: var(--surface-sage);
+  }
+
+  .wa-inbox .sender-list button[aria-pressed="true"] { border-inline-start-color: var(--pine); }
+  .wa-inbox .sender-list button:focus-visible { outline-offset: -3px; }
+  .wa-inbox .sender-list strong { overflow-wrap: anywhere; }
+
+  .wa-inbox .sender-preview {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: .875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wa-inbox .sender-time { color: var(--muted); font-size: .75rem; }
+
+  .wa-inbox .chat-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 18px;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .wa-inbox .chat-heading h2 {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font: 700 1.125rem/1.35 var(--font-body);
+  }
+
+  .wa-inbox .chat-back { display: none; }
+
+  .wa-inbox .chat-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 18px;
+    background: var(--paper);
+  }
+
+  .wa-inbox .chat-message {
+    max-inline-size: min(86%, 34rem);
+    padding: 8px 11px;
+    border-radius: 12px;
+    background: var(--white);
+    overflow-wrap: anywhere;
+  }
+
+  .wa-inbox .chat-message--outbound {
+    align-self: flex-end;
+    background: var(--surface-sage);
+  }
+
+  .wa-inbox .chat-message p { margin: 0; white-space: pre-wrap; }
+  .wa-inbox .chat-message-empty { color: var(--muted); font-style: italic; }
+
+  .wa-inbox .chat-message-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    margin-block-start: 3px;
+    color: var(--muted);
+    font-size: .75rem;
+  }
+
+  .wa-inbox .reply-form,
+  .wa-inbox .chat-note {
+    margin: 0;
+    padding: 10px 18px 12px;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .wa-inbox .chat-note,
+  .wa-inbox .reply-actions p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .875rem;
+  }
+
+  .wa-inbox .reply-form label { display: block; font-weight: 700; }
+  .wa-inbox .reply-form textarea {
+    display: block;
+    inline-size: 100%;
+    min-block-size: 64px;
+    max-block-size: 180px;
+    margin-block: 4px 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--ink);
+    font: inherit;
+    resize: vertical;
+  }
+
+  .wa-inbox .reply-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .wa-inbox .reply-actions p:empty { display: none; }
+  .wa-inbox .reply-send { border-color: transparent; background: var(--pine-fill); color: var(--on-pine); }
+  .wa-inbox .reply-send:hover:not(:disabled) { border-color: transparent; background: var(--pine-fill-hover); }
+
+  @media (max-width: 700px) {
+    .wa-inbox .inbox-heading { flex-wrap: wrap; }
+    .wa-inbox .inbox-actions { flex: 1 1 100%; justify-content: space-between; }
+    .wa-inbox .inbox-layout { grid-template-columns: minmax(0, 1fr); }
+    .wa-inbox .inbox-senders { border-inline-end: 0; }
+    .wa-inbox .inbox-layout:not([data-viewing-chat]) .inbox-conversation,
+    .wa-inbox .inbox-layout[data-viewing-chat] .inbox-senders { display: none; }
+
+    .wa-inbox .chat-back {
+      display: block;
+      flex-basis: 100%;
+      min-block-size: 44px;
+      padding: 7px 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: 650 .875rem var(--font-body);
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .wa-inbox :is(.chat-heading, .chat-timeline, .reply-form, .chat-note) { padding-inline: 12px; }
+  }
+</style>

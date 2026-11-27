@@ -161,8 +161,18 @@ def verify_preview(origin):
 
     def check_preview_page(path):
         url = urljoin(origin, quote(path))
-        html, headers = fetch(url, 'text/html')
-        assert headers.get_content_type() == 'text/html', f'{url} did not serve HTML.'
+        try:
+            html, headers = fetch(url, 'text/html')
+        except HTTPError as error:
+            try:
+                # The inbox can refuse preview access when its password is unavailable.
+                if path != 'mensajes/' or error.code != 403:
+                    raise
+                html = error.read().decode(error.headers.get_content_charset() or 'utf-8')
+            finally:
+                error.close()
+        else:
+            assert headers.get_content_type() == 'text/html', f'{url} did not serve HTML.'
         check_no_analytics(html, url)
 
     with ThreadPoolExecutor(max_workers=4) as pool:

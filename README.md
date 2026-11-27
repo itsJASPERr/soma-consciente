@@ -90,6 +90,54 @@ propuesta carece de enlace directo, su formulario guarda una solicitud en `offer
 puede consultar esa tabla en D1 para responder. La integración de inscripción
 y cupos con Reservas se sigue en #34.
 
+### Bandeja de WhatsApp
+
+La ruta de producción para Meta es
+`https://soma-consciente.com/api/whatsapp/webhook`. En Cloudflare Pages, configurá
+`WHATSAPP_VERIFY_TOKEN` para verificar el callback y `WHATSAPP_APP_SECRET` con el
+App Secret de la misma app de Meta para autenticar las entregas. Configurá ambos
+como secretos del entorno correspondiente y desplegá de nuevo. La bandeja
+`/mensajes/` usa el secreto `MENSJAES_PASSWORD` existente.
+
+En Meta, suscribí el campo `messages` y comprobá que la app esté suscrita a la
+cuenta de WhatsApp Business (WABA) que contiene el número receptor. La
+verificación del callback y la suscripción de la cuenta son comprobaciones
+distintas. Consultá la [suscripción de apps de la WABA](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/subscribed_apps/).
+
+Para probar la entrega real, enviá un mensaje nuevo al número de WhatsApp
+Business y actualizá la bandeja. En Cloudflare, el log del webhook registra
+conteos y fallos de almacenamiento sin incluir contenido ni remitentes.
+El webhook devuelve `401` si la firma falta o no coincide y `503` si falta el App
+Secret o D1 no puede guardar. Los estados de entrega se confirman sin crear
+mensajes en la bandeja.
+
+Para revisar D1 sin leer mensajes ni remitentes:
+
+```bash
+pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1 d1 execute WAITLIST_DB \
+  --config wrangler.d1.toml --env production --remote \
+  --command 'SELECT COUNT(*) AS message_count, MAX(received_at) AS latest_received_at FROM whatsapp_inbound_messages'
+```
+
+Las pruebas locales se ejecutan con `pnpm run test:whatsapp`.
+
+#### Respuestas manuales desde Mensajes
+
+Abrí un mensaje en la bandeja protegida y escribí una respuesta con **Responder**.
+Meta permite texto libre durante las 24 horas posteriores al último mensaje de
+esa persona. La bandeja muestra el historial de los envíos intentados. **Aceptada
+por WhatsApp** confirma que Meta aceptó el envío. Si el envío queda sin confirmar,
+revisá WhatsApp antes de reenviarlo. La API conserva el intento y evita repetirlo
+cuando el navegador vuelve a consultar el mismo envío.
+
+El entorno necesita el ID de la línea de WhatsApp Business en
+`WHATSAPP_PHONE_NUMBER_ID` y un token de Meta con permiso de mensajería en
+`WHATSAPP_TOKEN`. Configurá `WHATSAPP_MESSAGING_ACCOUNT_ID` para seleccionar
+explícitamente la cuenta de mensajería vinculada a esa línea.
+Activá `WHATSAPP_REPLIES_ENABLED=true` cuando esos valores
+correspondan al entorno. Mantené los secretos de producción fuera de las vistas
+previas. Las migraciones se aplican en el despliegue habitual de Pages.
+
 ### Medición del programa online
 
 En Umami, medí el embudo desde la portada hasta la lista de espera del

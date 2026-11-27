@@ -1,5 +1,15 @@
 {
   "version": 1,
-  "include": ["/api/waitlist", "/api/waitlist/", "/media/retreat/reels/video/*"],
+  "include": [
+    "/api/waitlist",
+    "/api/waitlist/",
+    "/api/whatsapp/webhook",
+    "/api/whatsapp/webhook/",
+    "/api/whatsapp/messages",
+    "/api/whatsapp/messages/",
+    "/mensajes",
+    "/mensajes/",
+    "/media/retreat/reels/video/*"
+  ],
   "exclude": []
 }

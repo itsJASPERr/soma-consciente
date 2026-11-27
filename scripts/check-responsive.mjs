@@ -20,6 +20,7 @@ const paths=[
  '/enfoque/',
  '/nucleo/',
  '/equipo/',
+ '/mensajes/',
  '/politica-de-privacidad/',
  '/terminos-y-condiciones/',
  '/biblioteca/',
@@ -73,7 +74,7 @@ try{
           '.journey-hero h1','.journey-row h2','.journey-resource-list a',
           '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
-          '.page-hero h1','.aula-hero h1','.course-hero h1',
+          '.page-hero h1','.aula-hero h1','.course-hero h1','.wa-inbox h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
           '.section-head h2','.course-outline__heading-copy strong'
         ];

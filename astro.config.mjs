@@ -7,7 +7,10 @@ export default defineConfig({
   // No base path: the custom domain serves SOMA at /, not /soma-consciente/.
   output: 'static',
   trailingSlash: 'always',
-  integrations: [icon(), sitemap({
-    filter: page => new URL(page).pathname !== '/terminos-y-condiciones/',
-  })]
+  integrations: [
+    icon(),
+    sitemap({
+      filter: page => !['/mensajes/', '/terminos-y-condiciones/'].includes(new URL(page).pathname),
+    }),
+  ],
 });
