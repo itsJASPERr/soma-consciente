@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequest } from '../functions/api/waitlist.ts';
-import { offeringConsentVersion, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
+import { offeringConsentVersion, retreatConsentVersion, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 const origin = 'https://www.soma-consciente.com';
 const url = origin + '/api/waitlist';
@@ -15,7 +15,7 @@ database.prepare('INSERT INTO waitlist_signups (channel, contact, consent_versio
 database.exec(readFileSync(new URL('../migrations/0002_waitlist_name.sql', import.meta.url), 'utf8'));
 database.exec(readFileSync(new URL('../migrations/0003_offering_requests.sql', import.meta.url), 'utf8'));
 for (const file of ['0004_whatsapp_inbound_messages.sql', '0005_whatsapp_outbound_replies.sql',
-  '0006_whatsapp_reply_diagnostics.sql', '0007_retreat_requests.sql']) {
+  '0006_whatsapp_reply_diagnostics.sql', '0007_retreat_requests.sql', '0008_retreat_rebates.sql']) {
   database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
 }
 const selectSignup = database.prepare('SELECT name, consent_version, consented_at FROM waitlist_signups WHERE contact = ?');
@@ -107,7 +107,11 @@ try {
     { offering: 'encuentro-febrero', name: 'María Pérez', consent_version: offeringConsentVersion },
   ]);
   assert.equal(database.prepare('SELECT COUNT(*) AS total FROM waitlist_signups').get().total, 3);
-  const retreat = { ...request, paymentPlan: '2_payments' };
+  const retreat = { ...request, paymentPlan: '2_payments', consent: retreatConsentVersion, rebates: ['with_friend', 'own_tent'] };
+  assert.equal(await submit({ ...retreat, consent: offeringConsentVersion }), 400);
+  assert.equal(await submit({ ...retreat, rebates: ['unknown'] }), 400);
+  assert.equal(await submit({ ...retreat, rebates: ['own_tent', 'own_tent'] }), 400);
+  assert.equal(await submit({ ...retreat, paymentPlan: undefined }), 400);
   assert.equal(await submit({ ...retreat, offering: 'circulos' }), 400);
   assert.equal(await submit({ ...retreat, paymentPlan: 'fake' }), 400);
   const first = await post(retreat);
@@ -115,10 +119,11 @@ try {
   const receipt = await first.json();
   assert.match(receipt.reference, /^SOMA-[0-9A-F]{12}$/);
   assert.equal(receipt.paymentPlan, '2_payments');
-  const duplicate = await post({ ...retreat, name: 'Changed', paymentPlan: '4_payments' });
+  assert.deepEqual(receipt.rebates, ['with_friend', 'own_tent']);
+  const duplicate = await post({ ...retreat, name: 'Changed', paymentPlan: '4_payments', rebates: [] });
   assert.equal(duplicate.status, 200);
   assert.deepEqual(await duplicate.json(), receipt);
-  const february = await post({ ...retreat, offering: 'encuentro-febrero', paymentPlan: 'undecided' });
+  const february = await post({ ...retreat, offering: 'encuentro-febrero', paymentPlan: 'undecided', rebates: [] });
   assert.equal(february.status, 201);
   assert.notEqual((await february.json()).reference, receipt.reference);
   assert.equal(database.prepare('SELECT name FROM offering_requests WHERE reference = ?').get(receipt.reference).name, 'María Pérez');

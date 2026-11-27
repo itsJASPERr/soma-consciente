@@ -233,6 +233,9 @@ try{
   const januaryEdition = 'retiro-enero-2027';
   const februaryEdition = 'retiro-febrero-2027';
   const februaryPath = '/encuentros/' + februaryEdition + '/';
+  const januaryRequest = '/encuentros/' + januaryEdition + '/solicitud/';
+  const februaryRequest = februaryPath + 'solicitud/';
+  const selectedPayment = dialog => dialog.locator('input[name="payment-plan"]:checked').inputValue();
   const verifyRetreatCta = async (link, action, placement, edition) => {
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
     assert.equal(await link.getAttribute('data-umami-event-placement'), hasUmami ? placement : null);
@@ -282,13 +285,38 @@ try{
   assert.equal(retreatLink.origin, 'https://wa.me');
   assert.match(retreatLink.searchParams.get('text'), /23 y 24 de enero/);
   if (hasRetreatRequests) {
+    const originalViewport = page.viewportSize();
+    await page.setViewportSize({ width: 320, height: 570 });
     const requestButton = retreatHero.getByRole('button', { name: 'Solicitar un lugar' });
     await verifyRetreatCta(requestButton, 'registration', 'retreat_hero', januaryEdition);
     await requestButton.click();
     const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
-    assert.equal(await dialog.getByLabel('Preferencia de pago').inputValue(), 'undecided');
-    await dialog.getByRole('button', { name: 'Cerrar' }).click();
+    assert.equal(await selectedPayment(dialog), 'undecided');
+    await page.waitForURL('**' + januaryRequest);
+    const layout = await dialog.evaluate(element => {
+      const body = element.querySelector('[role="region"]');
+      const close = element.querySelector('button[aria-label="Cerrar"]');
+      const startTop = close.getBoundingClientRect().top;
+      body.scrollTop = body.scrollHeight;
+      return {
+        scrolled: body.scrollTop > 0,
+        headerStayed: Math.abs(close.getBoundingClientRect().top - startTop) < 1,
+        modalClips: getComputedStyle(element).overflow === 'hidden',
+        scrollbarHidden: getComputedStyle(body).scrollbarWidth === 'none',
+        fitsWidth: body.scrollWidth <= body.clientWidth,
+      };
+    });
+    assert.deepEqual(layout, { scrolled: true, headerStayed: true, modalClips: true, scrollbarHidden: true, fitsWidth: true });
+    await page.waitForFunction(() => !document.querySelector('dialog[open]').getAnimations().length);
+    const closing = await dialog.evaluate(element => {
+      element.querySelector('button[aria-label="Cerrar"]').click();
+      return element.open && element.hasAttribute('data-closing') &&
+        element.getAnimations().some(animation => animation.transitionProperty === 'opacity');
+    });
+    assert.ok(closing, 'Close should leave the dialog open for its opacity transition');
     await dialog.waitFor({ state: 'hidden' });
+    await page.waitForURL('**/encuentros/' + januaryEdition + '/#cronograma');
+    await page.setViewportSize(originalViewport);
   }
   const pricing = page.locator('#inversion');
   await retreatHero.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
@@ -319,7 +347,7 @@ try{
     await page.route(endpoint, async route => {
       submissions.push(route.request().postDataJSON());
       const status = [503, 201, 200][submissions.length - 1];
-      await route.fulfill({ status, json: status === 503 ? { error: 'unavailable' } : { reference, paymentPlan: '2_payments' } });
+      await route.fulfill({ status, json: status === 503 ? { error: 'unavailable' } : { reference, paymentPlan: '2_payments', rebates: ['with_friend', 'own_tent'] } });
     });
 
     const plan = pricing.getByRole('button', { name: 'Elegir este plan · 2 pagos' });
@@ -327,14 +355,19 @@ try{
       await plan.click();
       const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
       await dialog.getByText(/23 y 24 de enero/).waitFor();
-      assert.equal(await dialog.getByLabel('Preferencia de pago').inputValue(), '2_payments');
+      assert.equal(await selectedPayment(dialog), '2_payments');
       assert.equal(await dialog.getByRole('radio', { name: 'WhatsApp' }).isChecked(), true);
       await dialog.getByLabel('Tu nombre').fill('Persona de prueba');
       await dialog.getByRole('radio', { name: 'Correo electrónico' }).check();
       await dialog.getByLabel('Tu correo electrónico').fill('retreat-test@example.com');
+      await dialog.getByRole('checkbox', { name: /10% de descuento/ }).check();
+      await dialog.getByRole('checkbox', { name: /50.000 de descuento/ }).check();
+      const legal = dialog.locator('#retreat-request-legal');
+      assert.equal(await legal.getByRole('link', { name: 'Términos y condiciones' }).getAttribute('href'), '/terminos-y-condiciones/');
+      assert.equal(await legal.getByRole('link', { name: 'Política de privacidad' }).getAttribute('href'), '/politica-de-privacidad/');
       const send = dialog.getByRole('button', { name: 'Enviar solicitud' });
       assert.equal(await send.isDisabled(), true);
-      await dialog.getByRole('checkbox').check();
+      await dialog.getByRole('checkbox', { name: /Acepto que SOMA/ }).check();
       await send.click();
       return dialog;
     };
@@ -345,6 +378,7 @@ try{
     await dialog.getByRole('button', { name: 'Enviar solicitud' }).click();
     const receipt = page.getByRole('dialog', { name: 'Recibimos tu solicitud' });
     await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.waitForURL('**' + januaryRequest + 'recibida/');
     assert.equal(await receipt.getByRole('button', { name: 'Enviar solicitud' }).count(), 0);
     await receipt.getByText(/te va a contactar por correo electrónico/).waitFor();
     const handoff = receipt.getByRole('link', { name: 'Continuar por WhatsApp' });
@@ -353,10 +387,11 @@ try{
     assert.equal(prepared.origin, retreatLink.origin);
     assert.equal(prepared.pathname, retreatLink.pathname);
     const message = prepared.searchParams.get('text');
-    for (const detail of [reference, '23 y 24 de enero', '2 cuotas de $330.000']) assert.ok(message.includes(detail));
+    for (const detail of [reference, '23 y 24 de enero', '2 cuotas de $330.000', '10% de descuento', '$50.000 de descuento']) assert.ok(message.includes(detail));
     assert.ok(!message.includes('retreat-test@example.com'));
     assert.equal(submissions[1].offering, 'encuentro-enero');
     assert.equal(submissions[1].paymentPlan, '2_payments');
+    assert.deepEqual(submissions[1].rebates, ['with_friend', 'own_tent']);
     const expectedEvents = hasUmami
       ? [['retreat_request_submitted', { channel: 'email', retreat_edition: januaryEdition, payment_plan: '2_payments' }]]
       : [];
@@ -367,7 +402,11 @@ try{
     await openRequest();
     await receipt.getByText(reference, { exact: true }).waitFor();
     assert.deepEqual(await trackerEvents(), expectedEvents);
-    await receipt.getByRole('button', { name: 'Cerrar' }).click();
+    await page.reload();
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.goBack();
+    await receipt.waitFor({ state: 'hidden' });
+    await page.waitForURL('**/encuentros/' + januaryEdition + '/#cronograma');
     await page.unroute(endpoint);
   }
   for (const text of [
@@ -397,7 +436,7 @@ try{
   await verifyRetreatCta(cardRegistration, hasRetreatRequests ? 'registration' : 'whatsapp', 'event_card_registration', januaryEdition);
   await verifyHeaderCta();
   const encounterLink = retreatLink;
-  assert.equal(await cardRegistration.getAttribute('href'), hasRetreatRequests ? '/encuentros/' + januaryEdition + '/#participar' : encounterLink.href);
+  assert.equal(await cardRegistration.getAttribute('href'), hasRetreatRequests ? januaryRequest : encounterLink.href);
   const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
   assert.equal(doorLink.pathname, encounterLink.pathname);
   assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
@@ -407,7 +446,7 @@ try{
   await verifyRetreatCta(februaryDetails, 'details', 'event_card_details', februaryEdition);
   await verifyRetreatCta(februaryRegistration, hasRetreatRequests ? 'registration' : 'whatsapp', 'event_card_registration', februaryEdition);
   const februaryRegistrationUrl = await februaryRegistration.getAttribute('href');
-  if (hasRetreatRequests) assert.equal(februaryRegistrationUrl, februaryPath + '#participar');
+  if (hasRetreatRequests) assert.equal(februaryRegistrationUrl, februaryRequest);
   await februaryDetails.click();
   await page.waitForURL('**' + februaryPath);
   await page.getByRole('heading', { name: 'Lunes 15' }).waitFor();
@@ -420,13 +459,14 @@ try{
   if (!hasRetreatRequests) assert.equal(februaryWhatsapp.href, februaryRegistrationUrl);
   const februaryPricing = page.locator('.retreat-plan__action');
   assert.equal(await februaryPricing.count(), hasRetreatRequests ? 4 : 0);
-  await page.getByText('$610.000', { exact: true }).waitFor();
-  await page.getByText('Total $740.000', { exact: true }).waitFor();
+  await page.locator('#inversion').getByText('$610.000', { exact: true }).waitFor();
+  await page.locator('#inversion').getByText('Total $740.000', { exact: true }).waitFor();
   if (hasRetreatRequests) {
-    await page.locator('#participar').getByRole('button', { name: 'Solicitar un lugar' }).click();
+    await page.goto(HOST + februaryRequest + 'recibida/');
+    await page.waitForURL('**' + februaryRequest);
     const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
     await dialog.getByText(/15 y 16 de febrero/).waitFor();
-    assert.equal(await dialog.getByLabel('Preferencia de pago').inputValue(), 'undecided');
+    assert.equal(await selectedPayment(dialog), 'undecided');
     await dialog.getByRole('button', { name: 'Cerrar' }).click();
   }
   await page.goto(HOST + BASE + '/encuentros/');

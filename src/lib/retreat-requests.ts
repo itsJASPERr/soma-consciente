@@ -5,6 +5,11 @@ export const retreatPaymentPlans = [
   { id: '4_payments', label: '4 pagos', payments: 4, amount: 185000 },
 ] as const;
 
+export const retreatRebates = [
+  { id: 'with_friend', label: 'Inscripción con un amigo o una amiga', discount: '10% de descuento' },
+  { id: 'own_tent', label: 'Alojamiento en carpa propia', discount: '$50.000 de descuento' },
+] as const;
+
 export const undecidedPayment = 'undecided';
 export const retreatReference = /\bSOMA-[0-9A-F]{12}\b/i;
 

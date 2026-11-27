@@ -85,7 +85,7 @@ aplicar las migraciones al destino respectivo.
 
 La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
 comunidad**. En las páginas del retiro, **Solicitar un lugar** guarda la fecha,
-el canal de contacto y la preferencia de pago en `offering_requests`. La
+el canal de contacto, la preferencia de pago y las promociones consultadas en `offering_requests`. La
 confirmación muestra una referencia y permite continuar por WhatsApp con un
 mensaje preparado. Si el webhook recibe esa referencia, asocia el mensaje a
 la solicitud. El equipo puede consultar los pedidos en **Solicitudes de retiro**
@@ -93,7 +93,8 @@ dentro de `/mensajes/`. El sistema de cupos y reservas se sigue en #34.
 
 El evento de Umami `retreat_request_submitted` se registra en producción al
 guardar una solicitud nueva. Incluye solo la edición, el canal y la opción de
-pago. Las vistas previas no cargan Umami.
+pago. Umami también mide los pasos por URL en `/solicitud/` y
+`/solicitud/recibida/` dentro de cada edición. Las vistas previas no cargan Umami.
 
 ### Bandeja de WhatsApp
 

@@ -1,10 +1,11 @@
 import { retreatEditions } from './offerings';
-import { retreatPaymentLabel, retreatPaymentPlans } from './retreat-requests';
+import { retreatPaymentLabel, retreatPaymentPlans, retreatRebates } from './retreat-requests';
 
 type RetreatRequest = {
   reference: string;
   offering: string;
   payment_plan: string;
+  rebates: string[];
   name: string;
   channel: 'whatsapp' | 'email';
   contact: string;
@@ -35,6 +36,7 @@ if (panel && list && status && refresh) {
         details.textContent = [
           edition?.when ?? request.offering,
           plan ? retreatPaymentLabel(plan) : 'Sin preferencia de pago',
+          ...retreatRebates.filter(rebate => request.rebates.includes(rebate.id)).map(rebate => rebate.label),
           request.whatsapp_received ? 'Mensaje de WhatsApp recibido' : '',
         ].filter(Boolean).join(' · ');
         const contact = document.createElement('a');

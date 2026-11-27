@@ -26,7 +26,10 @@ export default defineConfig({
   integrations: [
     icon(),
     sitemap({
-      filter: page => !excludedPaths.has(new URL(page).pathname),
+      filter: page => {
+        const pathname = new URL(page).pathname;
+        return !excludedPaths.has(pathname) && !/^\/encuentros\/[^/]+\/solicitud\//.test(pathname);
+      },
     }),
   ],
 });

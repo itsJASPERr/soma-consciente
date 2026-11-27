@@ -81,7 +81,7 @@ const circlePhoto = getOnlineCirclePhoto(home);
                   <div class="event-card__actions">
                     <a class="btn event-card__details" href={path(event.href)} {...retreatCta('details', 'event_card_details', event.pageSlug)}>Ver programa y precios <span aria-hidden="true">↗</span></a>
                     {requestsEnabled ? (
-                      <a class="btn btn--outline" href={path(event.href + '#participar')}
+                      <a class="btn btn--outline" href={path(event.href + 'solicitud/')}
                         {...retreatCta('registration', 'event_card_registration', event.pageSlug)}
                       >Solicitar un lugar <span aria-hidden="true">↗</span></a>
                     ) : (

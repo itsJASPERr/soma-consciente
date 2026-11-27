@@ -4,7 +4,7 @@ type Context = {
   request: Request;
   env: {
     MENSJAES_PASSWORD?: string;
-    WAITLIST_DB?: { prepare(sql: string): { all(): Promise<{ results?: unknown[] }> } };
+    WAITLIST_DB?: { prepare(sql: string): { all(): Promise<{ results?: { rebates: string | null }[] }> } };
   };
 };
 
@@ -18,11 +18,13 @@ export async function onRequestGet({ request, env }: Context) {
 
   try {
     const { results } = await env.WAITLIST_DB.prepare(
-      'SELECT reference, offering, payment_plan, name, channel, contact, consented_at, ' +
+      'SELECT reference, offering, payment_plan, name, channel, contact, rebates, ' +
       'EXISTS (SELECT 1 FROM whatsapp_inbound_messages WHERE retreat_request_reference = offering_requests.reference) AS whatsapp_received ' +
       'FROM offering_requests WHERE reference IS NOT NULL ORDER BY rowid DESC LIMIT 100',
     ).all();
-    return Response.json({ requests: results ?? [] }, { headers });
+    return Response.json({
+      requests: (results ?? []).map(row => ({ ...row, rebates: JSON.parse(row.rebates ?? '[]') })),
+    }, { headers });
   } catch {
     return Response.json({ error: 'unavailable' }, { status: 503, headers });
   }

@@ -21,6 +21,7 @@ for (const file of [
   '0005_whatsapp_outbound_replies.sql',
   '0006_whatsapp_reply_diagnostics.sql',
   '0007_retreat_requests.sql',
+  '0008_retreat_rebates.sql',
 ]) {
   database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
 }
@@ -363,6 +364,7 @@ try {
   const { requests } = await requestList.json();
   assert.equal(requests.length, 1);
   assert.equal(requests[0].reference, reference);
+  assert.deepEqual(requests[0].rebates, []);
   assert.equal(requests[0].whatsapp_received, 1);
   console.log('PASS: signed WhatsApp deliveries store once, including sender IDs, mixed batches and media captions.');
 
