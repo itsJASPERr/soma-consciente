@@ -77,24 +77,46 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
       <div class="container retreat-dates">
         <h2>Próximas fechas</h2>
         <div class="event-grid">
-          {retreatEvents.map((event, index) => (
-            <section class="event-card" aria-labelledby={event.slug + '-when'}>
-              {index === 0 && <a class="event-card__open" href={path('/encuentros/retiro-enero-2027/')}>Ver el recorrido del 23 y 24 de enero</a>}
-              <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{retreatDates[index]?.language || 'Español'}</span></p>
-              <p class="event-meta"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong id={event.slug + '-when'}>{event.when}</strong></p>
-              {event.venue && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{event.venue}</span></p>}
-              {event.details && (
-                <div class="event-benefit">
-                  <h3>Qué incluye</h3>
-                  <p>{event.details}</p>
-                  <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+          {retreatEvents.map((event, index) => {
+            const featured = index === 0;
+            return (
+              <section class:list={['event-card', { 'event-card--featured': featured }]} aria-labelledby={event.slug + '-card-title'}>
+                <div class="event-card__content">
+                  <p class="event-meta event-card__date"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong>{event.when}</strong></p>
+                  <h3 id={event.slug + '-card-title'}>
+                    {featured ? <>Cuerpo, respiración <em>y naturaleza</em></> : event.title}
+                  </h3>
+                  <div class="event-card__facts">
+                    {event.venue && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{event.venue}</span></p>}
+                    <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{retreatDates[index]?.language || 'Español'}</span></p>
+                  </div>
+                  {event.details && (
+                    <div class="event-benefit">
+                      <h4>Qué incluye</h4>
+                      <p>{event.details}</p>
+                      <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+                    </div>
+                  )}
+                  <div class="event-card__actions">
+                    {featured && <a class="btn event-card__details" href={path('/encuentros/retiro-enero-2027/')}>Ver programa y precios <span aria-hidden="true">↗</span></a>}
+                    <OfferingAction offer={event} requestsEnabled={requestsEnabled} class={featured ? 'btn btn--outline' : 'btn'} showArrow />
+                  </div>
                 </div>
-              )}
-              <div class="offering__action">
-                <OfferingAction offer={event} requestsEnabled={requestsEnabled} showArrow />
-              </div>
-            </section>
-          ))}
+                {featured && (
+                  <figure class="event-card__photo">
+                    <img
+                      src={path('/media/retreat/caballos-en-el-bosque.webp')}
+                      alt="Una persona sentada cerca de varios caballos en un claro del bosque"
+                      width="1280"
+                      height="718"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                )}
+              </section>
+            );
+          })}
         </div>
       </div>
     </article>
@@ -176,16 +198,95 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     border-radius: 22px;
     background: color-mix(in srgb, var(--cream) 78%, white);
   }
-  .event-card__open {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    color: transparent;
-  }
-  .event-card__open:focus-visible { outline: 2px solid var(--pine-dark); outline-offset: 3px; }
-  .event-card .offering__action,
-  .event-card .event-benefit a { position: relative; z-index: 1; }
   .event-card h3 { margin: 0 0 .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
+  .event-card--featured {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
+    align-items: stretch;
+    gap: 0;
+    grid-column: 1 / -1;
+    padding: 0;
+    overflow: clip;
+    border-color: #d9c7a9;
+    background: #fcf8ef;
+  }
+  .event-card__content { min-width: 0; }
+  .event-card--featured .event-card__content { padding: clamp(1.25rem, 4vw, 2.65rem); }
+  .event-card .event-card__date {
+    color: #944a36;
+    font-size: .9rem;
+    line-height: 1.35;
+  }
+  .event-card__content h3 {
+    margin-block: .65rem .85rem;
+    font-size: clamp(1.85rem, 3.2vw, 3rem);
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .event-card__content h3 em { color: #944a36; }
+  .event-card__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem 1rem;
+    font-size: .94rem;
+  }
+  .event-card__photo {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: center;
+    overflow: clip;
+    margin: 0;
+    padding: clamp(1rem, 3.5vw, 2.5rem);
+    background: #203b31;
+  }
+  .event-card__photo::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 14% -6% 12% 2%;
+    border: 1px solid #b99a64;
+    border-radius: 57% 43% 49% 45% / 65% 32% 61% 36%;
+    transform: rotate(-13deg);
+  }
+  .event-card__photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.37;
+    object-fit: cover;
+    object-position: center 42%;
+    border-radius: 52% 44% 51% 43% / 60% 39% 54% 42%;
+    box-shadow: 0 0 0 1px #d7ba85;
+  }
+  .event-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .55rem .65rem;
+    margin-top: 1.15rem;
+  }
+  .event-card__actions :global(.btn) {
+    gap: .6rem;
+    min-block-size: 44px;
+    padding-inline: 1rem;
+  }
+  .event-card__actions :global(.offering-action-hint) {
+    flex: 0 0 100%;
+    max-inline-size: 54ch;
+    margin: .15rem 0 0;
+  }
+  .event-card__actions .event-card__details {
+    background: #203b31;
+    color: #fff;
+  }
+  .event-card__actions .event-card__details:hover { background: #152d24; }
+  .event-card__actions :global(.btn--outline) {
+    border-color: #a78f6e;
+    background: transparent;
+    color: #203b31;
+  }
+  .event-card__actions :global(.btn--outline:hover) { background: #efe4cf; }
   .event-meta {
     display: flex;
     align-items: center;
@@ -194,9 +295,15 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     color: var(--pine-dark);
   }
   .event-meta :global(svg) { flex: none; color: var(--terra); }
-  .event-benefit { margin-top: .7rem; }
-  .event-benefit h3 { font-size: 1.05rem; margin: 0 0 .25rem; color: var(--pine-dark); }
+  .event-benefit {
+    margin-top: 1rem;
+    padding-inline-start: .85rem;
+    border-inline-start: 2px solid #d9c7a9;
+    font-size: .94rem;
+  }
+  .event-benefit h4 { margin: 0 0 .15rem; color: var(--pine-dark); font-size: 1em; }
   .event-benefit p { margin: 0; }
+  .event-benefit .journey-link { margin-top: .28rem; font-size: .89rem; }
   .event-note { margin: .55rem 0 0; color: var(--muted); font-size: .9rem; }
   .event-message {
     position: absolute;
@@ -215,6 +322,11 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
   .continuity h2 { font-size: clamp(1.85rem, 3.7vw, 3.6rem); margin-block-end: .6rem; }
   .continuity p { max-inline-size: 58ch; }
   @media (max-width: 720px) {
+    .event-card--featured { grid-template-columns: minmax(0, 1fr); }
+    .event-card__photo { grid-row: 1; padding: 1rem; }
+    .event-card__photo img { aspect-ratio: 2.05; }
+    .event-card__photo::before { inset: 5% 10% 5% 4%; }
+    .event-card__actions :global(.btn) { flex: 1 1 auto; }
     .event-message { position: relative; inset: auto; margin: -.75rem 0 0 auto; inline-size: min(89%, 19rem); }
     .continuity.journey-hero--photo { grid-template-columns: minmax(0,1fr); }
     .continuity > div { grid-row: 1; }
