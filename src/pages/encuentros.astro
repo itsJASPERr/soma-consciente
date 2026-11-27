@@ -53,7 +53,7 @@ const action = encounter && link ? {
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 23 y 24 de enero de 2027 en Casa Sabia, La Falda, e incluye cuatro encuentros grupales de integración online." openJourney journeyAction={action}>
+<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 23 y 24 de enero de 2027 en Casa Sabia, Huerta Grande, e incluye cuatro encuentros grupales de integración online." openJourney journeyAction={action}>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>

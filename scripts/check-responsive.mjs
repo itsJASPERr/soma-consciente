@@ -171,10 +171,37 @@ try{
   const retreatLink = new URL(await registration.getAttribute('href'));
   assert.equal(retreatLink.origin, 'https://wa.me');
   assert.match(retreatLink.searchParams.get('text'), /23 y 24 de enero/);
-  await page.locator('#inversion').getByText('ARS 450.000', { exact: true }).waitFor();
-  await page.locator('#inversion').getByText('2 × ARS 250.000', { exact: true }).waitFor();
-  await page.locator('#inversion').getByText('ARS 50.000', { exact: true }).waitFor();
-  await page.locator('#inversion').getByText('10%', { exact: true }).waitFor();
+  const pricing = page.locator('#inversion');
+  await retreatHero.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
+  for (const [label, id, amount, total, message] of [
+    ['Pago único', 'single', '$610.000', null, 'pago único de $610.000'],
+    ['2 pagos', '2_payments', '2 × $330.000', 'Total $660.000', '2 cuotas de $330.000 (total $660.000)'],
+    ['3 pagos', '3_payments', '3 × $230.000', 'Total $690.000', '3 cuotas de $230.000 (total $690.000)'],
+    ['4 pagos', '4_payments', '4 × $185.000', 'Total $740.000', '4 cuotas de $185.000 (total $740.000)'],
+  ]) {
+    const plan = pricing.getByRole('article', { name: label, exact: true });
+    await plan.getByText(amount, { exact: true }).waitFor();
+    if (total) await plan.getByText(total, { exact: true }).waitFor();
+    const cta = plan.getByRole('link', { name: 'Consultar por WhatsApp · ' + label, exact: true });
+    await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing');
+    assert.equal(await cta.getAttribute('data-umami-event-payment_plan'), hasUmami ? id : null);
+    const url = new URL(await cta.getAttribute('href'));
+    assert.equal(url.origin, retreatLink.origin);
+    assert.equal(url.pathname, retreatLink.pathname);
+    const text = url.searchParams.get('text');
+    assert.ok(text.startsWith(retreatLink.searchParams.get('text')));
+    assert.ok(text.includes(message));
+  }
+  for (const text of [
+    'Dos días de retiro.',
+    'Todas las comidas y bebidas.',
+    'Una noche de alojamiento en las habitaciones de Casa Sabia.',
+    'Cuatro encuentros grupales de integración online después del retiro.',
+    '10% de descuento',
+    '$50.000 de descuento',
+  ]) {
+    await pricing.getByText(text, { exact: true }).waitFor();
+  }
   await page.goto(HOST+BASE+'/encuentros/');
   const encounter = page.locator('article#encuentro-enero');
   const eventCard = encounter.getByRole('region', { name: 'Cuerpo, respiración y naturaleza' });
@@ -187,6 +214,7 @@ try{
   await page.waitForURL('**/encuentros/retiro-enero-2027/');
   await page.goto(HOST+BASE+'/encuentros/');
   await eventCard.getByRole('heading', { name: 'Qué incluye' }).waitFor();
+  await eventCard.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
   await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
   const cardRegistration = eventCard.getByRole('link', { name: 'Solicitar inscripción' });
   await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration');

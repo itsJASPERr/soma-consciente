@@ -9,13 +9,38 @@ import { path } from '../../lib/paths';
 
 const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
 const registrationUrl = encounter ? offeringUrl(encounter) : undefined;
-const whatsappAnalytics = registrationUrl?.startsWith('https://wa.me/')
-  ? retreatCta('whatsapp', 'retreat_registration')
-  : undefined;
+const whatsappUrl = registrationUrl?.startsWith('https://wa.me/') ? registrationUrl : undefined;
+const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registration') : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = encounter && (registrationUrl || requestsEnabled);
 const date = encounter?.when || '23 y 24 de enero de 2027';
-const venue = encounter?.venue || 'Casa Sabia · La Falda, Córdoba';
+const venue = encounter?.venue || 'Casa Sabia · Huerta Grande, Córdoba';
+
+const paymentPlans = [
+  { id: 'single', label: 'Pago único', payments: 1, amount: 610000 },
+  { id: '2_payments', label: '2 pagos', payments: 2, amount: 330000 },
+  { id: '3_payments', label: '3 pagos', payments: 3, amount: 230000 },
+  { id: '4_payments', label: '4 pagos', payments: 4, amount: 185000 },
+];
+const pesos = new Intl.NumberFormat('es-AR');
+const price = (amount: number) => '$' + pesos.format(amount);
+const included = [
+  'Dos días de retiro.',
+  'Todas las comidas y bebidas.',
+  'Una noche de alojamiento en las habitaciones de Casa Sabia.',
+  'Cuatro encuentros grupales de integración online después del retiro.',
+];
+
+function inquiryFor(plan: typeof paymentPlans[number]) {
+  if (!whatsappUrl) return undefined;
+  const inquiry = new URL(whatsappUrl);
+  const greeting = inquiry.searchParams.get('text')?.trim() || 'Hola, Yanina. Quisiera consultar por el retiro de SOMA.';
+  const choice = plan.payments === 1
+    ? 'el pago único de ' + price(plan.amount)
+    : 'la opción de ' + plan.payments + ' cuotas de ' + price(plan.amount) + ' (total ' + price(plan.payments * plan.amount) + ')';
+  inquiry.searchParams.set('text', greeting + ' Me interesa ' + choice + '.');
+  return inquiry.href;
+}
 
 type ScheduleEntry = {
   text: string;
@@ -60,8 +85,8 @@ const days: {
 ];
 
 const registrationSteps = [
-  'Escribile a Yanina para consultar disponibilidad.',
-  'Elegí cómo pagar y mencioná si venís con alguien o con tu carpa.',
+  'Elegí una forma de pago y consultá disponibilidad con Yanina por WhatsApp.',
+  'Mencioná si te inscribís con alguien o si vas a dormir en tu propia carpa.',
   'Coordiná el pago con Yanina y confirmá tu lugar con ella.',
 ];
 ---
@@ -173,34 +198,58 @@ const registrationSteps = [
     <section id="inversion" class="retreat-pricing" aria-labelledby="inversion-title">
       <div class="retreat-inner retreat-pricing__layout">
         <div class="retreat-price">
-          <h2 id="inversion-title">Inversión</h2>
-          <p>Incluye los dos días y los cuatro encuentros de integración online.</p>
-          <dl class="retreat-price__options" data-retreat-pricing={analyticsEnabled ? '' : undefined}>
-            <div>
-              <dt>Pago contado</dt>
-              <dd><strong>ARS 450.000</strong></dd>
-            </div>
-            <div>
-              <dt>Pago en cuotas</dt>
-              <dd>
-                <strong>2 × ARS 250.000</strong>
-                <span>Total ARS 500.000</span>
-              </dd>
-            </div>
-          </dl>
+          <p class="retreat-price__location">{venue}</p>
+          <h2 id="inversion-title">Inversión para el retiro</h2>
+          <p class="retreat-price__currency">Elegí cómo pagar. Valores en pesos argentinos.</p>
+          <div class="retreat-price__options">
+            {paymentPlans.map((plan, index) => {
+              const inquiry = inquiryFor(plan);
+              return (
+                <article
+                  class="retreat-plan"
+                  aria-labelledby={'plan-' + plan.id}
+                  data-retreat-pricing={analyticsEnabled && index === 0 ? '' : undefined}
+                >
+                  <h3 id={'plan-' + plan.id}>{plan.label}</h3>
+                  <p class="retreat-plan__amount">
+                    {plan.payments > 1 && <>{plan.payments} × </>}{price(plan.amount)}
+                  </p>
+                  {plan.payments > 1 && <p class="retreat-plan__total">Total {price(plan.payments * plan.amount)}</p>}
+                  {inquiry && (
+                    <a
+                      class="btn retreat-plan__action"
+                      href={inquiry}
+                      aria-label={'Consultar por WhatsApp · ' + plan.label}
+                      {...retreatCta('whatsapp', 'retreat_pricing')}
+                      data-umami-event-payment_plan={analyticsEnabled ? plan.id : undefined}
+                    >Consultar por WhatsApp <span aria-hidden="true">↗</span></a>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+          {whatsappUrl && <p class="retreat-price__note">Tu consulta a Yanina lleva la forma de pago elegida.</p>}
         </div>
-        <div class="retreat-discounts">
-          <h3 class="retreat-label">Descuentos</h3>
-          <dl>
-            <div>
-              <dt>10%</dt>
-              <dd>Si venís con un amigo o una amiga.</dd>
-            </div>
-            <div>
-              <dt>ARS 50.000</dt>
-              <dd>Si venís con tu carpa.</dd>
-            </div>
-          </dl>
+        <div class="retreat-pricing__extras">
+          <div class="retreat-included">
+            <h3>Qué incluye</h3>
+            <ul role="list">
+              {included.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+          <div class="retreat-discounts">
+            <h3>Promociones</h3>
+            <dl>
+              <div>
+                <dt>10% de descuento</dt>
+                <dd>Al inscribirte con un amigo o una amiga.</dd>
+              </div>
+              <div>
+                <dt>$50.000 de descuento</dt>
+                <dd>Si dormís en tu propia carpa.</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </div>
     </section>
@@ -533,32 +582,76 @@ const registrationSteps = [
     opacity: .65;
   }
   .retreat-price h2 { color: inherit; }
-  .retreat-price > p { margin-top: .65rem; }
-  .retreat-price__options,
-  .retreat-discounts dl {
+  .retreat-price .retreat-price__location { margin-bottom: .55rem; color: var(--retreat-gold); font-size: .9rem; }
+  .retreat-price .retreat-price__currency { margin-top: .65rem; }
+  .retreat-price__options {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: .9rem 1.25rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(.65rem, 1.5vw, 1.05rem);
+    margin-top: 1.45rem;
   }
-  .retreat-price .retreat-price__options { margin-top: 1.45rem; }
-  .retreat-price__options dt {
-    color: var(--retreat-gold);
-    font-size: .74rem;
-    font-weight: 700;
-    letter-spacing: .12em;
+  .retreat-plan {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    min-width: 0;
+    padding: clamp(.9rem, 2vw, 1.35rem);
+    border: 1px solid #d9c7a9;
+    border-radius: 1rem;
+    background: var(--retreat-card);
+    color: var(--retreat-pine);
+  }
+  .retreat-plan h3 {
+    color: var(--retreat-clay);
+    font: 700 .76rem/1.35 var(--font-body, sans-serif);
+    letter-spacing: .08em;
     text-transform: uppercase;
   }
-  .retreat-price__options dd { margin-top: .2rem; }
-  .retreat-price__options strong,
-  .retreat-discounts dt {
-    display: block;
-    font: 400 clamp(1.55rem, 4vw, 3.3rem)/1.15 var(--font-display);
+  .retreat-plan .retreat-plan__amount {
+    font: 400 clamp(1.28rem, 2.1vw, 2rem)/1.13 var(--font-display);
+    white-space: nowrap;
   }
-  .retreat-price__options span { display: block; margin-top: .2rem; font-size: .92rem; }
-  .retreat-discounts { padding: clamp(1.15rem, 3vw, 2rem) clamp(1.25rem, 4.2vw, 3.15rem); }
-  .retreat-discounts dl { margin-top: .5rem; }
-  .retreat-discounts dt { color: var(--retreat-clay); font-size: clamp(1.45rem, 3.2vw, 2.5rem); }
-  .retreat-discounts dd { margin-top: .25rem; line-height: 1.4; }
+  .retreat-plan .retreat-plan__total { color: var(--retreat-muted); font-size: .9rem; }
+  .retreat-plan__action {
+    min-height: 44px;
+    margin-top: auto;
+    padding: .6rem .75rem;
+    gap: .4rem;
+    background: var(--retreat-clay);
+    color: var(--retreat-paper);
+    line-height: 1.2;
+    text-align: center;
+  }
+  .retreat-plan__action:hover { background: #783c2d; color: var(--retreat-paper); }
+  .retreat-plan__action:focus-visible { outline-offset: 3px; }
+  .retreat-price .retreat-price__note { margin-top: .85rem; color: var(--retreat-paper); font-size: .92rem; }
+  .retreat-pricing__extras {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    gap: 1.35rem 2.1rem;
+    padding: clamp(1.2rem, 4vw, 2.65rem) clamp(1.25rem, 4.2vw, 3.15rem);
+  }
+  .retreat-pricing__extras h3 { font-size: clamp(1.48rem, 2.4vw, 2.1rem); }
+  .retreat-included ul {
+    display: grid;
+    gap: .45rem;
+    margin: .75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .retreat-included li { display: grid; grid-template-columns: .55rem minmax(0, 1fr); align-items: start; gap: .65rem; }
+  .retreat-included li::before {
+    content: "";
+    width: .38rem;
+    aspect-ratio: 1;
+    margin-top: .6rem;
+    border-radius: 50%;
+    background: var(--retreat-clay);
+  }
+  .retreat-discounts { padding-inline-start: 1.35rem; border-inline-start: 1px solid var(--retreat-line); }
+  .retreat-discounts dl { display: grid; gap: .8rem; margin-top: .65rem; }
+  .retreat-discounts dt { color: var(--retreat-clay); font: 400 clamp(1.17rem, 2.5vw, 1.65rem)/1.22 var(--font-display); }
+  .retreat-discounts dd { margin-top: .17rem; line-height: 1.4; }
   .retreat-join { padding-block: clamp(2.8rem, 6vw, 5rem); }
   .retreat-join__layout {
     display: grid;
@@ -612,13 +705,16 @@ const registrationSteps = [
     .retreat-hero__image { width: min(100%, 34rem); justify-self: center; }
     .retreat-hero::before { width: 66vw; height: 63%; }
     .retreat-hero { padding-bottom: 2.65rem; }
+    .retreat-price__options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 32rem) {
+    .retreat-price__options { grid-template-columns: 1fr; }
     .retreat-integration__layout,
     .retreat-join__layout { grid-template-columns: 1fr; }
     .retreat-integration__image,
     .retreat-join__image { width: min(82%, 15.5rem); }
-    .retreat-price__options { grid-template-columns: 1fr; }
+    .retreat-pricing__extras { grid-template-columns: 1fr; }
+    .retreat-discounts { padding: 1rem 0 0; border-inline-start: 0; border-block-start: 1px solid var(--retreat-line); }
     .retreat-timeline li { grid-template-columns: minmax(0, 4.65rem) minmax(0, 1fr); gap: .55rem; }
     .retreat-timeline__when { font-size: .77rem; }
   }

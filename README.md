@@ -122,15 +122,17 @@ suceden fuera del sitio.
 | `retreat_listing_clicked` | Clic en «Ver el encuentro» del encabezado que abre el listado | `site_header` |
 | `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `integration_page`, `team_header`, `team_footer` |
 | `retreat_registration_clicked` | Clic en «Consultar por un lugar» que lleva a la sección de inscripción | `retreat_header`, `retreat_hero` |
-| `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `events_header`, `event_card_registration`, `retreat_registration` |
+| `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `events_header`, `event_card_registration`, `retreat_registration`, `retreat_pricing` |
 | `retreat_schedule_clicked` | Clic en «Ver el cronograma» | `retreat_hero` |
-| `retreat_pricing_viewed` | Al menos la mitad del bloque de precios visible, una vez por carga | |
+| `retreat_pricing_viewed` | Al menos la mitad de la primera opción de pago visible, una vez por carga | |
 
 Para comparar las entradas internas, consultá `retreat_details_clicked`
 por `placement`. Los clics a WhatsApp desde el listado también aparecen
 en Eventos aunque la persona no haya visitado la página del retiro.
 Usá `retreat_registration_clicked` como señal intermedia opcional: las
 personas también pueden desplazarse directamente a la inscripción.
+
+Los clics desde las tarjetas de precios también llevan la propiedad `payment_plan`.
 
 Los eventos del retiro no agregan datos personales. Los enlaces de campaña
 deben llevar a la página del retiro para medir el recorrido en el sitio.
