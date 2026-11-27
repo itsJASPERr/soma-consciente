@@ -65,14 +65,17 @@ const [firstDay, secondDay] = [encounter.startDate, encounter.endDate].map(value
 const days: {
   id: string;
   title: string;
-  photo: string;
-  alt: string;
+  photo: { file: string; alt: string; width: number; height: number };
   schedule: ScheduleEntry[];
 }[] = [
   {
     ...firstDay,
-    photo: 'caminata-en-el-campo',
-    alt: 'Un grupo reunido a la sombra de los árboles al borde del campo',
+    photo: {
+      file: 'grupo-en-el-campo',
+      alt: 'Vista desde arriba de un grupo de personas sentadas o recostadas en distintos lugares del campo',
+      width: 633,
+      height: 507,
+    },
     schedule: [
       { time: '09:00', text: 'Llegada, caminata y movimiento con Nicky.' },
       { label: 'Por la mañana', text: 'Charla y práctica de respiración con Yani.' },
@@ -85,8 +88,12 @@ const days: {
   },
   {
     ...secondDay,
-    photo: 'encuentro-con-caballos',
-    alt: 'Personas y caballos reunidos en un claro junto al bosque',
+    photo: {
+      file: 'encuentro-con-caballos',
+      alt: 'Personas y caballos reunidos en un claro junto al bosque',
+      width: 840,
+      height: 471,
+    },
     schedule: [
       { time: '08:00', text: 'Desayuno.' },
       { time: '09:30', text: 'Salida al campo.' },
@@ -152,10 +159,10 @@ const registrationSteps = [
               <h3 id={day.id + '-title'}>{day.title}</h3>
               <img
                 class="retreat-day__photo"
-                src={path('/media/retreat/' + day.photo + '.webp')}
-                alt={day.alt}
-                width="840"
-                height="471"
+                src={path('/media/retreat/' + day.photo.file + '.webp')}
+                alt={day.photo.alt}
+                width={day.photo.width}
+                height={day.photo.height}
                 loading="lazy"
                 decoding="async"
               />
@@ -183,6 +190,7 @@ const registrationSteps = [
     <section id="impresiones" class="retreat-impressions" aria-labelledby="impresiones-title">
       <div class="retreat-inner">
         <h2 id="impresiones-title">Así se vive un encuentro SOMA</h2>
+        <p class="retreat-impressions__intro">Un vistazo al ritmo de nuestros encuentros en Casa Sabia, entre prácticas compartidas y tiempo al aire libre.</p>
         <ul class="retreat-impressions__reels" role="list">
           {retreatReels.map(reel => <li><RetreatReel reel={reel} /></li>)}
         </ul>
@@ -488,11 +496,12 @@ const registrationSteps = [
     width: 100%;
     height: auto;
     margin-block: 1rem 1.2rem;
-    aspect-ratio: 3.25;
+    aspect-ratio: 2;
     object-fit: cover;
     object-position: center 49%;
-    border-radius: 27% 9% 27% 12% / 62% 27% 59% 36%;
+    border-radius: 1rem;
   }
+  .retreat-day:first-child .retreat-day__photo { object-position: center 70%; }
   #domingo .retreat-day__photo { object-position: center 42%; }
   .retreat-timeline { list-style: none; padding: 0; }
   .retreat-timeline li {
@@ -529,6 +538,12 @@ const registrationSteps = [
   .retreat-impressions {
     padding-block: clamp(2.75rem, 6.5vw, 5.5rem);
     border-block-end: 1px solid var(--retreat-line);
+    text-align: center;
+  }
+  .retreat-impressions .retreat-impressions__intro {
+    max-inline-size: 46ch;
+    margin: .8rem auto 0;
+    color: var(--retreat-muted);
   }
   .retreat-impressions__reels {
     display: grid;
@@ -536,24 +551,25 @@ const registrationSteps = [
     align-items: start;
     gap: clamp(1rem, 3.5vw, 2.65rem);
     max-inline-size: 54rem;
-    margin: clamp(1.4rem, 4vw, 2.6rem) 0 0;
+    margin: clamp(1.4rem, 4vw, 2.6rem) auto 0;
     padding: 0;
     list-style: none;
+    text-align: start;
   }
   @media (max-width: 42rem) {
     .retreat-impressions__reels {
+      --reel-width: min(74vw, 15rem);
       grid-template-columns: none;
       grid-auto-flow: column;
-      grid-auto-columns: min(74%, 15rem);
+      grid-auto-columns: var(--reel-width);
       overflow-x: auto;
-      padding: .4rem .4rem .8rem;
-      margin-inline: -.4rem;
-      scroll-padding-inline: .4rem;
-      scroll-snap-type: x proximity;
+      padding-block: .4rem .8rem;
+      padding-inline: calc((100% - var(--reel-width)) / 2);
+      scroll-snap-type: x mandatory;
       scrollbar-width: thin;
       scrollbar-color: var(--sage) transparent;
     }
-    .retreat-impressions__reels > li { scroll-snap-align: start; }
+    .retreat-impressions__reels > li { scroll-snap-align: center; }
   }
   .retreat-integration {
     padding-block: clamp(2.65rem, 5.2vw, 4.4rem);
