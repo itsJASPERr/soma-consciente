@@ -23,7 +23,13 @@ const showDialog = requestsEnabled && [...retreatEditions, door].some(offer => o
 const encountersPhoto = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const circlePhoto = getOnlineCirclePhoto(home);
 ---
-<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. Consultá las próximas fechas en Casa Sabia, Huerta Grande. Cada retiro incluye cuatro encuentros grupales de integración online." openJourney>
+<SiteLayout
+  title="Retiros y encuentros en Huerta Grande"
+  description="Conocé las próximas fechas de los retiros de SOMA en Casa Sabia, Huerta Grande, Córdoba. Incluyen dos días de prácticas y cuatro círculos de integración online."
+  ogImage={encountersPhoto.src}
+  ogImageAlt={encountersPhoto.alt}
+  openJourney
+>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': encountersPhoto.src }]}>

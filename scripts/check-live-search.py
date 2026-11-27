@@ -153,6 +153,7 @@ def verify_preview_build():
 
 def verify_preview(origin):
     dist, pages = preview_files()
+    is_cloudflare_preview = (urlsplit(origin).hostname or '').endswith('.pages.dev')
     paths = [
         path.relative_to(dist).as_posix().removesuffix('index.html')
         for path in pages
@@ -173,6 +174,8 @@ def verify_preview(origin):
                 error.close()
         else:
             assert headers.get_content_type() == 'text/html', f'{url} did not serve HTML.'
+            if is_cloudflare_preview:
+                assert NOINDEX.search(headers.get('X-Robots-Tag', '')), f'{url} is missing the preview noindex header.'
         check_no_analytics(html, url)
 
     with ThreadPoolExecutor(max_workers=4) as pool:
@@ -190,6 +193,8 @@ def verify_preview(origin):
     else:
         raise AssertionError(f'{missing} returned HTTP 200, expected 404.')
     print(f'No analytics trackers on {len(paths)} deployed preview pages or the 404 response.')
+    if is_cloudflare_preview:
+        print('Cloudflare Pages blocks indexing on public preview routes.')
 
 
 if __name__ == '__main__':
@@ -202,7 +207,7 @@ if __name__ == '__main__':
         verify_preview_build()
         raise SystemExit(0)
 
-    check_name = 'Preview analytics' if args.preview else 'Production search'
+    check_name = 'Preview search and analytics' if args.preview else 'Production search'
     # The newest artifact may take a few seconds to reach the public edge.
     for delay in (5, 10, 20, None):
         try:

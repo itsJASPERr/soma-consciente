@@ -9,7 +9,11 @@ const aulas = await loadAulas();
 const upcoming = aulas.filter(aula => aula.launchStatus === 'upcoming');
 const available = aulas.filter(aula => aula.launchStatus !== 'upcoming');
 ---
-<SiteLayout title="Las cuatro Aulas" openJourney>
+<SiteLayout
+  title="Las cuatro Aulas de SOMA"
+  description="Conocé los recorridos de SOMA en psicología y presencia, música e integración, cuerpo y movimiento, y vínculo con caballos."
+  openJourney
+>
   <section class="container journey-hero journey-hero--photo journey-hero--profile">
     <div class="journey-hero__copy">
       <span class="eyebrow">Aulas</span>

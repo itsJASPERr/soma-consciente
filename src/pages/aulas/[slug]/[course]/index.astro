@@ -21,7 +21,15 @@ const {aula,course}=Astro.props as {aula:Aula;course:Curso};
 const tree=courseTree(course,await loadSections(),await loadLessons());
 const first=tree.sections.flatMap(group=>group.lessons.filter(hasPublicLessonPage).map(l=>({section:group.section,lesson:l})))[0];
 ---
-<SiteLayout title={course.title+' · '+aula.shortName} description={course.summary}>
+<SiteLayout
+  title={course.title+' · '+aula.shortName}
+  description={course.summary}
+  breadcrumbs={[
+    { name: 'Aulas', href: '/aulas/' },
+    { name: aula.shortName, href: '/aulas/' + aula.slug + '/' },
+  ]}
+  breadcrumbName={course.title}
+>
 <div class:list={['aula-page-theme','aula-page-theme--symbol-'+aula.symbol]}>
   <section class="course-hero"><div class="container course-hero__grid">
     <div class="course-hero__copy">

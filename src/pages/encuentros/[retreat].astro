@@ -9,6 +9,7 @@ import { getOnlineCirclePhoto, loadHomepage } from '../../lib/home';
 import { offeringUrl, retreatEditions } from '../../lib/offerings';
 import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
+import { somaName, somaOrganizationId } from '../../lib/site-identity';
 import { retreatReels } from '../../lib/retreat-reels';
 
 export const getStaticPaths = (() => retreatEditions.map(encounter => ({
@@ -22,7 +23,34 @@ const whatsappUrl = registrationUrl?.startsWith('https://wa.me/') ? registration
 const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registration', encounter.pageSlug) : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = Boolean(registrationUrl) || requestsEnabled;
-const { when: date, venue } = encounter;
+const date = encounter.when;
+const venue = encounter.venue?.trim() ?? '';
+const retreatImage = path('/media/retreat/caballos-en-el-bosque.webp');
+const retreatImageAlt = 'Una persona sentada cerca de varios caballos en un claro del bosque';
+const [venueName, venueArea] = venue.split(' · ');
+const [addressLocality, addressRegion] = (venueArea ?? '').split(', ');
+const seoLocation = addressLocality || venueName;
+const description = date + (venue ? ' en ' + venue.replace(' · ', ', ') : '') +
+  '. Dos días de respiración, movimiento y naturaleza con cuatro círculos de integración online.';
+const event = {
+  '@type': 'Event',
+  name: 'Cuerpo, respiración y naturaleza',
+  url: new URL(encounter.href, Astro.site).href,
+  startDate: encounter.startDate,
+  endDate: encounter.endDate,
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventStatus: 'https://schema.org/EventScheduled',
+  description,
+  image: new URL(retreatImage, Astro.site).href,
+  location: {
+    '@type': 'Place',
+    name: venueName,
+    ...(addressLocality && {
+      address: { '@type': 'PostalAddress', addressLocality, addressRegion, addressCountry: 'AR' },
+    }),
+  },
+  organizer: { '@type': 'Organization', '@id': somaOrganizationId(Astro.site), name: somaName, url: new URL('/', Astro.site).href },
+};
 const circlePhoto = getOnlineCirclePhoto(await loadHomepage());
 
 const paymentPlans = [
@@ -112,8 +140,13 @@ const registrationSteps = [
 ];
 ---
 <SiteLayout
-  title={'Retiro SOMA · ' + date}
-  description={'Retiro SOMA Consciente, ' + date + ' en ' + venue + '. Dos días de prácticas y cuatro encuentros grupales de integración online.'}
+  title={(seoLocation ? 'Retiro en ' + seoLocation : 'Retiro SOMA') + ' · ' + date}
+  description={description}
+  ogImage={retreatImage}
+  ogImageAlt={retreatImageAlt}
+  breadcrumbs={[{ name: 'Encuentros', href: '/encuentros/' }]}
+  breadcrumbName={'Retiro · ' + date}
+  structuredData={venueName && addressLocality ? [event] : []}
   openJourney
 >
   <article class="retreat">
@@ -136,8 +169,8 @@ const registrationSteps = [
         </div>
         <figure class="retreat-hero__image">
           <img
-            src={path('/media/retreat/caballos-en-el-bosque.webp')}
-            alt="Una persona sentada cerca de varios caballos en un claro del bosque"
+            src={retreatImage}
+            alt={retreatImageAlt}
             width="1280"
             height="718"
             fetchpriority="high"

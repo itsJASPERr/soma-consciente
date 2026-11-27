@@ -10,7 +10,13 @@ const resources = await loadResources();
 const featured = resources.find(resource => resource.slug === 'pausa-de-presencia') || resources[0];
 const image = featured && { src: mediaUrl(featured.image), alt: featured.imageAlt || featured.title };
 ---
-<SiteLayout title="Biblioteca abierta" openJourney>
+<SiteLayout
+  title="Biblioteca gratuita de bienestar y presencia"
+  description="Explorá prácticas gratuitas de meditación, ejercicios de presencia y un diario de integración. Podés leer y practicar a tu ritmo, sin registro."
+  ogImage={image?.src}
+  ogImageAlt={image?.alt}
+  openJourney
+>
   <section class:list={['container', 'journey-hero', { 'journey-hero--photo': image?.src }]}>
     <div class="journey-hero__copy">
       <span class="eyebrow">Biblioteca abierta</span>

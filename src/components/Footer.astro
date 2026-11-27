@@ -3,6 +3,7 @@ import { Icon } from 'astro-icon/components';
 import Brand from './Brand.astro';
 import { offeringUrl, offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { somaInstagram } from '../lib/site-identity';
 
 const circle = offerings.find(offer => offer.slug === 'circulos');
 const circleLink = circle ? offeringUrl(circle) : undefined;
@@ -14,7 +15,7 @@ const yaninaWhatsApp = circleLink?.match(/^https:\/\/wa\.me\/\d+(?=[?#]|$)/)?.[0
       <Brand compact />
       <p>Cuatro caminos, un mismo núcleo.<br/>Un espacio para aprender, integrar y encontrarnos.</p>
       <nav class="footer-social" aria-label="Redes y contacto">
-        <a href="https://www.instagram.com/soma.consciente.ar/" aria-label="Instagram de SOMA Consciente">
+        <a href={somaInstagram} aria-label="Instagram de SOMA Consciente">
           <span class="footer-social__icon"><Icon name="iconoir:instagram" size={18} aria-hidden="true" /></span>
           Instagram
         </a>

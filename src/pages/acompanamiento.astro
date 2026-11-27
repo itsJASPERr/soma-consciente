@@ -15,7 +15,13 @@ const circlePhoto = getOnlineCirclePhoto(home);
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [circle, community].some(offer => offer && !offeringUrl(offer));
 ---
-<SiteLayout title="Integración online" description="Participá en el círculo online semanal de SOMA o sumate a la comunidad gratuita de WhatsApp." openJourney>
+<SiteLayout
+  title="Círculo de integración online"
+  description="Sumate al círculo semanal de integración online de SOMA para compartir lo vivido y darle lugar en lo cotidiano. También hay una comunidad gratuita en WhatsApp."
+  ogImage={circlePhoto.src}
+  ogImageAlt={circlePhoto.alt}
+  openJourney
+>
   {circle ? (
     <article
       id={circle.slug}

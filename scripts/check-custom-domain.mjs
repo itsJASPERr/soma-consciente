@@ -3,8 +3,8 @@
  * Unlike checking DNS, this asserts our own generated HTML, assets and CMS paths.
  */
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join, sep } from 'node:path';
 
 const domain='soma-consciente.com';
 const site='https://'+domain;
@@ -55,20 +55,60 @@ for (const path of ['/politica-de-privacidad/', '/terminos-y-condiciones/']) {
   assert.ok(html.includes('href="' + path + '"'), 'The footer is missing ' + path);
   assert.ok(existsSync(join('dist', path, 'index.html')), 'The footer links to a missing page: ' + path);
 }
-const terms = readFileSync(join('dist', 'terminos-y-condiciones', 'index.html'), 'utf8');
-assert.match(terms, /<meta name="robots" content="noindex"/);
-assert.ok(!pageURLs.has(site + '/terminos-y-condiciones/'), 'The sitemap must exclude the terms draft.');
-const missingPage = readFileSync('dist/404.html', 'utf8');
-assert.match(missingPage, /<meta name="robots" content="noindex"/);
-for (const errorPath of ['/404', '/404/', '/404.html']) {
-  assert.ok(!pageURLs.has(site + errorPath), 'The sitemap must exclude the 404 page.');
+for (const path of ['/mensajes/', '/politica-de-privacidad/', '/terminos-y-condiciones/', '/404.html']) {
+  const file = path.endsWith('/') ? join(path, 'index.html') : path;
+  assert.match(readFileSync(join('dist', file), 'utf8'), /<meta name="robots" content="noindex"/);
 }
-const siteNameMarkup = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
-assert.ok(siteNameMarkup, 'Missing homepage WebSite structured data.');
-assert.deepEqual(JSON.parse(siteNameMarkup), {
+const metadata = new Map();
+const titles = new Set();
+const descriptions = new Set();
+const files = readdirSync('dist', { recursive: true }).filter(file => file.endsWith('.html'));
+for (const file of files) {
+  const page = readFileSync(join('dist', file), 'utf8');
+  const pathname = '/' + file.split(sep).join('/').replace(/(^|\/)index\.html$/, '$1');
+  const url = new URL(pathname, site).href;
+  const noIndex = /<meta name="robots" content="noindex"/.test(page);
+  assert.equal(pageURLs.has(url), !noIndex, 'Sitemap indexability mismatch: ' + pathname);
+
+  const schema = [...page.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)]
+    .map(match => JSON.parse(match[1]));
+  metadata.set(pathname, schema);
+  if (noIndex) continue;
+
+  for (const [label, pattern, seen] of [
+    ['title', /<title>([^<]+)<\/title>/g, titles],
+    ['description', /<meta name="description" content="([^"]+)"/g, descriptions],
+  ]) {
+    const matches = [...page.matchAll(pattern)];
+    assert.equal(matches.length, 1, 'Expected one ' + label + ': ' + pathname);
+    const value = matches[0][1].trim();
+    assert.ok(value && !seen.has(value), 'Empty or duplicate ' + label + ': ' + pathname);
+    seen.add(value);
+  }
+  assert.equal([...page.matchAll(/<h1\b/g)].length, 1, 'Expected one H1: ' + pathname);
+}
+assert.deepEqual(metadata.get('/').find(schema => schema['@type'] === 'WebSite'), {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'SOMA CONSCIENTE',
   url: site + '/',
 });
-console.log('PASS: canonical URLs, sitemap, robots.txt, homepage site name, assets and CMS paths.');
+const organization = metadata.get('/').find(schema => schema['@type'] === 'Organization');
+assert.deepEqual(organization.sameAs, ['https://www.instagram.com/soma.consciente.ar/']);
+for (const [month, starts, ends] of [
+  ['enero', '2027-01-23', '2027-01-24'],
+  ['febrero', '2027-02-15', '2027-02-16'],
+]) {
+  const pathname = '/encuentros/retiro-' + month + '-2027/';
+  const schema = metadata.get(pathname);
+  const event = schema.find(item => item['@type'] === 'Event');
+  assert.equal(event.url, site + pathname);
+  assert.equal(event.startDate, starts);
+  assert.equal(event.endDate, ends);
+  assert.equal(event.location.name, 'Casa Sabia');
+  assert.equal(event.location.address.addressLocality, 'Huerta Grande');
+  assert.equal(event.organizer['@id'], organization['@id']);
+  assert.ok(schema.some(item => item['@type'] === 'BreadcrumbList'));
+}
+assert.ok(metadata.get('/biblioteca/diario-de-integracion/').some(item => item['@type'] === 'Article'));
+console.log('PASS: SEO metadata across ' + files.length + ' pages, ' + pageURLs.size + ' canonical sitemap URLs, and structured data.');

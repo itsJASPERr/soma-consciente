@@ -34,7 +34,16 @@ const previousSection=lookup(previous);
 const nextSection=lookup(next);
 const lessonNum=String(section.order).padStart(2,'0')+'.'+String(lesson.order);
 ---
-<SiteLayout title={lesson.title+' · '+course.title} description={lesson.summary}>
+<SiteLayout
+  title={lesson.title+' · '+course.title}
+  description={lesson.summary || lesson.title + ' en el recorrido ' + course.title + '.'}
+  breadcrumbs={[
+    { name: 'Aulas', href: '/aulas/' },
+    { name: aula.shortName, href: '/aulas/' + aula.slug + '/' },
+    { name: course.title, href: courseHref(aula.slug, course) },
+  ]}
+  breadcrumbName={lesson.title}
+>
   <div class:list={['learning-view','aula-page-theme','aula-page-theme--symbol-'+aula.symbol]}>
     <div class="container learning-breadcrumbs breadcrumbs"><a href={path('/aulas/')}>Aulas</a><span>/</span><a href={path('/aulas/'+aula.slug+'/')}>{aula.shortName}</a><span>/</span><a href={courseHref(aula.slug,course)}>{course.title}</a><span>/</span><span>{section.title}</span></div>
     <div class="container lesson-shell">

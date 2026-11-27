@@ -4,6 +4,7 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import { loadResources, type Resource } from '../../lib/content';
 import { path } from '../../lib/paths';
 import { mediaUrl } from '../../lib/media';
+import { somaOrganizationId } from '../../lib/site-identity';
 
 export async function getStaticPaths() {
   const resources = await loadResources();
@@ -12,8 +13,27 @@ export async function getStaticPaths() {
 
 const { resource } = Astro.props as { resource: Resource };
 const image = { src: mediaUrl(resource.image), alt: resource.imageAlt || resource.title };
+const description = resource.summary + ' ' + resource.category + ' de ' + resource.duration + ' en la Biblioteca abierta de SOMA.';
+const article = {
+  '@type': 'Article',
+  headline: resource.title,
+  description,
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+  inLanguage: 'es-AR',
+  ...(image.src && { image: new URL(image.src, Astro.site).href }),
+  publisher: { '@id': somaOrganizationId(Astro.site) },
+};
 ---
-<SiteLayout title={resource.title} description={resource.summary} openJourney>
+<SiteLayout
+  title={resource.title}
+  description={description}
+  ogType="article"
+  ogImage={image.src}
+  ogImageAlt={image.alt}
+  breadcrumbs={[{ name: 'Biblioteca', href: '/biblioteca/' }]}
+  structuredData={[article]}
+  openJourney
+>
   <section class:list={['container', 'journey-hero', { 'journey-hero--photo': image.src }]}>
     <div class="journey-hero__copy">
       <a class="journey-link resource-back" href={path('/biblioteca/')}><span aria-hidden="true">←</span> Biblioteca</a>
