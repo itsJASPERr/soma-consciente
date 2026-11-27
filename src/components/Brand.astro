@@ -5,9 +5,7 @@ const originalEmblem = path('/media/soma-original-emblem.png');
 ---
 <a href={path('/')} class:list={['brand', { 'brand--compact': compact }]} aria-label="SOMA CONSCIENTE · Inicio">
   <span class="brand__symbol" aria-hidden="true">
-    <object class="brand__original-emblem" data={originalEmblem} type="image/png" tabindex="-1">
-      <span class="brand__fallback-emblem">S</span>
-    </object>
+    <img class="brand__original-emblem" src={originalEmblem} alt="" width="520" height="405" decoding="async" />
   </span>
   <span class="brand__type"><strong>SOMA</strong><small>CONSCIENTE</small></span>
 </a>

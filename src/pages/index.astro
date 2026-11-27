@@ -1,7 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
-import ResourceList from '../components/ResourceList.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SignupDialog from '../components/SignupDialog.astro';
 import { loadAulas, loadResources } from '../lib/content';
@@ -16,6 +15,13 @@ const themes = ['nicole', 'jasper', 'yanina', 'nico']
   .map(slug => aulas.find(aula => aula.slug === slug))
   .filter(aula => aula !== undefined);
 const resources = await loadResources();
+const meditation = resources.find(resource => resource.slug === 'primeros-pasos-meditacion');
+const featuredResource = meditation ?? resources[0];
+const featuredPhoto = meditation
+  ? { src: path('/media/photography/pausa-de-presencia.jpg'), alt: 'Luz del sol entre hojas verdes' }
+  : { src: mediaUrl(featuredResource?.image), alt: featuredResource?.imageAlt || featuredResource?.title };
+const remainingResources = resources.filter(resource => resource !== featuredResource);
+const resourcePath = (slug: string) => path('/biblioteca/' + slug + '/');
 const home = await loadHomepage();
 const sunrise = mediaUrl(home.heroImage);
 const landscape = mediaUrl(home.nucleoImage);
@@ -48,7 +54,7 @@ const calendar = [
   }] : []),
 ];
 ---
-<SiteLayout revealHeader openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
+<SiteLayout openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
   <section class="home-hero" aria-labelledby="participation-heading">
     {heroPhoto.src && (
       <img
@@ -63,16 +69,17 @@ const calendar = [
       />
     )}
     <div class="home-hero__copy">
-      <h1 id="participation-heading">La consciencia se vive.</h1>
+      <h1 id="participation-heading">La consciencia<br /> se vive.</h1>
       <p>Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.</p>
+      {calendar.length > 0 && (
+        <a class="home-hero__dates" href="#proximos-encuentros">Ver próximas fechas <span aria-hidden="true">↓</span></a>
+      )}
     </div>
   </section>
 
-  <div class="values-strip">
-    <div class="container values-list">
-      <span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span>
-    </div>
-  </div>
+  <ul class="home-values" aria-label="Nuestros valores" role="list">
+    <li>Presencia</li><li>Integración</li><li>Autonomía</li><li>Respeto</li><li>Comunidad</li>
+  </ul>
 
   <section class="program-section" id="metodologia" aria-labelledby="metodologia-title">
     {signupEnabled && landscape && <img class="program-overlay-art" src={landscape} alt="" width="1100" height="780" loading="lazy" decoding="async" />}
@@ -84,7 +91,9 @@ const calendar = [
         <div class="program-preview__shape">
           <div class="program-preview__window">
             {landscape && <img class="program-preview__landscape" src={landscape} alt="" loading="lazy" decoding="async" />}
-            <img class="program-preview__emblem" src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
+          </div>
+          <div class="program-preview__emblem">
+            <img src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
           </div>
         </div>
         <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
@@ -102,38 +111,12 @@ const calendar = [
     </div>
   </section>
 
-  <section class="home-active" aria-labelledby="programas-activos-title">
-    <div class="container home-active__inner">
-      <p class="eyebrow">Programas activos</p>
-      <h2 id="programas-activos-title">Encuentros presenciales. Integración online.</h2>
-      <p>Reunimos las cuatro miradas en el encuentro presencial y las seguimos en los círculos de integración online.</p>
-      <a class="btn btn--outline" href={path('/encuentros/')}>Ver encuentros <span aria-hidden="true">↗</span></a>
-    </div>
-  </section>
-
-  <section class="container home-library" aria-labelledby="biblioteca-home-title">
-    <p class="eyebrow">Abierto para todos</p>
-    <h2 id="biblioteca-home-title">Contenido para tu camino</h2>
-    <div class="home-library__intro">
-      <p>Recursos gratuitos para empezar hoy. Explorá, practicá y elegí a tu propio ritmo.</p>
-      <a class="journey-link" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
-    </div>
-    <ResourceList resources={resources} cards />
-  </section>
-
-  <div class="values-strip" aria-hidden="true">
-    <div class="container values-list">
-      <span>Presencia</span><span>Integración</span><span>Autonomía</span><span>Respeto</span><span>Comunidad</span>
-    </div>
-  </div>
-
   {calendar.length > 0 && (
     <section class="container home-calendar" aria-labelledby="proximos-encuentros">
-      <div class="journey-row">
-        <div>
-          <h2 id="proximos-encuentros">Próximos encuentros</h2>
-          <p>Fechas para encontrarnos en persona y seguir lo vivido en la integración.</p>
-        </div>
+      <div class="home-calendar__intro">
+        <h2 id="proximos-encuentros">Próximos encuentros</h2>
+        <p class="home-calendar__lead">Encuentros presenciales. Integración online.</p>
+        <p>Reunimos las cuatro miradas en el encuentro presencial y las seguimos en los círculos de integración online.</p>
       </div>
       <ul class="home-calendar__list" role="list">
         {calendar.map((event) => {
@@ -173,6 +156,43 @@ const calendar = [
       </div>
     </section>
   )}
+  {featuredResource && (
+    <section class="container home-library" aria-labelledby="biblioteca-home-title">
+      <div class="home-library__header">
+        <div>
+          <p class="eyebrow">Abierto para todos</p>
+          <h2 id="biblioteca-home-title">Contenido para tu camino</h2>
+          <p>Recursos gratuitos para empezar hoy. Explorá, practicá y elegí a tu propio ritmo.</p>
+        </div>
+        <a class="journey-link" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class:list={['home-library__reading', { 'home-library__reading--split': remainingResources.length > 0 }]}>
+        <article class="home-library__feature">
+          {featuredPhoto.src && (
+            <img src={featuredPhoto.src} alt={featuredPhoto.alt || ''} width="900" height="520" loading="lazy" decoding="async" />
+          )}
+          <p class="eyebrow">{featuredResource.category} · {featuredResource.duration}</p>
+          <h3><a href={resourcePath(featuredResource.slug)}>{featuredResource.title} <span aria-hidden="true">↗</span></a></h3>
+          <p>{featuredResource.summary}</p>
+        </article>
+        {remainingResources.length > 0 && (
+          <ul class="home-library__list" aria-label="Más recursos de la biblioteca" role="list">
+            {remainingResources.map(resource => (
+              <li>
+                <a href={resourcePath(resource.slug)}>
+                  <div>
+                    <h3>{resource.title}</h3>
+                    <p>{resource.category} · {resource.duration}</p>
+                  </div>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
   {signupEnabled && <SignupDialog />}
 </SiteLayout>
 
@@ -182,12 +202,12 @@ const calendar = [
     isolation: isolate;
     display: grid;
     place-items: center;
-    min-block-size: 100vh;
-    min-block-size: 100dvh;
-    padding: clamp(5.5rem, 14vh, 8rem) 1.25rem;
+    min-block-size: clamp(29rem, 70svh, 43rem);
+    padding: clamp(4rem, 9vw, 7rem) 1.25rem;
     overflow: hidden;
     text-align: center;
-    color: var(--pine-dark);
+    color: light-dark(#223d33, #fff1db);
+    background: light-dark(#e8c9a8, #363d32);
   }
   .home-hero__photo {
     position: absolute;
@@ -203,28 +223,51 @@ const calendar = [
     z-index: -1;
     inset: 0;
     background:
-      radial-gradient(ellipse at 50% 42%, rgba(246, 239, 227, .28), transparent 58%),
-      linear-gradient(180deg, rgba(246, 239, 227, .72) 0%, rgba(246, 239, 227, .38) 38%, rgba(246, 239, 227, .66) 100%);
+      radial-gradient(ellipse at 50% 52%, light-dark(#fff3dbdf, transparent), light-dark(#fff0d796, transparent) 42%, transparent 77%),
+      linear-gradient(light-dark(#eed8bc26, #18261c8a), light-dark(#eed8bc26, #18261cc4));
   }
-  .home-hero__copy { max-inline-size: 40rem; }
+  .home-hero__copy { max-inline-size: min(100%, 44rem); }
   .home-hero h1 {
-    margin: 0 auto;
-    max-inline-size: 11ch;
-    color: var(--pine-dark);
-    font-size: clamp(3.4rem, 8vw, 7rem);
-    line-height: .92;
+    margin: 0;
+    color: inherit;
+    font-size: clamp(3rem, 7.8vw, 6.85rem);
+    line-height: .96;
     text-wrap: balance;
   }
   .home-hero p {
-    max-inline-size: 34ch;
-    margin: clamp(1.4rem, 3vh, 2.2rem) auto 0;
-    color: #314038;
-    font-size: clamp(1.05rem, 1.7vw, 1.28rem);
-    line-height: 1.6;
-    text-wrap: pretty;
+    max-inline-size: 36ch;
+    margin: clamp(.95rem, 2.2vw, 1.45rem) auto .55rem;
+    font-size: clamp(1rem, 1.7vw, 1.22rem);
+    line-height: 1.55;
+    text-wrap: balance;
+  }
+  .home-hero__dates {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    min-block-size: 44px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .28em;
+  }
+  .home-values {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: .6rem clamp(.9rem, 4.6vw, 3.15rem);
+    margin: 0;
+    padding: 1.1rem 6%;
+    list-style: none;
+    border-block-end: 1px solid var(--journey-rule);
+    background: var(--cream);
+    color: var(--pine-dark);
+    font-size: .71rem;
+    font-weight: 700;
+    letter-spacing: .11em;
+    text-transform: uppercase;
   }
   .program-section {
-    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    padding-block-start: clamp(3.5rem, 8vw, 6.5rem);
     scroll-margin-top: 6.5rem;
     position: relative;
     isolation: isolate;
@@ -260,12 +303,14 @@ const calendar = [
     max-inline-size: 51rem;
     block-size: clamp(22rem, 55vw, 28.5rem);
     margin: clamp(.65rem, 2vw, 1.4rem) auto 1.2rem;
-    background: radial-gradient(ellipse at 47% 53%, #e7e9da 0%, transparent 60%);
+    background: radial-gradient(ellipse at 47% 53%, light-dark(#e7e9da, #465341) 0%, transparent 63%);
   }
   .program-preview__shape {
     --nucleus-shape: 57% 42% 50% 46% / 54% 38% 62% 45%;
     position: absolute;
     isolation: isolate;
+    display: grid;
+    place-items: center;
     inset: 50% auto auto 48%;
     inline-size: 59%;
     aspect-ratio: 1.42;
@@ -279,26 +324,24 @@ const calendar = [
   }
   .program-preview__shape::before {
     inset: -5% -4% -5% -5%;
-    border: 1px solid #aa8b51;
+    border: 1px solid light-dark(#aa8b51, #bca06c);
     border-radius: 49% 45% 48% 44% / 56% 50% 55% 43%;
     transform: rotate(9deg);
   }
   .program-preview__shape::after {
     inset: 8% -7% -7% -4%;
-    border: 1px solid #869484;
+    border: 1px solid light-dark(#869484, #a4b19b);
     border-radius: 46% 55% 45% 49% / 49% 39% 60% 47%;
-    background: #e6e5d3;
+    background: light-dark(#e6e5d3, #465342);
     transform: rotate(-9deg);
   }
   .program-preview__window {
     position: absolute;
     inset: 0;
     isolation: isolate;
-    display: grid;
-    place-items: center;
     overflow: hidden;
     border-radius: var(--nucleus-shape);
-    background: #eee5d2;
+    background: var(--surface-sand);
   }
   .program-preview__landscape {
     position: absolute;
@@ -311,13 +354,21 @@ const calendar = [
     transform: rotate(8deg) scale(1.12);
   }
   .program-preview__emblem {
-    display: block;
-    inline-size: 43%;
-    block-size: auto;
-    padding: 3.5%;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    inline-size: 45%;
+    aspect-ratio: 1.27;
     border-radius: 57% 43% 49% 53% / 47% 58% 42% 53%;
-    background: rgba(250, 243, 224, .94);
+    background: #faf3e0f5;
     transform: rotate(8deg);
+  }
+  .program-preview__emblem img {
+    display: block;
+    inline-size: 76%;
+    block-size: auto;
+    object-fit: contain;
   }
   .program-preview__themes {
     position: absolute;
@@ -343,7 +394,7 @@ const calendar = [
     transform: translate(-50%, -50%);
   }
   .program-preview__theme--nicole { --theme-x: 20%; --theme-y: 10%; --theme-tint: #e5eadc; }
-  .program-preview__theme--jasper { --theme-x: 88%; --theme-y: 28%; --theme-tint: #f1dfd3; }
+  .program-preview__theme--jasper { --theme-x: 86%; --theme-y: 26%; --theme-tint: #f1dfd3; }
   .program-preview__theme--yanina { --theme-x: 79%; --theme-y: 87%; --theme-tint: #efe3d7; }
   .program-preview__theme--nico { --theme-x: 12%; --theme-y: 75%; --theme-tint: #f4e7cb; }
   .program-preview__themes li span {
@@ -381,42 +432,21 @@ const calendar = [
     font-size: 1.35rem;
     font-weight: 400;
   }
-  .home-active {
-    padding-block: clamp(3rem, 7vw, 5.5rem);
-    background: #efe4d2;
-  }
-  .home-active__inner {
-    max-inline-size: 40rem;
-    text-align: center;
-  }
-  .home-active h2 {
-    margin: .2rem auto .7rem;
+  .home-calendar { padding-block-start: clamp(4rem, 9.5vw, 7rem); }
+  .home-calendar__intro { margin-block-end: clamp(1.3rem, 3vw, 2rem); }
+  .home-calendar__intro h2, .home-library h2 {
+    margin: 0 0 .55rem;
     color: var(--pine-dark);
-    font-size: clamp(2rem, 4vw, 3.3rem);
+    font-size: clamp(2.25rem, 4.6vw, 4.15rem);
     text-wrap: balance;
   }
-  .home-active p:not(.eyebrow) {
-    max-inline-size: 46ch;
-    margin: 0 auto;
-    text-wrap: pretty;
-  }
-  .home-active .btn { margin-top: 1.15rem; }
-  .home-library { margin-block: var(--journey-spacing); }
-  .home-library h2 {
-    margin: .15rem 0 .7rem;
+  .home-calendar__intro p { max-inline-size: 58ch; margin: 0; }
+  .home-calendar__intro .home-calendar__lead {
+    margin-block-end: .5rem;
     color: var(--pine-dark);
-    font-size: clamp(2.3rem, 4.6vw, 4rem);
-    text-wrap: balance;
+    font: 400 clamp(1.27rem, 2.45vw, 1.8rem)/1.22 var(--font-display);
   }
-  .home-library__intro {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: .8rem 1.5rem;
-  }
-  .home-library__intro p { max-inline-size: 42ch; margin: 0; }
-  .home-calendar { margin-block-end: var(--journey-spacing); }
+  #proximos-encuentros { scroll-margin-block-start: 1.6rem; }
   .home-calendar__list {
     display: grid;
     gap: .8rem;
@@ -435,7 +465,7 @@ const calendar = [
     padding: 0;
     border: 1px solid var(--journey-rule);
     border-radius: 1.15rem;
-    background: #faf5e9;
+    background: var(--surface-editorial);
   }
   .home-calendar__photo {
     display: block;
@@ -469,14 +499,12 @@ const calendar = [
   .home-calendar__content h3 a:hover { text-decoration: underline; }
   .home-calendar__date {
     margin: 0;
-    color: #8b4935;
+    color: var(--journey-clay);
     font-size: .9rem;
     font-weight: 700;
   }
-  .home-calendar__venue { margin: 0; color: #4d564a; }
+  .home-calendar__venue { margin: 0; color: var(--muted); }
   .home-calendar__content .journey-link { text-decoration: underline; text-underline-offset: .2em; }
-  .home-calendar__content .btn--rust { background: #8e472f; }
-  .home-calendar__content .btn--rust:hover { background: #783a29; }
 
   .home-base {
     display: grid;
@@ -484,8 +512,8 @@ const calendar = [
     overflow: hidden;
     margin-top: clamp(1.6rem, 4vw, 2.8rem);
     border-radius: 1.15rem;
-    background: #203b31;
-    color: #f6f0e3;
+    background: var(--pine-band);
+    color: var(--on-pine);
   }
   .home-base img {
     display: block;
@@ -522,10 +550,50 @@ const calendar = [
   .home-base p:not(.eyebrow) { margin: 0; max-inline-size: 32ch; }
   .home-base strong { display: block; margin-block-end: .25rem; }
 
+  .home-library { padding-block: clamp(4.25rem, 10vw, 7rem) var(--journey-spacing); }
+  .home-library__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: .55rem 1.5rem;
+    margin-block-end: clamp(1.1rem, 3vw, 2rem);
+  }
+  .home-library__header p { max-inline-size: 50ch; margin-block-end: 0; }
+  .home-library__header .eyebrow { margin-block-end: .55rem; }
+  .home-library__header .journey-link { align-self: end; }
+  .home-library__reading { display: grid; gap: clamp(1.35rem, 5.3vw, 4.25rem); }
+  .home-library__reading--split { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+  .home-library__feature { display: grid; gap: .5rem; }
+  .home-library__feature img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1.73;
+    object-fit: cover;
+    object-position: 50% 48%;
+    border-radius: .65rem;
+    margin-block-end: .38rem;
+  }
+  .home-library__feature h3, .home-library__list h3 { margin: 0; color: var(--pine-dark); }
+  .home-library__feature h3 { font-size: clamp(1.55rem, 3vw, 2.55rem); }
+  .home-library__feature p { margin: 0; max-inline-size: 45ch; }
+  .home-library__feature h3 span { font: 700 .9rem var(--font-body); }
+  .home-library__feature a:hover, .home-library__list a:hover h3 { text-decoration: underline; }
+  .home-library__list { margin: 0; padding: 0; list-style: none; border-block-start: 1px solid var(--journey-rule); }
+  .home-library__list li { border-block-end: 1px solid var(--journey-rule); }
+  .home-library__list a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-block-size: 5.2rem; padding-block: .85rem; }
+  .home-library__list h3 { font-size: clamp(1.28rem, 2.6vw, 1.95rem); }
+  .home-library__list p { margin: .3rem 0 0; color: var(--muted); font-size: .9rem; }
+  .home-library__list a > span { color: var(--journey-clay); }
+
   @media (max-width: 760px) {
     .nucleus-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
+    .home-hero { min-block-size: clamp(24rem, 62svh, 32rem); padding-block: 3.4rem; }
+    .home-hero h1 { font-size: clamp(2.3rem, 11.6vw, 4.2rem); }
+    .home-library__reading--split { grid-template-columns: minmax(0, 1fr); }
     .program-preview > :is(.eyebrow, h2, .program-preview__intro) {
       margin-inline: 0;
       text-align: start;

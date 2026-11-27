@@ -84,18 +84,18 @@ const heroPhoto = {
 </SiteLayout>
 
 <style>
-  .team-page { overflow: clip; background: #f6f1e7; color: #263a31; }
+  .team-page { overflow: clip; background: light-dark(#f6f1e7, var(--paper)); color: var(--ink); }
   .team-container { width: min(1190px, calc(100% - clamp(2rem, 7vw, 6rem))); margin-inline: auto; }
   .team-page :is(h1, h2, h3, p) { margin: 0; }
-  .team-page :is(h1, h2) { color: #203b31; line-height: 1.02; }
-  .team-page em { color: #944a36; }
+  .team-page :is(h1, h2) { color: var(--pine-dark); line-height: 1.02; }
+  .team-page em { color: var(--journey-clay); }
   .team-page .team-label {
-    color: #944a36;
+    color: var(--journey-clay);
     font: 700 .73rem/1.4 var(--font-body, sans-serif);
     letter-spacing: .15em;
     text-transform: uppercase;
   }
-  .team-hero { background: radial-gradient(ellipse at 92% 4%, #f0e5d4, transparent 55%); }
+  .team-hero { background: radial-gradient(ellipse at 92% 4%, var(--surface-sand), transparent 55%); }
   .team-hero__layout {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
@@ -111,7 +111,7 @@ const heroPhoto = {
   .team-index {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-block: 1px solid #d9c7a9;
+    border-block: 1px solid var(--line);
   }
   .team-index a {
     display: grid;
@@ -120,18 +120,18 @@ const heroPhoto = {
     gap: .6rem;
     min-height: 3.55rem;
     padding: .55rem clamp(.4rem, 2vw, 1.3rem);
-    color: #203b31;
+    color: var(--pine-dark);
     font-size: .92rem;
     font-weight: 700;
   }
-  .team-index a + a { border-inline-start: 1px solid #d9c7a9; }
-  .team-index a:hover { background: #efe4cf; }
+  .team-index a + a { border-inline-start: 1px solid var(--line); }
+  .team-index a:hover { background: var(--surface-sand); }
   .team-index :global(img) { width: 100%; height: auto; }
-  .team-index__arrow { color: #944a36; }
+  .team-index__arrow { color: var(--journey-clay); }
 
   .team-profile {
-    --team-accent: #315d49;
-    --team-tint: #e4e8db;
+    --team-accent: light-dark(#315d49, #b3ceb8);
+    --team-tint: var(--surface-sage);
     --practice-photo-ratio: 1.28;
     position: relative;
     isolation: isolate;
@@ -142,10 +142,10 @@ const heroPhoto = {
     padding-block: clamp(2.85rem, 7.5vw, 6.5rem);
     scroll-margin-top: 4rem;
   }
-  .team-profile + .team-profile { border-top: 1px solid #d9c7a9; }
-  .team-profile[data-tone='earth'] { --team-accent: #704735; --team-tint: #eee1d6; }
-  .team-profile[data-tone='ochre'] { --team-accent: #79551a; --team-tint: #f1e6cf; }
-  .team-profile[data-tone='clay'] { --team-accent: #944a36; --team-tint: #efe0d4; }
+  .team-profile + .team-profile { border-top: 1px solid var(--line); }
+  .team-profile[data-tone='earth'] { --team-accent: light-dark(#704735, #e4b5a1); --team-tint: var(--surface-clay); }
+  .team-profile[data-tone='ochre'] { --team-accent: light-dark(#79551a, #e7c791); --team-tint: var(--surface-sand); }
+  .team-profile[data-tone='clay'] { --team-accent: var(--journey-clay); --team-tint: var(--surface-clay); }
   .team-profile::before {
     content: '';
     position: absolute;
@@ -166,7 +166,7 @@ const heroPhoto = {
   .team-profile__copy .team-label { margin-block: 1.25rem .45rem; color: var(--team-accent); }
   .team-profile__copy p { line-height: 1.64; }
 
-  .team-retreat { position: relative; isolation: isolate; overflow: clip; background: #203b31; color: #f6f1e7; }
+  .team-retreat { position: relative; isolation: isolate; overflow: clip; background: var(--pine-band); color: var(--on-pine); }
   .team-retreat::after {
     content: '';
     position: absolute;
@@ -211,7 +211,7 @@ const heroPhoto = {
   @media (max-width: 560px) {
     .team-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .team-index a:nth-child(n) { border-inline-start: 0; }
-    .team-index a:nth-child(even) { border-inline-start: 1px solid #d9c7a9; }
-    .team-index a:nth-child(n + 3) { border-top: 1px solid #d9c7a9; }
+    .team-index a:nth-child(even) { border-inline-start: 1px solid var(--line); }
+    .team-index a:nth-child(n + 3) { border-top: 1px solid var(--line); }
   }
 </style>

@@ -210,7 +210,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     padding: clamp(1.15rem, 2.5vw, 1.6rem);
     border: 1px solid var(--line);
     border-radius: 22px;
-    background: color-mix(in srgb, var(--cream) 78%, white);
+    background: var(--surface-editorial);
   }
   .event-card h3 { margin: 0 0 .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
   .event-card--featured {
@@ -221,13 +221,13 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     grid-column: 1 / -1;
     padding: 0;
     overflow: clip;
-    border-color: #d9c7a9;
-    background: #fcf8ef;
+    border-color: var(--line);
+    background: var(--surface-editorial);
   }
   .event-card__content { min-width: 0; }
   .event-card--featured .event-card__content { padding: clamp(1.25rem, 4vw, 2.65rem); }
   .event-card .event-card__date {
-    color: #944a36;
+    color: var(--journey-clay);
     font-size: .9rem;
     line-height: 1.35;
   }
@@ -237,7 +237,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     line-height: 1.05;
     text-wrap: balance;
   }
-  .event-card__content h3 em { color: #944a36; }
+  .event-card__content h3 em { color: var(--journey-clay); }
   .event-card__facts {
     display: flex;
     flex-wrap: wrap;
@@ -252,7 +252,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     overflow: clip;
     margin: 0;
     padding: clamp(1rem, 3.5vw, 2.5rem);
-    background: #203b31;
+    background: var(--pine-band);
   }
   .event-card__photo::before {
     content: "";
@@ -291,16 +291,16 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     margin: .15rem 0 0;
   }
   .event-card__actions .event-card__details {
-    background: #203b31;
+    background: var(--pine-band);
     color: #fff;
   }
-  .event-card__actions .event-card__details:hover { background: #152d24; }
+  .event-card__actions .event-card__details:hover { background: var(--pine-fill-hover); }
   .event-card__actions :global(.btn--outline) {
     border-color: #a78f6e;
     background: transparent;
-    color: #203b31;
+    color: var(--pine-dark);
   }
-  .event-card__actions :global(.btn--outline:hover) { background: #efe4cf; }
+  .event-card__actions :global(.btn--outline:hover) { background: var(--surface-sand); }
   .event-meta {
     display: flex;
     align-items: center;
@@ -312,7 +312,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
   .event-benefit {
     margin-top: 1rem;
     padding-inline-start: .85rem;
-    border-inline-start: 2px solid #d9c7a9;
+    border-inline-start: 2px solid var(--line);
     font-size: .94rem;
   }
   .event-benefit h4 { margin: 0 0 .15rem; color: var(--pine-dark); font-size: 1em; }

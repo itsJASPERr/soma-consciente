@@ -35,7 +35,7 @@ const teamPage = path('/equipo/');
     isolation: isolate;
     overflow: clip;
     padding-block: clamp(2.9rem, 7vw, 6rem) clamp(2.85rem, 6vw, 5rem);
-    background: #f6f1e7;
+    background: light-dark(#f6f1e7, var(--paper));
   }
   .retreat-team::before {
     content: '';
@@ -45,7 +45,7 @@ const teamPage = path('/equipo/');
     width: min(38rem, 43%);
     height: 61%;
     border-radius: 57% 0 0 46%;
-    background: #f1e6d3;
+    background: var(--surface-sand);
     transform: rotate(-12deg);
   }
   .retreat-team::after {
@@ -55,7 +55,7 @@ const teamPage = path('/equipo/');
     inset: auto -10% -3.75rem;
     height: 7rem;
     border-radius: 53% 43% 0 0;
-    background: #efe4cf;
+    background: var(--surface-sand);
     transform: rotate(-2deg);
   }
   .retreat-team__inner {
@@ -71,15 +71,15 @@ const teamPage = path('/equipo/');
   }
   .retreat-team__head h2 {
     margin: 0;
-    color: #203b31;
+    color: var(--pine-dark);
     font-size: clamp(2.35rem, 5.5vw, 4.65rem);
     line-height: 1.02;
   }
-  .retreat-team__head em { display: block; color: #944a36; }
+  .retreat-team__head em { display: block; color: var(--journey-clay); }
   .retreat-team__head p {
     max-width: 34ch;
     margin: 0;
-    color: #263a31;
+    color: var(--ink);
     font-size: clamp(1rem, 1.6vw, 1.22rem);
     line-height: 1.55;
   }
@@ -96,24 +96,24 @@ const teamPage = path('/equipo/');
     --practice-photo-dot: .55rem;
     --practice-photo-inset: .48rem;
     min-width: 0;
-    --team-accent: #315d49;
+    --team-accent: light-dark(#315d49, #b3ceb8);
   }
-  .retreat-team__member[data-tone='earth'] { --team-accent: #704735; }
-  .retreat-team__member[data-tone='ochre'] { --team-accent: #79551a; }
-  .retreat-team__member[data-tone='clay'] { --team-accent: #944a36; }
+  .retreat-team__member[data-tone='earth'] { --team-accent: light-dark(#704735, #e4b5a1); }
+  .retreat-team__member[data-tone='ochre'] { --team-accent: light-dark(#79551a, #e7c791); }
+  .retreat-team__member[data-tone='clay'] { --team-accent: var(--journey-clay); }
   .retreat-team__copy { margin-top: 1.15rem; }
-  .retreat-team__copy h3 { margin: 0 0 .3rem; color: #203b31; font-size: clamp(1.23rem, 1.65vw, 1.55rem); }
+  .retreat-team__copy h3 { margin: 0 0 .3rem; color: var(--pine-dark); font-size: clamp(1.23rem, 1.65vw, 1.55rem); }
   .retreat-team__copy h3 a { text-decoration: none; }
   .retreat-team__copy h3 a:hover { text-decoration: underline; text-underline-offset: .18em; }
   .retreat-team__copy h3 span { color: var(--team-accent); font: .65em var(--font-body, sans-serif); }
-  .retreat-team__copy p { margin: 0; color: #263a31; font-size: .9rem; line-height: 1.55; }
+  .retreat-team__copy p { margin: 0; color: var(--ink); font-size: .9rem; line-height: 1.55; }
   .retreat-team__copy .retreat-team__practice { margin-bottom: .4rem; color: var(--team-accent); font-weight: 700; }
   .retreat-team__action {
     display: flex;
     justify-content: end;
     margin-top: 1.85rem;
     padding-top: 1.1rem;
-    border-top: 1px solid #d9c7a9;
+    border-top: 1px solid var(--line);
   }
   @media (max-width: 860px) {
     .retreat-team__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
@@ -138,7 +138,7 @@ const teamPage = path('/equipo/');
       gap: .78rem;
       padding-block: 1rem;
     }
-    .retreat-team__member + .retreat-team__member { border-top: 1px solid #d9c7a9; }
+    .retreat-team__member + .retreat-team__member { border-top: 1px solid var(--line); }
     .retreat-team__copy { margin-top: 0; }
     .retreat-team__copy p { font-size: .87rem; }
     .retreat-team__action { margin-top: .3rem; justify-content: start; }

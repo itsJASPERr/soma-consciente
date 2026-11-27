@@ -325,14 +325,14 @@ const registrationSteps = [
 
 <style>
   .retreat {
-    --retreat-paper: #f6f1e7;
-    --retreat-sand: #efe4cf;
-    --retreat-card: #fcf8ef;
-    --retreat-pine: #203b31;
-    --retreat-ink: #263a31;
-    --retreat-clay: #944a36;
-    --retreat-muted: #425950;
-    --retreat-line: #d9c7a9;
+    --retreat-paper: light-dark(#f6f1e7, var(--paper));
+    --retreat-sand: var(--surface-sand);
+    --retreat-card: var(--surface-editorial);
+    --retreat-pine: var(--pine-dark);
+    --retreat-ink: var(--ink);
+    --retreat-clay: var(--journey-clay);
+    --retreat-muted: var(--muted);
+    --retreat-line: var(--line);
     --retreat-gold: #e7c488;
     background: var(--retreat-paper);
     color: var(--retreat-ink);
@@ -402,9 +402,9 @@ const registrationSteps = [
   .retreat :global(.retreat-button) {
     min-block-size: 44px;
     gap: .65rem;
-    background: var(--retreat-pine);
+    background: var(--pine-band);
   }
-  .retreat :global(.retreat-button:hover) { background: #152d24; }
+  .retreat :global(.retreat-button:hover) { background: var(--pine-fill-hover); }
   .retreat-link {
     display: inline-flex;
     align-items: center;
@@ -448,7 +448,7 @@ const registrationSteps = [
   }
   .retreat-schedule {
     padding-block: clamp(2.9rem, 6vw, 5.25rem);
-    background: linear-gradient(var(--retreat-paper), #f4ecde);
+    background: linear-gradient(var(--retreat-paper), var(--surface-editorial));
   }
   .retreat-section-head { margin-bottom: clamp(1.25rem, 3vw, 2.2rem); }
   .retreat-section-head h2, .retreat-integration h2, .retreat-join h2 { margin-top: .55rem; }
@@ -566,8 +566,8 @@ const registrationSteps = [
     position: relative;
     isolation: isolate;
     padding: clamp(1.25rem, 4.2vw, 3.15rem);
-    background: var(--retreat-pine);
-    color: var(--retreat-paper);
+    background: var(--pine-band);
+    color: var(--on-pine);
   }
   .retreat-price::after {
     content: "";
@@ -596,7 +596,7 @@ const registrationSteps = [
     gap: .45rem;
     min-width: 0;
     padding: clamp(.9rem, 2vw, 1.35rem);
-    border: 1px solid #d9c7a9;
+    border: 1px solid var(--retreat-line);
     border-radius: 1rem;
     background: var(--retreat-card);
     color: var(--retreat-pine);
@@ -617,14 +617,14 @@ const registrationSteps = [
     margin-top: auto;
     padding: .6rem .75rem;
     gap: .4rem;
-    background: var(--retreat-clay);
-    color: var(--retreat-paper);
+    background: var(--rust-fill);
+    color: var(--on-rust);
     line-height: 1.2;
     text-align: center;
   }
-  .retreat-plan__action:hover { background: #783c2d; color: var(--retreat-paper); }
+  .retreat-plan__action:hover { background: var(--rust-fill-hover); color: var(--on-rust); }
   .retreat-plan__action:focus-visible { outline-offset: 3px; }
-  .retreat-price .retreat-price__note { margin-top: .85rem; color: var(--retreat-paper); font-size: .92rem; }
+  .retreat-price .retreat-price__note { margin-top: .85rem; color: var(--on-pine); font-size: .92rem; }
   .retreat-pricing__extras {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
@@ -679,8 +679,8 @@ const registrationSteps = [
     aspect-ratio: 1;
     margin-top: .03rem;
     border-radius: 50%;
-    background: var(--retreat-pine);
-    color: var(--retreat-paper);
+    background: var(--pine-band);
+    color: var(--on-pine);
     font-size: .82rem;
     font-weight: 700;
   }

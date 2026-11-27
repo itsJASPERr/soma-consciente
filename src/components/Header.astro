@@ -27,6 +27,10 @@ const links = [
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
     {action && <a class="header-cta" href={action.href} {...(action.analytics ?? {})}>{action.label} <span aria-hidden="true">↗</span></a>}
+    <button class="theme-toggle" type="button" aria-label="Modo oscuro" title="Modo oscuro" data-theme-toggle hidden>
+      <Icon name="iconoir:half-moon" size={20} class="theme-toggle__moon" aria-hidden="true" />
+      <Icon name="iconoir:sun-light" size={20} class="theme-toggle__sun" aria-hidden="true" />
+    </button>
     <details class="mobile-nav">
       <summary aria-label="Abrir menú de navegación">Menú <Icon name="iconoir:menu" size={20} aria-hidden="true"/></summary>
       <nav aria-label="Navegación móvil">
@@ -54,3 +58,26 @@ const links = [
     })();
   </script>
 )}
+
+<style>
+  .theme-toggle {
+    flex: 0 0 auto;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--pine-dark);
+    cursor: pointer;
+  }
+  .theme-toggle:not([hidden]) { display: grid; }
+  .theme-toggle:hover { background: var(--surface-sage); }
+  .theme-toggle[aria-pressed='false'] .theme-toggle__sun,
+  .theme-toggle[aria-pressed='true'] .theme-toggle__moon { display: none; }
+  @media (max-width: 1150px) {
+    .theme-toggle { margin-inline-start: auto; }
+    .theme-toggle:not([hidden]) + .mobile-nav { margin-inline-start: 0; }
+  }
+</style>

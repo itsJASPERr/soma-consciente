@@ -635,7 +635,7 @@ const countries = getCountries()
     font-weight: 700;
   }
   .program-signup__country-options li:is(:hover, [data-highlighted]) {
-    background: #e4e9d8;
+    background: var(--surface-sage);
   }
   .program-signup__country-empty {
     margin: .4rem 0 0;
@@ -677,12 +677,12 @@ const countries = getCountries()
     margin-top: .7rem;
     padding: .65rem .75rem;
     border-inline-start: 2px solid #638170;
-    background: #e8ecdf;
+    background: var(--surface-sage);
     color: var(--pine-dark);
   }
   .program-signup__result[data-state="error"] {
     border-inline-start-color: #944b34;
-    background: #f2e4d8;
+    background: var(--surface-clay);
   }
   [data-program-open] button[type="submit"] {
     width: 100%;
@@ -692,7 +692,7 @@ const countries = getCountries()
     justify-self: start;
   }
   .program-signup__form button:disabled {
-    background: #e4e9d8;
+    background: var(--surface-sage);
     color: var(--pine-dark);
     cursor: default;
     transform: none;

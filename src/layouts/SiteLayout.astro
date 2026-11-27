@@ -37,7 +37,55 @@ const socialDescription = description.trim().length >= 60
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="color-scheme" content="light dark"/>
     <meta name="theme-color" content="#f7f1e8"/>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const system = window.matchMedia('(prefers-color-scheme: dark)');
+        const key = 'soma-theme';
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        let selection;
+        let toggle;
+
+        const readTheme = () => {
+          try {
+            const stored = localStorage.getItem(key);
+            return stored === 'light' || stored === 'dark' ? stored : undefined;
+          } catch {
+            return undefined;
+          }
+        };
+        const currentTheme = () => selection ?? (system.matches ? 'dark' : 'light');
+        const apply = () => {
+          const dark = currentTheme() === 'dark';
+          if (selection) root.dataset.theme = selection;
+          else delete root.dataset.theme;
+          themeColor.content = dark ? '#242d25' : '#f7f1e8';
+          toggle?.setAttribute('aria-pressed', String(dark));
+        };
+
+        selection = readTheme();
+        apply();
+        system.addEventListener('change', apply);
+        window.addEventListener('storage', (event) => {
+          if (event.key !== key && event.key !== null) return;
+          selection = readTheme();
+          apply();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+          toggle = document.querySelector('[data-theme-toggle]');
+          if (!toggle) return;
+          apply();
+          toggle.hidden = false;
+          toggle.addEventListener('click', () => {
+            selection = currentTheme() === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem(key, selection); } catch {}
+            apply();
+          });
+        }, { once: true });
+      })();
+    </script>
     <meta name="description" content={description}/>
     {noIndex
       ? <meta name="robots" content="noindex"/>

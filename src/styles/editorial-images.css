@@ -97,19 +97,19 @@
 
 /* Núcleo: lighter editorial illustration with emblem over nature image. */
 .nucleo-section {
-  background:radial-gradient(circle at 40% 80%,#eee3d3,transparent 49%),linear-gradient(110deg,#f6eee2,#f9f3e9);
+  background:radial-gradient(circle at 40% 80%,var(--surface-sand),transparent 49%),linear-gradient(110deg,var(--paper),var(--cream));
   color:var(--ink);
   border-block:1px solid var(--line);
 }
 .nucleo-section::before {border-color:#c79d7790;}
-.nucleo-section .eyebrow {color:#a86f52!important;}
-.nucleo-section h2 {color:#2b302a;}
-.nucleo-section p {color:#5e665e;}
-.nucleo-section .btn--light {background:var(--pine);color:#fff;}
-.nucleo-section .btn--light:hover {background:#1b382e;}
+.nucleo-section .eyebrow {color:var(--terra)!important;}
+.nucleo-section h2 {color:var(--pine-dark);}
+.nucleo-section p {color:var(--muted);}
+.nucleo-section .btn--light {background:var(--pine-fill);color:var(--on-pine);}
+.nucleo-section .btn--light:hover {background:var(--pine-fill-hover);}
 .nucleo-grid {grid-template-columns:minmax(0,.88fr) minmax(0,1.1fr) minmax(0,.8fr);gap:28px;}
-.nucleo-point {color:#4f5d53;}
-.nucleo-point span:first-child {color:#b4774d;}
+.nucleo-point {color:var(--ink);}
+.nucleo-point span:first-child {color:var(--terra);}
 .nucleo-editorial-art {
   position:relative;min-width:0;
   aspect-ratio:1;max-width:490px;
@@ -174,7 +174,7 @@
 .digital-visual--editorial::after {display:none;}
 .digital-visual__detail {
   position:absolute;z-index:2;bottom:-1%;right:0;
-  font:italic 1.4rem var(--font-display);color:var(--pine);
+  font:italic 1.4rem var(--font-display);color:#274d41;
   background:#f8f0e7e8;padding:8px 15px;border-radius:18px;
 }
 

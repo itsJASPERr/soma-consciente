@@ -66,7 +66,7 @@ try{
           '.site-header .brand',
           '.site-header .mobile-nav summary',
           '.home-hero h1','.home-calendar h3','.home-calendar .journey-link',
-          '.home-active h2',
+          '.theme-toggle','.program-preview__themes li','.home-library h3',
           '.journey-hero h1','.journey-row h2','.journey-resource-list a',
           '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
@@ -141,6 +141,43 @@ try{
   }
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
+  const themeToggle = page.getByRole('button', { name: 'Modo oscuro' });
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.waitForFunction(() => document.querySelector('[data-theme-toggle]')?.getAttribute('aria-pressed') === 'true');
+  const darkBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
+  await themeToggle.press('Space');
+  assert.equal(await themeToggle.getAttribute('aria-pressed'), 'false');
+  const lightBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
+  assert.notEqual(lightBackground, darkBackground);
+  await page.goto(HOST + BASE + '/biblioteca/');
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+  await themeToggle.click();
+  await page.reload();
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+  assert.equal(await themeToggle.getAttribute('aria-pressed'), 'true');
+  await page.evaluate(() => localStorage.removeItem('soma-theme'));
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto(HOST + BASE + '/');
+
+  const homeMethod = page.locator('#metodologia');
+  const emblem = homeMethod.locator('.program-preview__emblem img');
+  await emblem.scrollIntoViewIfNeeded();
+  assert(await emblem.evaluate(async image => {
+    await image.decode();
+    const imageBounds = image.getBoundingClientRect();
+    const holder = image.parentElement;
+    const holderBounds = holder.getBoundingClientRect();
+    return image.naturalWidth === 520 && image.naturalHeight === 405
+      && !image.closest('.program-preview__window')
+      && getComputedStyle(image).objectFit === 'contain'
+      && imageBounds.left > holderBounds.left && imageBounds.top > holderBounds.top
+      && imageBounds.right < holderBounds.right && imageBounds.bottom < holderBounds.bottom;
+  }), 'The original SOMA logo fits inside its frame outside the landscape crop');
+  const homeLibrary = page.locator('.home-library');
+  assert.equal(await homeLibrary.locator('img').count(), 1);
+  await homeLibrary.getByRole('link', { name: /Una pausa de presencia/ }).waitFor();
+  await page.getByRole('link', { name: 'Ver próximas fechas' }).click();
+  await page.waitForURL('**/#proximos-encuentros');
   const hasUmami = (await page.locator('script[data-website-id]').count()) === 1;
   const verifyRetreatCta = async (link, action, placement) => {
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
