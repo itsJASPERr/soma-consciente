@@ -46,6 +46,7 @@ const formatter = new Intl.DateTimeFormat('es-AR', {
 });
 const inboxUrl = path('/api/whatsapp/messages');
 const phonePattern = /^[1-9]\d{6,14}$/;
+const pollIntervalMs = 10_000;
 
 function groupConversations(messages: unknown[], replies: Reply[]) {
   const bySender = new Map<string, Conversation>();
@@ -91,7 +92,9 @@ function setTime(element: HTMLTimeElement, at: number) {
 function mountInbox(inbox: HTMLElement) {
   const layout = inbox.querySelector<HTMLElement>('[data-inbox-layout]')!;
   const status = inbox.querySelector<HTMLElement>('[data-status]')!;
+  const inboxActions = inbox.querySelector<HTMLElement>('[data-inbox-actions]')!;
   const refresh = inbox.querySelector<HTMLButtonElement>('[data-refresh]')!;
+  const autoRefresh = inbox.querySelector<HTMLInputElement>('[data-auto-refresh]')!;
   const senderList = inbox.querySelector<HTMLElement>('[data-senders]')!;
   const back = inbox.querySelector<HTMLButtonElement>('[data-back]')!;
   const chatTitle = inbox.querySelector<HTMLElement>('[data-chat-title]')!;
@@ -112,6 +115,8 @@ function mountInbox(inbox: HTMLElement) {
   let repliesEnabled = false;
   let loading = false;
   let sending = false;
+  let pollTimer: number | undefined;
+  let lastResponse: string | undefined;
 
   function updateControls() {
     refresh.disabled = loading || sending;
@@ -165,7 +170,8 @@ function mountInbox(inbox: HTMLElement) {
       : target ? errors.reply_window_closed : 'Esta conversación no está disponible para responder desde SOMA.';
     const draft = selected ? drafts.get(selected) ?? '' : '';
     if (textarea.value !== draft) textarea.value = draft;
-    feedback.textContent = selected ? feedbackBySender.get(selected) ?? '' : '';
+    const message = selected ? feedbackBySender.get(selected) ?? '' : '';
+    if (feedback.textContent !== message) feedback.textContent = message;
     updateControls();
   }
 
@@ -210,6 +216,7 @@ function mountInbox(inbox: HTMLElement) {
     drafts.clear();
     attempts.clear();
     feedbackBySender.clear();
+    lastResponse = undefined;
     selected = undefined;
     senderList.replaceChildren();
     timeline.replaceChildren();
@@ -228,11 +235,19 @@ function mountInbox(inbox: HTMLElement) {
       const response = await fetch(inboxUrl, { cache: 'no-store' });
       if (response.status === 401 || response.status === 403) {
         clearInbox();
+        autoRefresh.checked = false;
+        syncPolling();
         showStatus(errors.unauthorized);
         return;
       }
       if (!response.ok) throw new Error('unavailable');
-      const payload: { messages?: unknown; replies?: Reply[]; replies_enabled?: boolean } = await response.json();
+      const body = await response.text();
+      if (body === lastResponse) {
+        showStatus(selected ? '' : 'Todavía no hay mensajes.');
+        renderComposer();
+        return;
+      }
+      const payload: { messages?: unknown; replies?: Reply[]; replies_enabled?: boolean } = JSON.parse(body);
       if (!Array.isArray(payload.messages)) throw new Error('invalid response');
 
       const next = groupConversations(payload.messages, payload.replies ?? []);
@@ -250,9 +265,11 @@ function mountInbox(inbox: HTMLElement) {
       repliesEnabled = Boolean(payload.replies_enabled);
       layout.hidden = !selected;
       showStatus(selected ? '' : 'Todavía no hay mensajes.');
-      if (!selected) return;
-      renderSenders();
-      renderConversation(scrollToLatest || previous !== selected);
+      if (selected) {
+        renderSenders();
+        renderConversation(scrollToLatest || previous !== selected);
+      }
+      lastResponse = body;
     } catch {
       showStatus('No pudimos leer los mensajes. Volvé a intentar.');
     } finally {
@@ -328,10 +345,26 @@ function mountInbox(inbox: HTMLElement) {
     }
   });
 
-  refresh.hidden = false;
+  function syncPolling() {
+    if (autoRefresh.checked && document.visibilityState === 'visible') {
+      pollTimer ??= window.setInterval(() => void loadMessages(), pollIntervalMs);
+    } else if (pollTimer !== undefined) {
+      window.clearInterval(pollTimer);
+      pollTimer = undefined;
+    }
+  }
+
+  inboxActions.hidden = false;
   refresh.addEventListener('click', () => void loadMessages());
+  autoRefresh.addEventListener('change', () => {
+    syncPolling();
+    if (autoRefresh.checked && document.visibilityState === 'visible') void loadMessages();
+  });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && document.activeElement !== textarea) void loadMessages();
+    syncPolling();
+    if (document.visibilityState === 'visible' && (autoRefresh.checked || document.activeElement !== textarea)) {
+      void loadMessages();
+    }
   });
   void loadMessages();
 }

@@ -13,7 +13,14 @@ import SiteLayout from '../layouts/SiteLayout.astro';
           <span class="eyebrow">WhatsApp</span>
           <h1 id="inbox-title">Mensajes</h1>
         </div>
-        <button class="inbox-button" type="button" data-refresh hidden>Actualizar</button>
+        <div class="inbox-actions" data-inbox-actions hidden>
+          <label class="inbox-auto-refresh">
+            <input type="checkbox" role="switch" autocomplete="off" data-auto-refresh />
+            <span class="inbox-switch-track" aria-hidden="true"></span>
+            <span>Autoactualizar</span>
+          </label>
+          <button class="inbox-button" type="button" data-refresh>Actualizar</button>
+        </div>
       </header>
       <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
 
@@ -69,6 +76,61 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     margin: 4px 0 0;
     font-size: clamp(2.35rem, 5vw, 3.7rem);
     line-height: 1;
+  }
+
+  .wa-inbox .inbox-actions,
+  .wa-inbox .inbox-auto-refresh {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wa-inbox .inbox-auto-refresh {
+    position: relative;
+    min-block-size: 44px;
+    color: var(--ink);
+    font: 650 .875rem/1.3 var(--font-body);
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-auto-refresh input {
+    position: absolute;
+    inset: 0 auto 0 0;
+    inline-size: 36px;
+    block-size: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-switch-track {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 36px;
+    block-size: 22px;
+    padding: 2px;
+    border: 1px solid var(--sage);
+    border-radius: 999px;
+    background: var(--paper);
+  }
+
+  .wa-inbox .inbox-switch-track::before {
+    content: '';
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track { background: var(--pine); }
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track::before {
+    margin-inline-start: auto;
+    background: #fff;
+  }
+  .wa-inbox .inbox-auto-refresh input:focus-visible + .inbox-switch-track {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
   }
 
   .wa-inbox .inbox-button {
@@ -265,6 +327,8 @@ import SiteLayout from '../layouts/SiteLayout.astro';
   .wa-inbox .reply-send { border-color: transparent; background: var(--pine); color: #fff; }
 
   @media (max-width: 700px) {
+    .wa-inbox .inbox-heading { flex-wrap: wrap; }
+    .wa-inbox .inbox-actions { flex: 1 1 100%; justify-content: space-between; }
     .wa-inbox .inbox-layout { grid-template-columns: minmax(0, 1fr); }
     .wa-inbox .inbox-senders { border-inline-end: 0; }
     .wa-inbox .inbox-layout:not([data-viewing-chat]) .inbox-conversation,
