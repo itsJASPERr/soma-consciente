@@ -96,6 +96,12 @@ guardar una solicitud nueva. Incluye solo la edición, el canal y la opción de
 pago. Umami también mide los pasos por URL en `/solicitud/` y
 `/solicitud/recibida/` dentro de cada edición. Las vistas previas no cargan Umami.
 
+En el círculo de integración, **Quiero participar** guarda el nombre y el
+contacto y muestra una referencia. El equipo ve los pedidos en **Solicitudes
+de círculos** dentro de `/mensajes/`. En producción, Umami registra
+`circle_request_submitted` para solicitudes nuevas y mide los pasos
+`/acompanamiento/solicitud/` y `/acompanamiento/solicitud/recibida/`.
+
 ### Bandeja de WhatsApp
 
 La ruta de producción para Meta es

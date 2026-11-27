@@ -1,0 +1,16 @@
+---
+import type { GetStaticPaths } from 'astro';
+import OnlineCirclePage from '../../../components/OnlineCirclePage.astro';
+import { circleOffering } from '../../../lib/offerings';
+
+export const getStaticPaths = (() => {
+  if (!circleOffering || (import.meta.env.PROD && import.meta.env.PUBLIC_WAITLIST_ENABLED !== 'true')) return [];
+  return [
+    { params: { step: undefined }, props: { requestState: 'form' as const } },
+    { params: { step: 'recibida' }, props: { requestState: 'receipt' as const } },
+  ];
+}) satisfies GetStaticPaths;
+
+const { requestState } = Astro.props;
+---
+<OnlineCirclePage requestState={requestState} />

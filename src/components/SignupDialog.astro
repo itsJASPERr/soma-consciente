@@ -1,15 +1,18 @@
 ---
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js/min';
 import { offeringConsentText } from '../lib/waitlist-consent';
-import { analyticsEnabled, retreatCta } from '../lib/analytics';
+import { analyticsEnabled, circleCta, retreatCta } from '../lib/analytics';
 import { retreatPaymentPlans, retreatPrice, retreatRebates, undecidedPayment } from '../lib/retreat-requests';
 import { path } from '../lib/paths';
 
+type RequestOptions = { offering: string; href: string; whatsappUrl?: string; receiptPage?: boolean };
+
 interface Props {
-  retreat?: { edition: string; href: string; whatsappUrl?: string };
+  request?: RequestOptions & ({ kind: 'retreat'; edition: string } | { kind: 'circle' });
 }
 
-const { retreat } = Astro.props;
+const { request } = Astro.props;
+const retreat = request?.kind === 'retreat' ? request : undefined;
 
 const collectsSignups = import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 
@@ -20,8 +23,16 @@ const countries = getCountries()
   .map(code => ({ code, name: regionNames.of(code) ?? code, dialingCode: getCountryCallingCode(code) }))
   .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 ---
+{request?.receiptPage && (
+  <script is:inline define:vars={{ requestPath: request.href + 'solicitud/' }}>
+    const requestState = history.state?.somaRequest ?? history.state?.somaRetreat;
+    if (!requestState?.receipt?.reference) {
+      history.replaceState(history.state, '', requestPath + location.search);
+    }
+  </script>
+)}
 <div class="program-signup">
-  <dialog id="program-launch-dialog" class="program-signup__dialog" aria-labelledby="program-launch-title" data-retreat-dialog={retreat ? true : undefined}>
+  <dialog id="program-launch-dialog" class="program-signup__dialog" aria-labelledby="program-launch-title">
     <header class="program-signup__header">
       <div>
         <p class="eyebrow program-signup__status">Próximamente</p>
@@ -29,12 +40,13 @@ const countries = getCountries()
       </div>
       <button id="program-launch-close" class="program-signup__close" type="button" aria-label="Cerrar"><span aria-hidden="true">×</span></button>
     </header>
-    <div class="program-signup__body" tabindex={retreat ? 0 : undefined}
-      role={retreat ? 'region' : undefined} aria-label={retreat ? 'Contenido de la solicitud' : undefined}
+    <div class="program-signup__body" tabindex={request ? 0 : undefined}
+      role={request ? 'region' : undefined} aria-label={request ? 'Contenido de la solicitud' : undefined}
     >
       <p id="program-launch-offering" class="program-signup__offering"></p>
       <form id="program-launch-form" class="program-signup__form" method="post" data-collect={String(collectsSignups)}
-        data-retreat-edition={retreat?.edition} data-retreat-url={retreat?.href} data-track-retreat={retreat && analyticsEnabled ? 'true' : undefined}
+        data-retreat-edition={retreat?.edition} data-request-url={request?.href} data-request-offering={request?.offering}
+        data-track-request={request && analyticsEnabled ? 'true' : undefined}
       >
         {retreat && (
           <fieldset class="program-signup__payment">
@@ -72,7 +84,7 @@ const countries = getCountries()
           <input id="program-launch-name" name="name" autocomplete="name" placeholder="Nombre y apellido" required maxlength="120" />
         </div>
         <fieldset>
-          <legend>{retreat ? "¿Cómo querés que te contactemos?" : "¿Cómo querés que te avisemos?"}</legend>
+          <legend>{request ? "¿Cómo querés que te contactemos?" : "¿Cómo querés que te avisemos?"}</legend>
           <div class="program-signup__channels">
             <label><input type="radio" name="channel" value="whatsapp" checked required /> WhatsApp</label>
             <label><input type="radio" name="channel" value="email" required /> Correo electrónico</label>
@@ -128,12 +140,11 @@ const countries = getCountries()
           </div>
         </div>
         <div id="program-launch-contact-consent" class="program-signup__contact-consent" hidden>
-          <input id="program-launch-consent" type="checkbox" name="contact-consent" value="yes" required disabled
-            aria-describedby={retreat ? 'retreat-request-legal' : undefined} />
+          <input id="program-launch-consent" type="checkbox" name="contact-consent" value="yes" required disabled />
           <div>
             <label for="program-launch-consent"><span>{offeringConsentText}</span></label>
-            {retreat && (
-              <p id="retreat-request-legal">
+            {request && (
+              <p id="request-legal" hidden>
                 Al marcar la casilla, acepto los
                 {' '}<a href={path('/terminos-y-condiciones/')} target="_blank" rel="noopener">Términos y condiciones</a>
                 {' '}y la <a href={path('/politica-de-privacidad/')} target="_blank" rel="noopener">Política de privacidad</a>.
@@ -145,12 +156,12 @@ const countries = getCountries()
         <button class="btn" type="submit" disabled>Enviar solicitud</button>
       </form>
       <p id="program-launch-result" class="program-signup__result" role="status" tabindex="-1" hidden></p>
-      {retreat && (
-        <div id="retreat-request-receipt" class="program-signup__receipt" hidden>
-          <p>Tu referencia <strong id="retreat-request-reference"></strong></p>
-          {retreat.whatsappUrl && (
-            <a class="btn" id="retreat-request-whatsapp" data-url={retreat.whatsappUrl}
-              {...retreatCta('whatsapp', 'retreat_confirmation', retreat.edition)}
+      {request && (
+        <div id="request-receipt" class="program-signup__receipt" hidden>
+          <p>Tu referencia <strong id="request-reference"></strong></p>
+          {request.whatsappUrl && (
+            <a class="btn" id="request-whatsapp" data-url={request.whatsappUrl}
+              {...(retreat ? retreatCta('whatsapp', 'retreat_confirmation', retreat.edition) : circleCta('whatsapp', 'circle_confirmation'))}
             >Continuar por WhatsApp <span aria-hidden="true">↗</span></a>
           )}
         </div>
@@ -162,6 +173,7 @@ const countries = getCountries()
 <script>
   import { parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
   import {
+    circleConsentVersion,
     offeringConsentText,
     offeringConsentVersion,
     retreatConsentVersion,
@@ -172,9 +184,9 @@ const countries = getCountries()
   import { retreatPaymentLabel, retreatPaymentPlans, retreatRebates, retreatReference, undecidedPayment } from '../lib/retreat-requests';
 
   type SignupChannel = 'whatsapp' | 'email';
-  type RetreatReceipt = { reference: string; channel: SignupChannel; paymentPlan?: string; rebates?: string[] };
-  type RetreatHistory = { fromRetreat?: boolean; receipt?: RetreatReceipt };
-  type SignupEvent = 'waitlist_opened' | 'waitlist_submitted' | 'retreat_request_submitted';
+  type RequestReceipt = { reference: string; channel: SignupChannel; paymentPlan?: string | null; rebates?: string[] };
+  type RequestHistory = { fromOffering?: boolean; fromRetreat?: boolean; receipt?: RequestReceipt };
+  type SignupEvent = 'waitlist_opened' | 'waitlist_submitted' | 'retreat_request_submitted' | 'circle_request_submitted';
   type SignupProperties = { channel: SignupChannel; retreat_edition?: string; payment_plan?: string };
   const analytics = window as Window & {
     umami?: { track(event: SignupEvent, properties?: SignupProperties): unknown };
@@ -213,9 +225,10 @@ const countries = getCountries()
   const submit = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
   const paymentOptions = [...(form?.querySelectorAll<HTMLInputElement>('input[name="payment-plan"]') ?? [])];
   const scrollBody = dialog?.querySelector<HTMLElement>('.program-signup__body');
-  const receipt = document.querySelector<HTMLElement>('#retreat-request-receipt');
-  const referenceLabel = document.querySelector<HTMLElement>('#retreat-request-reference');
-  const handoff = document.querySelector<HTMLAnchorElement>('#retreat-request-whatsapp');
+  const legal = document.querySelector<HTMLElement>('#request-legal');
+  const receipt = document.querySelector<HTMLElement>('#request-receipt');
+  const referenceLabel = document.querySelector<HTMLElement>('#request-reference');
+  const handoff = document.querySelector<HTMLAnchorElement>('#request-whatsapp');
   const result = document.querySelector<HTMLElement>('#program-launch-result');
 
   if (
@@ -231,10 +244,14 @@ const countries = getCountries()
     let submission: AbortController | undefined;
     let opener: HTMLButtonElement | undefined;
     let restoreUrlOnClose = true;
-    const retreatUrl = form.dataset.retreatUrl;
-    const requestPath = retreatUrl ? retreatUrl + 'solicitud/' : undefined;
+    const requestTrigger = [...triggers].find(trigger => trigger.dataset.offeringSignup === form.dataset.requestOffering);
+    const offeringUrl = form.dataset.requestUrl;
+    const requestPath = offeringUrl ? offeringUrl + 'solicitud/' : undefined;
     const receiptPath = requestPath ? requestPath + 'recibida/' : undefined;
-    const currentRetreatState = () => (history.state as { somaRetreat?: RetreatHistory } | null)?.somaRetreat;
+    const currentRequestState = () => {
+      const state = history.state as { somaRequest?: RequestHistory; somaRetreat?: RequestHistory } | null;
+      return state?.somaRequest ?? state?.somaRetreat;
+    };
     const isRequestPath = () => Boolean(requestPath && (location.pathname === requestPath || location.pathname === receiptPath));
 
 
@@ -393,8 +410,13 @@ const countries = getCountries()
       consentCopy.textContent = isProgramWaitlist ? waitlistConsentText : offeringConsentText;
       const payment = paymentOptions.find(option => option.value === (trigger.dataset.paymentPlan || undecidedPayment));
       if (payment) payment.checked = true;
-      if (requestPath && !fromHistory && !isRequestPath()) {
-        history.pushState({ somaRetreat: { fromRetreat: true } }, '', requestPath + location.search);
+      const usesReceipt = Boolean(form.dataset.requestOffering && trigger.dataset.offeringSignup === form.dataset.requestOffering);
+      dialog.toggleAttribute('data-request-dialog', usesReceipt);
+      if (legal) legal.hidden = !usesReceipt;
+      if (usesReceipt) contactConsent.setAttribute('aria-describedby', 'request-legal');
+      else contactConsent.removeAttribute('aria-describedby');
+      if (usesReceipt && requestPath && !fromHistory && !isRequestPath()) {
+        history.pushState({ somaRequest: { fromOffering: true } }, '', requestPath + location.search);
       }
       trigger.focus({ preventScroll: true });
       dialog.showModal();
@@ -440,9 +462,10 @@ const countries = getCountries()
         if (isRequestPath()) openFromLocation();
         return;
       }
-      if (retreatUrl && isRequestPath()) {
-        if (currentRetreatState()?.fromRetreat) history.back();
-        else history.replaceState(null, '', retreatUrl + location.search);
+      if (offeringUrl && isRequestPath()) {
+        const state = currentRequestState();
+        if (state?.fromOffering || state?.fromRetreat) history.back();
+        else history.replaceState(null, '', offeringUrl + location.search);
       }
     });
     form.addEventListener('change', (event) => {
@@ -468,7 +491,7 @@ const countries = getCountries()
       result.focus();
     };
 
-    const renderReceipt = ({ reference, channel, paymentPlan, rebates }: RetreatReceipt) => {
+    const renderReceipt = ({ reference, channel, paymentPlan, rebates }: RequestReceipt) => {
       if (!receipt || !referenceLabel) return;
       form.hidden = true;
       title.textContent = 'Recibimos tu solicitud';
@@ -481,35 +504,41 @@ const countries = getCountries()
         const rebateNote = promotions.length
           ? ' Quisiera consultar por: ' + promotions.map(rebate => rebate.label + ' (' + rebate.discount + ')').join(' y ') + '.'
           : '';
-        url.searchParams.set('text', 'Hola, Yanina. Envié mi solicitud para el retiro del ' +
-          (opener?.dataset.retreatDate ?? '') + '. Mi referencia es ' + reference + '.' + plan + rebateNote);
+        const activity = form.dataset.retreatEdition
+          ? 'el retiro del ' + (opener?.dataset.retreatDate ?? '')
+          : 'participar en el círculo de integración online';
+        url.searchParams.set('text', 'Hola, Yanina. Envié mi solicitud para ' +
+          activity + '. Mi referencia es ' + reference + '.' + plan + rebateNote);
         handoff.href = url.href;
       }
       receipt.hidden = false;
-      showResult('Yanina te va a contactar por ' + (channel === 'whatsapp' ? 'WhatsApp' : 'correo electrónico') +
-        ' para confirmar disponibilidad y coordinar la inscripción.');
+      const nextStep = form.dataset.retreatEdition
+        ? ' para confirmar disponibilidad y coordinar la inscripción.'
+        : ' para compartirte los horarios y los pasos para sumarte al círculo.';
+      showResult('Yanina te va a contactar por ' + (channel === 'whatsapp' ? 'WhatsApp' : 'correo electrónico') + nextStep);
       if (scrollBody) scrollBody.scrollTop = 0;
     };
 
     function openFromLocation() {
-      if (!requestPath || !receiptPath) return;
+      if (!requestPath || !receiptPath || !requestTrigger) return;
       if (!isRequestPath()) {
         closeDialog(false);
         return;
       }
       if (dialog.hasAttribute('data-closing')) return;
-      const savedReceipt = location.pathname === receiptPath ? currentRetreatState()?.receipt : undefined;
+      const savedReceipt = location.pathname === receiptPath ? currentRequestState()?.receipt : undefined;
       const hasReceipt = savedReceipt && retreatReference.test(savedReceipt.reference);
       if (location.pathname === receiptPath && !hasReceipt) {
         history.replaceState(null, '', requestPath + location.search);
       }
-      openDialog(triggers[0], true);
+      openDialog(requestTrigger, true);
       if (hasReceipt) renderReceipt(savedReceipt);
     }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const offering = opener?.dataset.offeringSignup;
+      const usesReceipt = Boolean(offering && offering === form.dataset.requestOffering);
       const isProgramWaitlist = opener?.hasAttribute('data-program-waitlist') === true;
       const followUp = opener?.dataset.signupFollowUp || 'Te contactaremos por el medio que elegiste.';
       if (submission || (!isProgramWaitlist && !offering) || !contactConsent.checked) return;
@@ -561,6 +590,7 @@ const countries = getCountries()
             contact: contact.value,
             country: channel === 'whatsapp' ? selectedOption.dataset.country : undefined,
             consent: paymentPlan ? retreatConsentVersion
+              : usesReceipt ? circleConsentVersion
               : isProgramWaitlist ? waitlistConsentVersion : offeringConsentVersion,
           }),
           signal: currentSubmission.signal,
@@ -568,23 +598,25 @@ const countries = getCountries()
         if (!response.ok) throw new Error('Waitlist signup failed');
         if (currentSubmission.signal.aborted) return;
         const edition = form.dataset.retreatEdition;
-        if (edition && receipt && referenceLabel && paymentPlan) {
+        if (usesReceipt && receipt && referenceLabel) {
           const { reference, paymentPlan: savedPaymentPlan, rebates: savedRebates } = await response.json() as {
-            reference?: string; paymentPlan?: string; rebates?: string[];
+            reference?: string; paymentPlan?: string | null; rebates?: string[];
           };
           if (currentSubmission.signal.aborted) return;
-          if (typeof reference !== 'string' || !retreatReference.test(reference)) throw new Error('Missing retreat reference');
+          if (typeof reference !== 'string' || !retreatReference.test(reference)) throw new Error('Missing request reference');
 
           const savedReceipt = { reference, channel, paymentPlan: savedPaymentPlan, rebates: savedRebates };
           if (receiptPath) {
-            const somaRetreat = { ...currentRetreatState(), receipt: savedReceipt };
-            history.replaceState({ somaRetreat }, '', receiptPath + location.search);
+            const somaRequest = { ...currentRequestState(), receipt: savedReceipt };
+            history.replaceState({ somaRequest }, '', receiptPath + location.search);
           }
           renderReceipt(savedReceipt);
-          if (response.status === 201 && form.dataset.trackRetreat === 'true') {
-            void trackSignup('retreat_request_submitted', {
-              channel, retreat_edition: edition, payment_plan: paymentPlan,
-            });
+          if (response.status === 201 && form.dataset.trackRequest === 'true') {
+            if (edition) {
+              void trackSignup('retreat_request_submitted', { channel, retreat_edition: edition, payment_plan: paymentPlan });
+            } else {
+              void trackSignup('circle_request_submitted', { channel });
+            }
           }
           return;
         }
@@ -644,8 +676,8 @@ const countries = getCountries()
     box-shadow: 0 18px 55px #17382f33;
     text-align: left;
   }
-  .program-signup__dialog[data-retreat-dialog][open] {
-    --retreat-dialog-gutter: clamp(.9rem, 4vw, 1.55rem);
+  .program-signup__dialog[data-request-dialog][open] {
+    --request-dialog-gutter: clamp(.9rem, 4vw, 1.55rem);
     display: flex;
     flex-direction: column;
     inline-size: min(34rem, calc(100% - 1.5rem));
@@ -653,28 +685,28 @@ const countries = getCountries()
     padding: 0;
     overflow: hidden;
   }
-  [data-retreat-dialog] .program-signup__header {
+  [data-request-dialog] .program-signup__header {
     flex: none;
     align-items: center;
     margin: 0;
-    padding: .8rem var(--retreat-dialog-gutter);
+    padding: .8rem var(--request-dialog-gutter);
     background: var(--cream);
     border-block-end: 1px solid var(--line);
   }
-  [data-retreat-dialog] .program-signup__body {
+  [data-request-dialog] .program-signup__body {
     min-block-size: 0;
-    padding: 1rem var(--retreat-dialog-gutter) 1.3rem;
+    padding: 1rem var(--request-dialog-gutter) 1.3rem;
     overflow: hidden auto;
     overscroll-behavior: contain;
     scrollbar-width: none;
     scroll-padding-block: .75rem;
   }
-  [data-retreat-dialog] .program-signup__body::-webkit-scrollbar { display: none; }
-  [data-retreat-dialog] .program-signup__body:focus-visible {
+  [data-request-dialog] .program-signup__body::-webkit-scrollbar { display: none; }
+  [data-request-dialog] .program-signup__body:focus-visible {
     outline: 2px solid var(--gold);
     outline-offset: -2px;
   }
-  [data-retreat-dialog] .program-signup__offering {
+  [data-request-dialog] .program-signup__offering {
     margin-block-end: 1.2rem;
     padding-inline-start: .75rem;
     border-inline-start: 2px solid var(--gold);
@@ -807,9 +839,9 @@ const countries = getCountries()
     color: var(--muted);
   }
   .program-signup__promotions p,
-  #retreat-request-legal { margin: 0; font-size: .8rem; line-height: 1.4; color: var(--muted); }
-  #retreat-request-legal { margin-block-start: .35rem; }
-  #retreat-request-legal a {
+  #request-legal { margin: 0; font-size: .8rem; line-height: 1.4; color: var(--muted); }
+  #request-legal { margin-block-start: .35rem; }
+  #request-legal a {
     color: var(--pine-dark);
     font-weight: 650;
     text-decoration: underline;

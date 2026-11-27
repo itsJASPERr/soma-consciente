@@ -4,6 +4,7 @@ export type Offering = (typeof catalog.offers)[number];
 
 export const offerings = catalog.offers;
 export const offeringIntro = catalog.intro;
+export const circleOffering = offerings.find(offer => offer.slug === 'circulos');
 export const retreatOffering = offerings.find(offer => offer.slug === 'encuentro-enero');
 
 const januaryRetreatDates = {

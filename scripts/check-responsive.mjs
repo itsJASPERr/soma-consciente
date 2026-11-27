@@ -362,7 +362,7 @@ try{
       await dialog.getByLabel('Tu correo electrónico').fill('retreat-test@example.com');
       await dialog.getByRole('checkbox', { name: /10% de descuento/ }).check();
       await dialog.getByRole('checkbox', { name: /50.000 de descuento/ }).check();
-      const legal = dialog.locator('#retreat-request-legal');
+      const legal = dialog.locator('#request-legal');
       assert.equal(await legal.getByRole('link', { name: 'Términos y condiciones' }).getAttribute('href'), '/terminos-y-condiciones/');
       assert.equal(await legal.getByRole('link', { name: 'Política de privacidad' }).getAttribute('href'), '/politica-de-privacidad/');
       const send = dialog.getByRole('button', { name: 'Enviar solicitud' });
@@ -475,11 +475,80 @@ try{
   await verifyRetreatCta(page.getByRole('link', { name: 'Ver fechas del retiro' }), 'listing', 'integration_page');
   await page.getByText('Una vez por semana', { exact: true }).waitFor();
   assert.equal(await page.getByText('ARS 20.000 por mes', { exact: true }).count(), 0);
-  const circleCta = page.getByRole('link', { name: 'Quiero participar' });
-  assert.equal(await circleCta.getAttribute('data-umami-event'), null);
-  const circleLink = new URL(await circleCta.getAttribute('href'));
-  assert.equal(circleLink.pathname, encounterLink.pathname);
-  assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const hasCircleRequests = (await page.locator('form[data-request-offering="circulos"]').count()) === 1;
+  if (process.env.REQUIRE_WAITLIST_TRACKING === 'true') assert.ok(hasCircleRequests);
+  if (hasCircleRequests) {
+    const circleCta = page.getByRole('button', { name: 'Quiero participar' });
+    assert.equal(await circleCta.getAttribute('data-umami-event'), hasUmami ? 'circle_registration_clicked' : null);
+    const circleFormUrl = '/acompanamiento/solicitud/';
+    const reference = 'SOMA-000011112222';
+    const endpoint = '**/api/waitlist';
+    const submissions = [];
+    await page.evaluate(() => {
+      window.circleEvents = [];
+      window.umami = { track: (...args) => window.circleEvents.push(args) };
+    });
+    await page.route(endpoint, async route => {
+      submissions.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: submissions.length === 1 ? 201 : 200,
+        json: { reference, paymentPlan: null, rebates: [] },
+      });
+    });
+    const receipt = page.getByRole('dialog', { name: 'Recibimos tu solicitud' });
+    const submitCircle = async () => {
+      await circleCta.click();
+      await page.waitForURL('**' + circleFormUrl);
+      const dialog = page.getByRole('dialog', { name: 'Solicitá participar' });
+      assert.equal(await dialog.locator('input[name="payment-plan"], input[name="rebates"]').count(), 0);
+      assert.equal(await dialog.getByRole('radio', { name: 'WhatsApp' }).isChecked(), true);
+      await dialog.getByLabel('Tu nombre').fill('Persona de prueba');
+      await dialog.getByRole('radio', { name: 'Correo electrónico' }).check();
+      await dialog.getByLabel('Tu correo electrónico').fill('circle-test@example.com');
+      assert.equal(await dialog.getByRole('button', { name: 'Enviar solicitud' }).isDisabled(), true);
+      await dialog.getByRole('link', { name: 'Política de privacidad' }).waitFor();
+      await dialog.getByRole('link', { name: 'Términos y condiciones' }).waitFor();
+      await dialog.getByRole('checkbox', { name: /Acepto que SOMA/ }).check();
+      await dialog.getByRole('button', { name: 'Enviar solicitud' }).click();
+      await page.waitForURL('**' + circleFormUrl + 'recibida/');
+      await receipt.getByText(reference, { exact: true }).waitFor();
+    };
+
+    await submitCircle();
+    await receipt.getByText(/los horarios y los pasos para sumarte al círculo/).waitFor();
+    const handoff = receipt.getByRole('link', { name: 'Continuar por WhatsApp' });
+    assert.equal(await handoff.getAttribute('data-umami-event'), hasUmami ? 'circle_whatsapp_clicked' : null);
+    const circleLink = new URL(await handoff.getAttribute('href'));
+    assert.equal(circleLink.pathname, encounterLink.pathname);
+    const text = circleLink.searchParams.get('text');
+    assert.ok(text.includes('círculo de integración online') && text.includes(reference));
+    assert.ok(!text.includes('circle-test@example.com'));
+    assert.deepEqual(submissions[0], {
+      offering: 'circulos', name: 'Persona de prueba', channel: 'email', contact: 'circle-test@example.com', consent: 'circle-1',
+    });
+    await receipt.getByRole('button', { name: 'Cerrar' }).click();
+    await page.waitForURL('**/acompanamiento/#circulos');
+    await submitCircle();
+    assert.deepEqual(await page.evaluate(() => window.circleEvents), hasUmami ? [['circle_request_submitted', { channel: 'email' }]] : []);
+    await page.reload();
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.goBack();
+    await page.waitForURL('**/acompanamiento/#circulos');
+    await receipt.waitFor({ state: 'hidden' });
+    await page.unroute(endpoint);
+
+    await page.goto(HOST + BASE + circleFormUrl + 'recibida/');
+    await page.waitForURL('**' + circleFormUrl);
+    await page.getByRole('dialog', { name: 'Solicitá participar' }).waitFor();
+    await page.getByRole('button', { name: 'Cerrar' }).click();
+    await page.waitForURL('**/acompanamiento/');
+  } else {
+    const circleCta = page.getByRole('link', { name: 'Quiero participar' });
+    assert.equal(await circleCta.getAttribute('data-umami-event'), null);
+    const circleLink = new URL(await circleCta.getAttribute('href'));
+    assert.equal(circleLink.pathname, encounterLink.pathname);
+    assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  }
   const mobileMenu = page.locator('.mobile-nav');
   await mobileMenu.locator('summary').click();
   await mobileMenu.getByRole('link', { name: 'Comunidad', exact: true }).click();

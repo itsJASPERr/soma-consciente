@@ -23,12 +23,17 @@ import SiteLayout from '../layouts/SiteLayout.astro';
           <button class="inbox-button" type="button" data-refresh>Actualizar</button>
         </div>
       </header>
-      <details class="retreat-request-inbox" data-retreat-inbox>
-        <summary>Solicitudes de retiro</summary>
-        <p role="status" data-retreat-status></p>
-        <ul data-retreat-requests></ul>
-        <button class="inbox-button" type="button" data-retreat-refresh>Actualizar solicitudes</button>
-      </details>
+      {[
+        { kind: 'retreat', title: 'Solicitudes de retiro' },
+        { kind: 'circle', title: 'Solicitudes de círculos' },
+      ].map(({ kind, title }) => (
+        <details class="retreat-request-inbox" data-request-inbox={kind}>
+          <summary>{title}</summary>
+          <p role="status" data-request-status></p>
+          <ul data-requests></ul>
+          <button class="inbox-button" type="button" data-request-refresh>Actualizar solicitudes</button>
+        </details>
+      ))}
       <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
 
       <div class="inbox-layout" data-inbox-layout hidden>

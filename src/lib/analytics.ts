@@ -18,3 +18,11 @@ export function retreatCta(
     ...(edition ? { 'data-umami-event-retreat_edition': edition } : {}),
   };
 }
+
+export function circleCta(action: 'registration' | 'whatsapp', placement: 'circle_hero' | 'circle_confirmation'): AnalyticsLinkAttributes {
+  if (!analyticsEnabled) return {};
+  return {
+    'data-umami-event': 'circle_' + action + '_clicked',
+    'data-umami-event-placement': placement,
+  };
+}

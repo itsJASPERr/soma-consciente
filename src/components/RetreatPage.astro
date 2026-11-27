@@ -137,13 +137,6 @@ const registrationSteps = [
   noIndex={Boolean(requestState)}
   openJourney
 >
-  {requestState === 'receipt' && (
-    <script is:inline define:vars={{ requestPath: path(encounter.href + 'solicitud/') }}>
-      if (!history.state?.somaRetreat?.receipt?.reference) {
-        history.replaceState(history.state, '', requestPath + location.search);
-      }
-    </script>
-  )}
   <article class="retreat">
     <header class="retreat-hero">
       <div class="retreat-inner retreat-hero__layout">
@@ -349,7 +342,10 @@ const registrationSteps = [
       </section>
     )}
   </article>
-  {requestsEnabled && <SignupDialog retreat={{ edition: encounter.pageSlug, href: path(encounter.href), whatsappUrl }} />}
+  {requestsEnabled && <SignupDialog request={{
+    kind: 'retreat', offering: encounter.slug, edition: encounter.pageSlug, href: path(encounter.href),
+    whatsappUrl, receiptPage: requestState === 'receipt',
+  }} />}
 </SiteLayout>
 
 <script>

@@ -366,6 +366,22 @@ try {
   assert.equal(requests[0].reference, reference);
   assert.deepEqual(requests[0].rebates, []);
   assert.equal(requests[0].whatsapp_received, 1);
+  const circleReference = 'SOMA-222233334444';
+  database.prepare('INSERT INTO offering_requests (offering, channel, contact, name, consent_version, reference) VALUES (?, ?, ?, ?, ?, ?)')
+    .run('circulos', 'email', 'circle@example.com', 'Prueba círculo', 'circle-1', circleReference);
+  const circleHandoff = { ...handoff, id: 'wamid.CIRCLE', text: { body: 'Mi referencia es ' + circleReference + '.' } };
+  assert.equal((await post(envelope([circleHandoff]))).status, 200);
+  assert.equal(linked.get(circleHandoff.id).reference, circleReference);
+  for (const [query, expected] of [['?kind=retreat', reference], ['?kind=circle', circleReference]]) {
+    const response = await listRetreatRequests({
+      request: new Request(requestListUrl + query, { headers: { Cookie: setCookie.split(';')[0] } }),
+      env: listEnv,
+    });
+    assert.equal(response.status, 200);
+    const { requests: matching } = await response.json();
+    assert.deepEqual(matching.map(row => row.reference), [expected]);
+    assert.equal(matching[0].whatsapp_received, 1);
+  }
   console.log('PASS: signed WhatsApp deliveries store once, including sender IDs, mixed batches and media captions.');
 
   const now = Math.floor(Date.now() / 1000);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequest } from '../functions/api/waitlist.ts';
-import { offeringConsentVersion, retreatConsentVersion, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
+import { circleConsentVersion, offeringConsentVersion, retreatConsentVersion, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 const origin = 'https://www.soma-consciente.com';
 const url = origin + '/api/waitlist';
@@ -127,6 +127,19 @@ try {
   assert.equal(february.status, 201);
   assert.notEqual((await february.json()).reference, receipt.reference);
   assert.equal(database.prepare('SELECT name FROM offering_requests WHERE reference = ?').get(receipt.reference).name, 'María Pérez');
+  const circle = { ...request, offering: 'circulos', consent: circleConsentVersion };
+  assert.equal(await submit({ ...circle, offering: 'encuentro-enero' }), 400);
+  assert.equal(await submit({ ...circle, paymentPlan: 'single' }), 400);
+  assert.equal(await submit({ ...circle, rebates: [] }), 400);
+  const circleResponse = await post(circle);
+  assert.equal(circleResponse.status, 201);
+  const circleReceipt = await circleResponse.json();
+  assert.match(circleReceipt.reference, /^SOMA-[0-9A-F]{12}$/);
+  assert.equal(circleReceipt.paymentPlan, null);
+  assert.deepEqual(circleReceipt.rebates, []);
+  const repeatCircle = await post(circle);
+  assert.equal(repeatCircle.status, 200);
+  assert.deepEqual(await repeatCircle.json(), circleReceipt);
   console.log('PASS: signup requests are routed by offer, deduplicate per offer, and preserve prior waitlist entries.');
 } finally {
   database.close();

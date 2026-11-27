@@ -4,16 +4,16 @@ import {
   parsePhoneNumberFromString,
   type CountryCode,
 } from 'libphonenumber-js/min';
-import { offeringConsentVersion, retreatConsentVersion, waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
+import { circleConsentVersion, offeringConsentVersion, retreatConsentVersion, waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
 import { retreatPaymentPlans, retreatRebates, undecidedPayment } from '../../src/lib/retreat-requests.ts';
-import { offerings, retreatEditions } from '../../src/lib/offerings.ts';
+import { circleOffering, offerings, retreatEditions } from '../../src/lib/offerings.ts';
 
 type Context = {
   request: Request;
   env: {
     WAITLIST_DB?: {
       prepare(sql: string): {
-        bind(...values: string[]): { run(): Promise<unknown>; first<T>(): Promise<T | null> };
+        bind(...values: (string | null)[]): { run(): Promise<unknown>; first<T>(): Promise<T | null> };
       };
     };
   };
@@ -72,7 +72,9 @@ export async function onRequest({ request, env }: Context) {
   if (rebates !== undefined && (paymentPlan === undefined || !Array.isArray(rebates)
     || rebates.length > retreatRebates.length || new Set(rebates).size !== rebates.length
     || rebates.some(id => !retreatRebates.some(rebate => rebate.id === id)))) return response(400, 'rebates');
+  const isCircleRequest = Boolean(circleOffering && offering === circleOffering.slug && input.consent === circleConsentVersion);
   const consentVersion = paymentPlan !== undefined ? retreatConsentVersion
+    : isCircleRequest ? circleConsentVersion
     : offering ? offeringConsentVersion : waitlistConsentVersion;
   if (input.consent !== consentVersion) return response(400, 'consent');
 
@@ -101,7 +103,7 @@ export async function onRequest({ request, env }: Context) {
     return response(400, 'channel');
   }
 
-  if (typeof offering === 'string' && typeof paymentPlan === 'string') {
+  if (typeof offering === 'string' && (isCircleRequest || typeof paymentPlan === 'string')) {
     const reference = 'SOMA-' + crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase();
     try {
       const row = await env.WAITLIST_DB.prepare(`
@@ -116,8 +118,9 @@ export async function onRequest({ request, env }: Context) {
           payment_plan = COALESCE(offering_requests.payment_plan, excluded.payment_plan),
           rebates = COALESCE(offering_requests.rebates, excluded.rebates)
         RETURNING reference, payment_plan AS paymentPlan, rebates
-      `).bind(offering, channel, contact, name, consentVersion, reference, paymentPlan, JSON.stringify(rebates ?? []))
-        .first<{ reference: string; paymentPlan: string; rebates: string }>();
+      `).bind(offering, channel, contact, name, consentVersion, reference,
+        typeof paymentPlan === 'string' ? paymentPlan : null, JSON.stringify(rebates ?? []))
+        .first<{ reference: string; paymentPlan: string | null; rebates: string }>();
       if (!row) return response(503, 'unavailable');
       return Response.json({ ...row, rebates: JSON.parse(row.rebates) }, {
         status: row.reference === reference ? 201 : 200,
