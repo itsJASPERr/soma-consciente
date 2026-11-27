@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { createHmac } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequestGet, onRequestHead, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
-import { onRequestGet as listMessages } from '../functions/api/whatsapp/messages.ts';
+import { onRequestGet as listMessages, onRequestPost as replyToMessage } from '../functions/api/whatsapp/messages.ts';
 import { onRequestGet as openMensajes, onRequestPost as submitMensajes } from '../functions/mensajes.ts';
 import { mensajesCookie, passwordToken } from '../functions/lib/mensajes-access.ts';
 
@@ -17,6 +17,7 @@ for (const file of [
   '0002_waitlist_name.sql',
   '0003_offering_requests.sql',
   '0004_whatsapp_inbound_messages.sql',
+  '0005_whatsapp_outbound_replies.sql',
 ]) {
   database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
 }
@@ -43,10 +44,13 @@ const env = {
     },
     prepare(sql) {
       const statement = database.prepare(sql);
-      return {
-        bind: (...values) => ({ run: () => statement.run(...values) }),
-        all: () => ({ results: statement.all().map(row => ({ ...row })) }),
-      };
+      const bound = values => ({
+        bind: (...next) => bound(next),
+        run: () => statement.run(...values),
+        first: () => statement.get(...values) ?? null,
+        all: () => ({ results: statement.all(...values).map(row => ({ ...row })) }),
+      });
+      return bound([]);
     },
   },
 };
@@ -116,10 +120,10 @@ const imageMessage = {
 
 try {
   assert.deepEqual(columns.map(column => column.name), [
-    'wa_message_id', 'from_wa_id', 'wa_timestamp', 'message_type', 'text_body', 'raw_json', 'received_at',
+    'wa_message_id', 'from_wa_id', 'wa_timestamp', 'message_type', 'text_body', 'raw_json', 'received_at', 'business_phone_number_id',
   ]);
   assert.equal(columns.find(column => column.name === 'text_body').notnull, 0);
-  assert.equal(columns.filter(column => column.name !== 'text_body').every(column => column.notnull === 1), true);
+  assert.equal(columns.filter(column => !['text_body', 'business_phone_number_id'].includes(column.name)).every(column => column.notnull === 1), true);
 
   const routes = JSON.parse(readFileSync(new URL('../public/_routes.json', import.meta.url), 'utf8'));
   for (const route of [
@@ -280,16 +284,18 @@ try {
   assert.equal(listed.status, 200);
   assert.equal(listed.headers.get('Cache-Control'), 'no-store');
   assert.deepEqual(await listed.json(), {
+    replies: [],
+    replies_enabled: false,
     messages: [
-      { wa_message_id: 'newer-same-second', from_wa_id: '5491100000002', wa_timestamp: '300', text_body: '  después  ' },
-      { wa_message_id: 'same-second-early', from_wa_id: '5491100000003', wa_timestamp: '300', text_body: null },
-      { wa_message_id: 'older', from_wa_id: '5491100000001', wa_timestamp: '100', text_body: 'primero' },
+      { wa_message_id: 'newer-same-second', from_wa_id: '5491100000002', wa_timestamp: '300', text_body: '  después  ', reply_until: null },
+      { wa_message_id: 'same-second-early', from_wa_id: '5491100000003', wa_timestamp: '300', text_body: null, reply_until: null },
+      { wa_message_id: 'older', from_wa_id: '5491100000001', wa_timestamp: '100', text_body: 'primero', reply_until: null },
     ],
   });
   database.exec('DELETE FROM whatsapp_inbound_messages');
   const empty = await listMessages({ request: authed, env: gated });
   assert.equal(empty.status, 200);
-  assert.deepEqual(await empty.json(), { messages: [] });
+  assert.deepEqual(await empty.json(), { messages: [], replies: [], replies_enabled: false });
   const unavailable = await listMessages({ request: authed, env: { MENSJAES_PASSWORD: pagePassword } });
   assert.equal(unavailable.status, 503);
 
@@ -333,6 +339,100 @@ try {
   assert.equal(inbox.status, 200);
   assert.equal(await inbox.text(), 'inbox-page');
   console.log('PASS: signed WhatsApp deliveries store once, including sender IDs, mixed batches and media captions.');
+
+  const now = Math.floor(Date.now() / 1000);
+  const fresh = { ...textMessage, id: 'wamid.REPLY_TARGET', timestamp: String(now-120) };
+  const freshIdOnly = { ...identifierOnly, id: 'wamid.REPLY_BSUID', timestamp: String(now-60) };
+  const stale = { ...textMessage, id: 'wamid.STALE_WINDOW', from: '15550001002', timestamp: String(now-86_410) };
+  const wrongNumber = { ...stale, id: 'wamid.OTHER_NUMBER', timestamp: String(now-30) };
+  assert.equal((await post(envelope([fresh, freshIdOnly, stale]))).status, 200);
+  assert.equal((await post(envelope([wrongNumber], { metadata: { phone_number_id: '654321' } }))).status, 200);
+  assert.equal(database.prepare('SELECT business_phone_number_id FROM whatsapp_inbound_messages WHERE wa_message_id = ?')
+    .get(fresh.id).business_phone_number_id, '123456');
+  insert.run('legacy', '15550001004', String(now-60), 'text', 'legacy', '{}', '2026-11-26T12:00:02.000Z');
+
+  const allowed = {
+    ...gated, WHATSAPP_REPLIES_ENABLED: 'true', WHATSAPP_PHONE_NUMBER_ID: '123456', WHATSAPP_TOKEN: 'token-fixture',
+  };
+  const cookie = authed.headers.get('Cookie');
+  const submit = (input, bindings = allowed, sendingOrigin = origin, authCookie = cookie) => replyToMessage({
+    request: new Request(origin + '/api/whatsapp/messages', {
+      method:'POST',
+      headers: { 'Content-Type':'application/json', Origin:sendingOrigin, ...(authCookie ? { Cookie:authCookie } : {}) },
+      body:JSON.stringify(input),
+    }),
+    env:bindings,
+  });
+  const input = (message, text = 'Hola, gracias por escribir.') => ({
+    request_id:randomUUID(), in_reply_to:message, text,
+  });
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  let outcome = 'accepted';
+  let hold;
+  globalThis.fetch = async (url, init) => {
+    assert.equal(url, 'https://graph.facebook.com/v27.0/123456/messages');
+    assert.equal(init.headers.Authorization, 'Bearer token-fixture');
+    calls.push(JSON.parse(init.body));
+    if (hold) await hold;
+    if (outcome === 'failed') return new Response(null, { status:400 });
+    if (outcome === 'unknown') throw new Error('simulated timeout');
+    return Response.json({ messages:[{ id:'wamid.OUTBOUND_' + calls.length }] });
+  };
+  try {
+    const request = input(fresh.id);
+    assert.equal((await submit(request, allowed, 'https://another.invalid')).status, 403);
+    assert.equal((await submit(request, allowed, origin, null)).status, 401);
+    assert.equal((await submit(request, gated)).status, 503);
+    assert.equal((await submit(input(stale.id))).status, 409);
+    assert.equal((await submit(input(wrongNumber.id))).status, 404);
+    assert.equal((await submit(input('unknown'))).status, 404);
+    assert.equal((await submit(input(fresh.id, 'x'.repeat(4097)))).status, 400);
+    assert.equal(calls.length, 0);
+
+    let unblock;
+    hold = new Promise(resolve => { unblock = resolve; });
+    const first = submit(request);
+    try {
+      for (let i=0; i<40 && calls.length===0; i++) await new Promise(resolve => setTimeout(resolve, 5));
+      assert.equal(calls.length, 1);
+      assert.equal((await (await submit(request)).json()).reply.status, 'sending');
+      assert.equal(calls.length, 1);
+    } finally {
+      unblock();
+      hold = undefined;
+    }
+    const sent = await first;
+    assert.equal(sent.status, 200);
+    assert.equal((await sent.json()).reply.status, 'accepted');
+    assert.equal((await (await submit(request)).json()).reply.status, 'accepted');
+    assert.equal((await submit({ ...request, text:'Changed draft' })).status, 409);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0], {
+      messaging_product:'whatsapp', recipient_type:'individual', to:'+5491112345678',
+      context:{message_id:fresh.id}, type:'text', text:{body:request.text},
+    });
+
+    outcome = 'failed';
+    assert.equal((await (await submit(input(freshIdOnly.id))).json()).reply.status, 'failed');
+    assert.equal(calls[1].recipient, freshIdOnly.from_user_id);
+    assert.equal(calls[1].to, undefined);
+    outcome = 'unknown';
+    const uncertain = input('legacy');
+    assert.equal((await (await submit(uncertain)).json()).reply.status, 'unknown');
+    assert.equal((await (await submit(uncertain)).json()).reply.status, 'unknown');
+    assert.equal(calls.length, 3);
+    const inboxAfter = await (await listMessages({ request:authed, env:allowed })).json();
+    assert.equal(inboxAfter.replies_enabled, true);
+    assert.deepEqual(inboxAfter.replies.map(reply => reply.status), ['accepted','failed','unknown']);
+    assert.equal(inboxAfter.messages.find(message => message.wa_message_id === fresh.id).reply_until, now+86_280);
+    assert.equal(inboxAfter.messages.find(message => message.wa_message_id === wrongNumber.id).reply_until, null);
+    assert.equal(inboxAfter.messages.find(message => message.wa_message_id === stale.id).reply_until, now-10);
+    assert.ok(inboxAfter.messages.find(message => message.wa_message_id === 'legacy').reply_until > now);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  console.log('PASS: manual replies enforce the window and origin, save history, and never repeat a claimed send.');
 } finally {
   database.close();
 }
