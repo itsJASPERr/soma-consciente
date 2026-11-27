@@ -31,7 +31,7 @@ h1, h2, h3, p { overflow-wrap: break-word; }
 .brand__type { min-width: 0; }
 .header-inner { min-width: 0; }
 .site-header .mobile-nav { z-index: 50; }
-.mobile-nav nav { max-height: min(75dvh, 600px); overflow-y: auto; }
+.mobile-nav nav { max-height: min(75dvh, 600px, calc(100dvh - var(--site-header-height))); overflow-y: auto; }
 .lesson-pager, .section-head { min-width: 0; }
 .lesson-pager a, .lesson-pager strong { overflow-wrap: anywhere; }
 .lesson-video, .lesson-video-file, .lesson-block audio { max-width: 100%; }
@@ -69,8 +69,9 @@ h1, h2, h3, p { overflow-wrap: break-word; }
 }
 
 @media (max-width: 650px) {
+  :root { --site-header-height: 75px; }
   .container { width: calc(100% - 36px); max-width: 100%; }
-  .site-header .header-inner { min-height: 74px; gap: 10px; }
+  .site-header .header-inner { gap: 10px; }
   .site-header .brand { gap: 7px; max-width: calc(100% - 64px); }
   .site-header .brand__symbol { width: 44px; height: 44px; }
   .site-header .brand__type strong { font-size: clamp(1.35rem, 6.2vw, 1.8rem); letter-spacing: .025em; }

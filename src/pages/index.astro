@@ -270,7 +270,6 @@ const calendar = [
   }
   .home-hero__down:hover { background: light-dark(#f7f1e8, #172820); }
   .home-values {
-    scroll-margin-block-start: 6rem;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -288,7 +287,6 @@ const calendar = [
   }
   .program-section {
     padding-block-start: clamp(3.5rem, 8vw, 6.5rem);
-    scroll-margin-top: 6.5rem;
     position: relative;
     isolation: isolate;
     overflow: clip;
@@ -468,7 +466,6 @@ const calendar = [
     color: var(--pine-dark);
     font: 400 clamp(1.27rem, 2.45vw, 1.8rem)/1.22 var(--font-display);
   }
-  #proximos-encuentros { scroll-margin-block-start: 7rem; }
   .home-calendar__list {
     display: grid;
     gap: .8rem;
@@ -483,12 +480,11 @@ const calendar = [
   .home-calendar__event--featured {
     display: grid;
     grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
-    overflow: hidden;
-    padding: 0;
-    border: 1px solid var(--journey-rule);
-    border-radius: 1.15rem;
-    background: var(--surface-editorial);
+    column-gap: clamp(1.15rem, 4.2vw, 3.5rem);
+    padding-block: clamp(.65rem, 1.6vw, 1.15rem);
+    border-block: 1px solid var(--journey-rule);
   }
+  .home-calendar__event--featured + .home-calendar__event { border-block-start: 0; }
   .home-calendar__photo {
     display: block;
     inline-size: 100%;
@@ -510,7 +506,7 @@ const calendar = [
     align-items: start;
     justify-content: center;
     gap: 1rem;
-    padding: clamp(1.15rem, 3.4vw, 2.5rem);
+    padding-block: clamp(1.15rem, 3.4vw, 2.5rem);
   }
   .home-calendar__content h3 {
     margin: .2rem 0 .3rem;

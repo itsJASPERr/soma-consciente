@@ -19,6 +19,8 @@ const paths=[
  '/enfoque/',
  '/nucleo/',
  '/equipo/',
+ '/politica-de-privacidad/',
+ '/terminos-y-condiciones/',
  '/biblioteca/',
  '/biblioteca/pausa-de-presencia/',
  '/aulas/',
@@ -209,6 +211,11 @@ try{
   await scheduleLink.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/#cronograma');
   await page.locator('#cronograma:target').getByRole('heading', { name: 'Sábado 23' }).waitFor();
+  await page.waitForFunction(() => {
+    const header = document.querySelector('.site-header').getBoundingClientRect();
+    const schedule = document.querySelector('#cronograma').getBoundingClientRect();
+    return Math.abs(header.top) < 1 && schedule.top >= header.bottom - 1 && schedule.top <= header.bottom + 16;
+  });
   await page.getByRole('heading', { name: 'Domingo 24' }).waitFor();
   const registrationJump = retreatHero.getByRole('link', { name: 'Consultar por un lugar' });
   await verifyRetreatCta(registrationJump, 'registration', 'retreat_hero');
@@ -231,6 +238,7 @@ try{
     await plan.getByText(amount, { exact: true }).waitFor();
     if (total) await plan.getByText(total, { exact: true }).waitFor();
     const cta = plan.getByRole('link', { name: 'Consultar por WhatsApp · ' + label, exact: true });
+    assert.equal((await cta.textContent()).trim(), 'WhatsApp ↗');
     await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing');
     assert.equal(await cta.getAttribute('data-umami-event-payment_plan'), hasUmami ? id : null);
     const url = new URL(await cta.getAttribute('href'));
@@ -276,11 +284,18 @@ try{
   await eventCard.getByRole('link', { name: 'Conocer los círculos' }).click();
   assert.equal(new URL(page.url()).hash, '#circulos');
   await verifyRetreatCta(page.getByRole('link', { name: 'Ver el encuentro de enero' }), 'details', 'integration_page');
+  await page.getByText('Una vez por semana', { exact: true }).waitFor();
+  assert.equal(await page.getByText('ARS 20.000 por mes', { exact: true }).count(), 0);
   const circleCta = page.getByRole('link', { name: 'Quiero participar' });
   assert.equal(await circleCta.getAttribute('data-umami-event'), null);
   const circleLink = new URL(await circleCta.getAttribute('href'));
   assert.equal(circleLink.pathname, encounterLink.pathname);
   assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const mobileMenu = page.locator('.mobile-nav');
+  await mobileMenu.locator('summary').click();
+  await mobileMenu.getByRole('link', { name: 'Comunidad', exact: true }).click();
+  await page.waitForURL('**/acompanamiento/#grupo-whatsapp');
+  await mobileMenu.locator('nav').waitFor({ state: 'hidden' });
   const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
   assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
   const teamMembers = [

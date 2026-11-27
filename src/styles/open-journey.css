@@ -5,7 +5,6 @@
   --journey-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   background: light-dark(#f6efe3, var(--paper));
 }
-.journey-page .site-header { background: transparent; }
 .journey-page .values-strip {
   border-top: 1px solid var(--pine-dark);
   border-bottom: 0;

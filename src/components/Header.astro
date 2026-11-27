@@ -38,6 +38,12 @@ const links = [
     </details>
   </div>
 </header>
+<script>
+  const menu = document.querySelector<HTMLDetailsElement>('.site-header .mobile-nav');
+  menu?.querySelector('nav')?.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('a')) menu.open = false;
+  });
+</script>
 {reveal && (
   <script is:inline>
     (() => {

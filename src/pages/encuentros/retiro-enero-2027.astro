@@ -217,7 +217,7 @@ const registrationSteps = [
                       aria-label={'Consultar por WhatsApp · ' + plan.label}
                       {...retreatCta('whatsapp', 'retreat_pricing')}
                       data-umami-event-payment_plan={analyticsEnabled ? plan.id : undefined}
-                    >Consultar por WhatsApp <span aria-hidden="true">↗</span></a>
+                    >WhatsApp <span aria-hidden="true">↗</span></a>
                   )}
                 </article>
               );
@@ -338,7 +338,6 @@ const registrationSteps = [
   .retreat h2 { font-size: clamp(2rem, 4.5vw, 3.9rem); line-height: 1.01; }
   .retreat h3 { font-size: clamp(1.8rem, 3.5vw, 2.75rem); line-height: 1.04; }
   .retreat em { color: var(--retreat-clay); }
-  .retreat section[id] { scroll-margin-block-start: 6.5rem; }
   .retreat-inner {
     width: min(1140px, calc(100% - clamp(2rem, 7vw, 6rem)));
     margin-inline: auto;
