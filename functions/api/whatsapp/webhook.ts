@@ -1,3 +1,5 @@
+import { readRequestBytes } from '../../lib/request-bytes.ts';
+
 type BoundStatement = { run(): Promise<unknown> };
 
 type Database = {
@@ -23,13 +25,14 @@ type StoredMessage = {
   type: string;
   textBody: string | null;
   rawJson: string;
+  businessPhoneNumberId: string | null;
 };
 
 const headers = { 'Cache-Control': 'no-store' };
 const maxBodyBytes = 1_048_576;
 const insertSql = `INSERT INTO whatsapp_inbound_messages (
-  wa_message_id, from_wa_id, wa_timestamp, message_type, text_body, raw_json
-) VALUES (?, ?, ?, ?, ?, ?)
+  wa_message_id, from_wa_id, wa_timestamp, message_type, text_body, raw_json, business_phone_number_id
+) VALUES (?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(wa_message_id) DO NOTHING`;
 
 function empty(status: number) {
@@ -70,7 +73,7 @@ function messageText(message: Record<string, unknown>, type: string) {
   return typeof text === 'string' ? text : null;
 }
 
-function parseMessage(value: unknown): StoredMessage | undefined {
+function parseMessage(value: unknown, businessPhoneNumberId: string | null): StoredMessage | undefined {
   const message = record(value);
   if (!message) return undefined;
   const id = requiredString(message.id);
@@ -78,7 +81,7 @@ function parseMessage(value: unknown): StoredMessage | undefined {
   const timestamp = timestampValue(message.timestamp);
   const type = requiredString(message.type);
   if (!id || !from || timestamp === undefined || !type) return undefined;
-  return { id, from, timestamp, type, textBody: messageText(message, type), rawJson: JSON.stringify(message) };
+  return { id, from, timestamp, type, textBody: messageText(message, type), rawJson: JSON.stringify(message), businessPhoneNumberId };
 }
 
 function collectMessages(payload: unknown) {
@@ -92,50 +95,22 @@ function collectMessages(payload: unknown) {
     for (const change of changes) {
       const event = record(change);
       if (event?.field !== 'messages') continue;
-      const batch = record(event.value)?.messages;
+      const value = record(event.value);
+      const batch = value?.messages;
       if (batch == null) continue; // Delivery statuses have no inbound messages.
       if (!Array.isArray(batch)) {
         skipped++;
         continue;
       }
-      for (const value of batch) {
-        const message = parseMessage(value);
+      const businessPhoneNumberId = requiredString(record(value?.metadata)?.phone_number_id) ?? null;
+      for (const rawMessage of batch) {
+        const message = parseMessage(rawMessage, businessPhoneNumberId);
         if (message) messages.push(message);
         else skipped++;
       }
     }
   }
   return { messages, skipped };
-}
-
-async function readBody(request: Request): Promise<{ error: 400 | 413 } | { bytes: Uint8Array<ArrayBuffer> }> {
-  const reader = request.body?.getReader();
-  if (!reader) return { error: 400 };
-  const chunks: Uint8Array[] = [];
-  let length = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      length += value.byteLength;
-      if (length > maxBodyBytes) {
-        await reader.cancel();
-        return { error: 413 };
-      }
-      chunks.push(value);
-    }
-  } catch {
-    return { error: 400 };
-  } finally {
-    reader.releaseLock();
-  }
-  const bytes = new Uint8Array(length);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return { bytes };
 }
 
 async function isMetaSignature(signature: string | null, secret: string, body: Uint8Array<ArrayBuffer>) {
@@ -184,7 +159,7 @@ export async function onRequestPost({ request, env }: Context) {
     console.error('WhatsApp webhook: missing app secret');
     return empty(503);
   }
-  const body = await readBody(request);
+  const body = await readRequestBytes(request, maxBodyBytes);
   if ('error' in body) return empty(body.error);
   if (!(await isMetaSignature(request.headers.get('X-Hub-Signature-256'), secret, body.bytes))) {
     return empty(401);
@@ -210,7 +185,10 @@ export async function onRequestPost({ request, env }: Context) {
   try {
     const insert = env.WAITLIST_DB.prepare(insertSql);
     await env.WAITLIST_DB.batch(messages.map(message =>
-      insert.bind(message.id, message.from, message.timestamp, message.type, message.textBody, message.rawJson),
+      insert.bind(
+        message.id, message.from, message.timestamp, message.type, message.textBody,
+        message.rawJson, message.businessPhoneNumberId,
+      ),
     ));
   } catch {
     console.error('WhatsApp webhook: D1 batch failed', { count: messages.length });

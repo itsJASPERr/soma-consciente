@@ -121,6 +121,21 @@ pnpm dlx --allow-build=esbuild,workerd wrangler@4.160.1 d1 execute WAITLIST_DB \
 
 Las pruebas locales se ejecutan con `pnpm run test:whatsapp`.
 
+#### Respuestas manuales desde Mensajes
+
+Abrí un mensaje en la bandeja protegida y escribí una respuesta con **Responder**.
+Meta permite texto libre durante las 24 horas posteriores al último mensaje de
+esa persona. La bandeja muestra el historial de los envíos intentados. **Aceptada
+por WhatsApp** confirma que Meta aceptó el envío. Si el envío queda sin confirmar,
+revisá WhatsApp antes de reenviarlo. La API conserva el intento y evita repetirlo
+cuando el navegador vuelve a consultar el mismo envío.
+
+El entorno necesita el ID de la línea de WhatsApp Business en
+`WHATSAPP_PHONE_NUMBER_ID` y un token de Meta con permiso de mensajería en
+`WHATSAPP_TOKEN`. Activá `WHATSAPP_REPLIES_ENABLED=true` cuando esos valores
+correspondan al entorno. Mantené los secretos de producción fuera de las vistas
+previas. Las migraciones se aplican en el despliegue habitual de Pages.
+
 ### Medición del programa online
 
 En Umami, medí el embudo desde la portada hasta la lista de espera del
