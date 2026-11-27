@@ -19,7 +19,7 @@ const areas = ['nicole', 'jasper', 'yanina', 'nico']
   .filter((aula) => aula !== undefined);
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
-const showDialog = requestsEnabled && [...retreatEditions, door].some(offer => offer && !offeringUrl(offer));
+const showDialog = requestsEnabled && door && !offeringUrl(door);
 const encountersPhoto = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const circlePhoto = getOnlineCirclePhoto(home);
 ---
@@ -55,9 +55,6 @@ const circlePhoto = getOnlineCirclePhoto(home);
         <div class="event-grid">
           {retreatEditions.map((event, index) => {
             const featured = index === 0;
-            const registrationAnalytics = offeringUrl(event)?.startsWith('https://wa.me/')
-              ? retreatCta('whatsapp', 'event_card_registration', event.pageSlug)
-              : undefined;
             return (
               <section
                 id={event.slug === encounter.slug ? undefined : event.slug}
@@ -83,13 +80,15 @@ const circlePhoto = getOnlineCirclePhoto(home);
                   )}
                   <div class="event-card__actions">
                     <a class="btn event-card__details" href={path(event.href)} {...retreatCta('details', 'event_card_details', event.pageSlug)}>Ver programa y precios <span aria-hidden="true">↗</span></a>
-                    <OfferingAction
-                      offer={event}
-                      requestsEnabled={requestsEnabled}
-                      class="btn btn--outline"
-                      analytics={registrationAnalytics}
-                      showArrow
-                    />
+                    {requestsEnabled ? (
+                      <a class="btn btn--outline" href={path(event.href + '#participar')}
+                        {...retreatCta('registration', 'event_card_registration', event.pageSlug)}
+                      >Solicitar un lugar <span aria-hidden="true">↗</span></a>
+                    ) : (
+                      <OfferingAction offer={event} requestsEnabled={false} class="btn btn--outline" showArrow
+                        analytics={retreatCta('whatsapp', 'event_card_registration', event.pageSlug)}
+                      />
+                    )}
                   </div>
                 </div>
                 {featured && (

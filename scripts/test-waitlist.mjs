@@ -14,13 +14,17 @@ database.prepare('INSERT INTO waitlist_signups (channel, contact, consent_versio
   .run('email', legacyContact, '1', legacyDate);
 database.exec(readFileSync(new URL('../migrations/0002_waitlist_name.sql', import.meta.url), 'utf8'));
 database.exec(readFileSync(new URL('../migrations/0003_offering_requests.sql', import.meta.url), 'utf8'));
+for (const file of ['0004_whatsapp_inbound_messages.sql', '0005_whatsapp_outbound_replies.sql',
+  '0006_whatsapp_reply_diagnostics.sql', '0007_retreat_requests.sql']) {
+  database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
+}
 const selectSignup = database.prepare('SELECT name, consent_version, consented_at FROM waitlist_signups WHERE contact = ?');
 
 const env = {
   WAITLIST_DB: {
     prepare(sql) {
       const statement = database.prepare(sql);
-      return { bind: (...values) => ({ run: () => statement.run(...values) }) };
+      return { bind: (...values) => ({ run: () => statement.run(...values), first: () => statement.get(...values) ?? null }) };
     },
   },
 };
@@ -30,7 +34,7 @@ const whatsapp = {
   name: 'Noa', channel: 'whatsapp', country: 'AR', contact: '011 15 2345-6789', consent: waitlistConsentVersion,
 };
 
-async function submit(body, overrides = {}, bindings = env) {
+async function post(body, overrides = {}, bindings = env) {
   const request = new Request(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: origin, ...overrides },
@@ -38,7 +42,11 @@ async function submit(body, overrides = {}, bindings = env) {
   });
   const response = await onRequest({ request, env: bindings });
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
-  return response.status;
+  return response;
+}
+
+async function submit(...args) {
+  return (await post(...args)).status;
 }
 
 try {
@@ -99,6 +107,21 @@ try {
     { offering: 'encuentro-febrero', name: 'María Pérez', consent_version: offeringConsentVersion },
   ]);
   assert.equal(database.prepare('SELECT COUNT(*) AS total FROM waitlist_signups').get().total, 3);
+  const retreat = { ...request, paymentPlan: '2_payments' };
+  assert.equal(await submit({ ...retreat, offering: 'circulos' }), 400);
+  assert.equal(await submit({ ...retreat, paymentPlan: 'fake' }), 400);
+  const first = await post(retreat);
+  assert.equal(first.status, 201);
+  const receipt = await first.json();
+  assert.match(receipt.reference, /^SOMA-[0-9A-F]{12}$/);
+  assert.equal(receipt.paymentPlan, '2_payments');
+  const duplicate = await post({ ...retreat, name: 'Changed', paymentPlan: '4_payments' });
+  assert.equal(duplicate.status, 200);
+  assert.deepEqual(await duplicate.json(), receipt);
+  const february = await post({ ...retreat, offering: 'encuentro-febrero', paymentPlan: 'undecided' });
+  assert.equal(february.status, 201);
+  assert.notEqual((await february.json()).reference, receipt.reference);
+  assert.equal(database.prepare('SELECT name FROM offering_requests WHERE reference = ?').get(receipt.reference).name, 'María Pérez');
   console.log('PASS: signup requests are routed by offer, deduplicate per offer, and preserve prior waitlist entries.');
 } finally {
   database.close();

@@ -23,6 +23,12 @@ import SiteLayout from '../layouts/SiteLayout.astro';
           <button class="inbox-button" type="button" data-refresh>Actualizar</button>
         </div>
       </header>
+      <details class="retreat-request-inbox" data-retreat-inbox>
+        <summary>Solicitudes de retiro</summary>
+        <p role="status" data-retreat-status></p>
+        <ul data-retreat-requests></ul>
+        <button class="inbox-button" type="button" data-retreat-refresh>Actualizar solicitudes</button>
+      </details>
       <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
 
       <div class="inbox-layout" data-inbox-layout hidden>
@@ -59,10 +65,20 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 
 <script>
   import '../lib/whatsapp-inbox';
+  import '../lib/retreat-request-inbox';
 </script>
 
 <style is:global>
   .wa-inbox { padding-block: var(--journey-spacing); }
+  .wa-inbox .retreat-request-inbox {
+    padding-block: .75rem;
+    margin-block-end: 1.2rem;
+    border-block: 1px solid var(--line);
+  }
+  .wa-inbox .retreat-request-inbox summary { font-weight: 700; cursor: pointer; }
+  .wa-inbox .retreat-request-inbox li { margin-block: .7rem; overflow-wrap: anywhere; }
+  .wa-inbox .retreat-request-inbox li p { margin: .2rem 0; }
+  .wa-inbox .retreat-request-inbox li a { text-decoration: underline; }
   .wa-inbox [hidden] { display: none !important; }
 
   .wa-inbox .inbox-heading {

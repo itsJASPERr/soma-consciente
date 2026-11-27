@@ -84,11 +84,16 @@ aplicar las migraciones al destino respectivo.
 `pnpm run dev` abre la vista local del formulario y descarta las pruebas.
 
 La agenda y sus enlaces se editan en Pages CMS, en **Encuentros, círculos y
-comunidad**. Los enlaces de los encuentros y del círculo abren WhatsApp con
-Yanina. El botón del grupo abre la invitación pública de WhatsApp. Si una
-propuesta carece de enlace directo, su formulario guarda una solicitud en `offering_requests` con la propuesta y el canal elegido. El equipo
-puede consultar esa tabla en D1 para responder. La integración de inscripción
-y cupos con Reservas se sigue en #34.
+comunidad**. En las páginas del retiro, **Solicitar un lugar** guarda la fecha,
+el canal de contacto y la preferencia de pago en `offering_requests`. La
+confirmación muestra una referencia y permite continuar por WhatsApp con un
+mensaje preparado. Si el webhook recibe esa referencia, asocia el mensaje a
+la solicitud. El equipo puede consultar los pedidos en **Solicitudes de retiro**
+dentro de `/mensajes/`. El sistema de cupos y reservas se sigue en #34.
+
+El evento de Umami `retreat_request_submitted` se registra en producción al
+guardar una solicitud nueva. Incluye solo la edición, el canal y la opción de
+pago. Las vistas previas no cargan Umami.
 
 ### Bandeja de WhatsApp
 

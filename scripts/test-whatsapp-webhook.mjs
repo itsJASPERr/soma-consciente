@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequestGet, onRequestHead, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
 import { onRequestGet as listMessages, onRequestPost as replyToMessage } from '../functions/api/whatsapp/messages.ts';
+import { onRequestGet as listRetreatRequests } from '../functions/api/retreat-requests.ts';
 import { onRequestGet as openMensajes, onRequestPost as submitMensajes } from '../functions/mensajes.ts';
 import { mensajesCookie, passwordToken } from '../functions/lib/mensajes-access.ts';
 
@@ -19,6 +20,7 @@ for (const file of [
   '0004_whatsapp_inbound_messages.sql',
   '0005_whatsapp_outbound_replies.sql',
   '0006_whatsapp_reply_diagnostics.sql',
+  '0007_retreat_requests.sql',
 ]) {
   database.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
 }
@@ -121,14 +123,15 @@ const imageMessage = {
 
 try {
   assert.deepEqual(columns.map(column => column.name), [
-    'wa_message_id', 'from_wa_id', 'wa_timestamp', 'message_type', 'text_body', 'raw_json', 'received_at', 'business_phone_number_id',
+    'wa_message_id', 'from_wa_id', 'wa_timestamp', 'message_type', 'text_body', 'raw_json', 'received_at', 'business_phone_number_id', 'retreat_request_reference',
   ]);
   assert.equal(columns.find(column => column.name === 'text_body').notnull, 0);
-  assert.equal(columns.filter(column => !['text_body', 'business_phone_number_id'].includes(column.name)).every(column => column.notnull === 1), true);
+  assert.equal(columns.filter(column => !['text_body', 'business_phone_number_id', 'retreat_request_reference'].includes(column.name)).every(column => column.notnull === 1), true);
 
   const routes = JSON.parse(readFileSync(new URL('../public/_routes.json', import.meta.url), 'utf8'));
   for (const route of [
     '/api/waitlist',
+    '/api/retreat-requests',
     '/api/whatsapp/webhook',
     '/api/whatsapp/webhook/',
     '/api/whatsapp/messages',
@@ -339,6 +342,28 @@ try {
   });
   assert.equal(inbox.status, 200);
   assert.equal(await inbox.text(), 'inbox-page');
+  const reference = 'SOMA-111122223333';
+  database.prepare('INSERT INTO offering_requests (offering, channel, contact, name, consent_version, reference, payment_plan) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run('encuentro-enero', 'email', 'retreat@example.com', 'Prueba', 'offering-1', reference, 'single');
+  const handoff = { ...textMessage, from: '15550001003', id: 'wamid.RETREAT', text: { body: 'Mi referencia es ' + reference.toLowerCase() + '.' } };
+  const unmatched = { ...handoff, id: 'wamid.UNMATCHED', text: { body: 'Mi referencia es SOMA-555566667777.' } };
+  assert.equal((await post(envelope([handoff, unmatched]))).status, 200);
+  const linked = database.prepare('SELECT retreat_request_reference AS reference FROM whatsapp_inbound_messages WHERE wa_message_id = ?');
+  assert.equal(linked.get(handoff.id).reference, reference);
+  assert.equal(linked.get(unmatched.id).reference, null);
+  const requestListUrl = origin + '/api/retreat-requests';
+  const listEnv = { ...env, MENSJAES_PASSWORD: pagePassword };
+  assert.equal((await listRetreatRequests({ request: new Request(requestListUrl), env: listEnv })).status, 401);
+  const requestList = await listRetreatRequests({
+    request: new Request(requestListUrl, { headers: { Cookie: setCookie.split(';')[0] } }),
+    env: listEnv,
+  });
+  assert.equal(requestList.status, 200);
+  assert.equal(requestList.headers.get('Cache-Control'), 'no-store');
+  const { requests } = await requestList.json();
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].reference, reference);
+  assert.equal(requests[0].whatsapp_received, 1);
   console.log('PASS: signed WhatsApp deliveries store once, including sender IDs, mixed batches and media captions.');
 
   const now = Math.floor(Date.now() / 1000);

@@ -1,6 +1,5 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import OfferingAction from '../../components/OfferingAction.astro';
 import RetreatReel from '../../components/RetreatReel.astro';
 import RetreatTeam from '../../components/RetreatTeam.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
@@ -10,6 +9,7 @@ import { offeringUrl, retreatEditions } from '../../lib/offerings';
 import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
 import { somaName, somaOrganizationId } from '../../lib/site-identity';
+import { retreatPaymentPlans as paymentPlans, retreatPrice as price } from '../../lib/retreat-requests';
 import { retreatReels } from '../../lib/retreat-reels';
 
 export const getStaticPaths = (() => retreatEditions.map(encounter => ({
@@ -20,11 +20,18 @@ export const getStaticPaths = (() => retreatEditions.map(encounter => ({
 const { encounter } = Astro.props;
 const registrationUrl = offeringUrl(encounter);
 const whatsappUrl = registrationUrl?.startsWith('https://wa.me/') ? registrationUrl : undefined;
-const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registration', encounter.pageSlug) : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = Boolean(registrationUrl) || requestsEnabled;
 const date = encounter.when;
 const venue = encounter.venue?.trim() ?? '';
+const requestFields = {
+  'data-offering-signup': encounter.slug,
+  'data-signup-title': [date, venue].filter(Boolean).join(' · '),
+  'data-signup-action': 'Solicitá tu lugar',
+  'data-retreat-date': date,
+  'aria-haspopup': 'dialog' as const,
+  'aria-controls': 'program-launch-dialog',
+};
 const retreatImage = path('/media/retreat/caballos-en-el-bosque.webp');
 const retreatImageAlt = 'Una persona sentada cerca de varios caballos en un claro del bosque';
 const [venueName, venueArea] = venue.split(' · ');
@@ -53,31 +60,12 @@ const event = {
 };
 const circlePhoto = getOnlineCirclePhoto(await loadHomepage());
 
-const paymentPlans = [
-  { id: 'single', label: 'Pago único', payments: 1, amount: 610000 },
-  { id: '2_payments', label: '2 pagos', payments: 2, amount: 330000 },
-  { id: '3_payments', label: '3 pagos', payments: 3, amount: 230000 },
-  { id: '4_payments', label: '4 pagos', payments: 4, amount: 185000 },
-];
-const pesos = new Intl.NumberFormat('es-AR');
-const price = (amount: number) => '$' + pesos.format(amount);
 const included = [
   'Dos días de retiro.',
   'Todas las comidas y bebidas.',
   'Una noche de alojamiento en las habitaciones de Casa Sabia.',
   'Cuatro encuentros grupales de integración online después del retiro.',
 ];
-
-function inquiryFor(plan: typeof paymentPlans[number]) {
-  if (!whatsappUrl) return undefined;
-  const inquiry = new URL(whatsappUrl);
-  const greeting = inquiry.searchParams.get('text')?.trim() || 'Hola, Yanina. Quisiera consultar por el retiro de SOMA.';
-  const choice = plan.payments === 1
-    ? 'el pago único de ' + price(plan.amount)
-    : 'la opción de ' + plan.payments + ' cuotas de ' + price(plan.amount) + ' (total ' + price(plan.payments * plan.amount) + ')';
-  inquiry.searchParams.set('text', greeting + ' Me interesa ' + choice + '.');
-  return inquiry.href;
-}
 
 type ScheduleEntry = {
   text: string;
@@ -134,9 +122,9 @@ const days: {
 ];
 
 const registrationSteps = [
-  'Elegí una forma de pago y consultá disponibilidad con Yanina por WhatsApp.',
-  'Mencioná si te inscribís con alguien o si vas a dormir en tu propia carpa.',
-  'Coordiná el pago con Yanina y confirmá tu lugar con ella.',
+  'Enviá tu solicitud y elegí cómo querés que te contactemos.',
+  'Yanina te confirma si hay lugar. En ese momento podés consultar por las promociones.',
+  'Coordiná el pago y la confirmación de tu inscripción con Yanina.',
 ];
 ---
 <SiteLayout
@@ -159,7 +147,13 @@ const registrationSteps = [
           <p class="retreat-hero__place">{venue}</p>
           <p class="retreat-hero__intro">Dos días para bajar el ritmo, mover el cuerpo y estar en la naturaleza.</p>
           <div class="retreat-actions">
-            {canRegister && <a class="btn retreat-button" href="#participar" {...retreatCta('registration', 'retreat_hero', encounter.pageSlug)}>Consultar por un lugar <span aria-hidden="true">↗</span></a>}
+            {requestsEnabled ? (
+              <button class="btn retreat-button" type="button" hidden {...requestFields}
+                {...retreatCta('registration', 'retreat_hero', encounter.pageSlug)}
+              >Solicitar un lugar <span aria-hidden="true">↗</span></button>
+            ) : canRegister && (
+              <a class="btn retreat-button" href="#participar">Cómo participar <span aria-hidden="true">↓</span></a>
+            )}
             <a
               class="retreat-link"
               href="#cronograma"
@@ -262,9 +256,7 @@ const registrationSteps = [
           <h2 id="inversion-title">Inversión para el retiro</h2>
           <p class="retreat-price__currency">Elegí cómo pagar. Valores en pesos argentinos.</p>
           <div class="retreat-price__options">
-            {paymentPlans.map((plan, index) => {
-              const inquiry = inquiryFor(plan);
-              return (
+            {paymentPlans.map((plan, index) => (
                 <article
                   class="retreat-plan"
                   aria-labelledby={'plan-' + plan.id}
@@ -275,20 +267,20 @@ const registrationSteps = [
                     {plan.payments > 1 && <>{plan.payments} × </>}{price(plan.amount)}
                   </p>
                   {plan.payments > 1 && <p class="retreat-plan__total">Total {price(plan.payments * plan.amount)}</p>}
-                  {inquiry && (
-                    <a
-                      class="btn retreat-plan__action"
-                      href={inquiry}
-                      aria-label={'Consultar por WhatsApp · ' + plan.label}
-                      {...retreatCta('whatsapp', 'retreat_pricing', encounter.pageSlug)}
+                  {requestsEnabled && (
+                    <button
+                      type="button" class="btn retreat-plan__action" hidden
+                      aria-label={'Elegir este plan · ' + plan.label}
+                      {...requestFields}
+                      data-payment-plan={plan.id}
+                      {...retreatCta('registration', 'retreat_pricing', encounter.pageSlug)}
                       data-umami-event-payment_plan={analyticsEnabled ? plan.id : undefined}
-                    >WhatsApp <span aria-hidden="true">↗</span></a>
+                    >Elegir este plan <span aria-hidden="true">↗</span></button>
                   )}
                 </article>
-              );
-            })}
+            ))}
           </div>
-          {whatsappUrl && <p class="retreat-price__note">Tu consulta a Yanina lleva la forma de pago elegida.</p>}
+          {requestsEnabled && <p class="retreat-price__note">Podés cambiar tu preferencia antes de enviar la solicitud.</p>}
         </div>
         <div class="retreat-pricing__extras">
           <div class="retreat-included">
@@ -328,14 +320,18 @@ const registrationSteps = [
                 </li>
               ))}
             </ol>
-            <OfferingAction
-              offer={encounter}
-              requestsEnabled={requestsEnabled}
-              class="btn retreat-button"
-              analytics={whatsappAnalytics}
-              showArrow
-            />
-            {!registrationUrl && <SignupDialog />}
+            <div class="retreat-actions">
+              {requestsEnabled && (
+                <button class="btn retreat-button" type="button" hidden {...requestFields}
+                  {...retreatCta('registration', 'retreat_registration', encounter.pageSlug)}
+                >Solicitar un lugar <span aria-hidden="true">↗</span></button>
+              )}
+              {registrationUrl && (
+                <a class="retreat-link" href={registrationUrl}
+                  {...(whatsappUrl ? retreatCta('whatsapp', 'retreat_registration', encounter.pageSlug) : {})}
+                >{whatsappUrl ? 'Hacer una consulta por WhatsApp' : encounter.action} <span aria-hidden="true">↗</span></a>
+              )}
+            </div>
           </div>
           <figure class="retreat-join__image">
             <img
@@ -351,6 +347,7 @@ const registrationSteps = [
       </section>
     )}
   </article>
+  {requestsEnabled && <SignupDialog retreat={{ edition: encounter.pageSlug, whatsappUrl }} />}
 </SiteLayout>
 
 <script>
@@ -452,6 +449,8 @@ const registrationSteps = [
     margin-top: .8rem;
     font-size: clamp(1rem, 1.4vw, 1.15rem);
   }
+  .retreat button.btn { cursor: pointer; }
+  .retreat button[hidden] { display: none; }
   .retreat-actions {
     display: flex;
     flex-wrap: wrap;

@@ -5,6 +5,7 @@ import {
   type CountryCode,
 } from 'libphonenumber-js/min';
 import { offeringConsentVersion, waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
+import { retreatPaymentPlans, undecidedPayment } from '../../src/lib/retreat-requests.ts';
 import { offerings, retreatEditions } from '../../src/lib/offerings.ts';
 
 type Context = {
@@ -12,7 +13,7 @@ type Context = {
   env: {
     WAITLIST_DB?: {
       prepare(sql: string): {
-        bind(...values: string[]): { run(): Promise<unknown> };
+        bind(...values: string[]): { run(): Promise<unknown>; first<T>(): Promise<T | null> };
       };
     };
   };
@@ -40,7 +41,7 @@ export async function onRequest({ request, env }: Context) {
   let bytes = 0;
   let body = '';
   const decoder = new TextDecoder();
-  let input: { offering?: unknown; name?: unknown; channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown };
+  let input: { offering?: unknown; name?: unknown; channel?: unknown; contact?: unknown; country?: unknown; consent?: unknown; paymentPlan?: unknown };
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -63,6 +64,11 @@ export async function onRequest({ request, env }: Context) {
         (!offerings.some(offer => offer.slug === offering) && !retreatEditions.some(edition => edition.slug === offering)))) {
     return response(400, 'offering');
   }
+  const { paymentPlan } = input;
+  if (paymentPlan !== undefined && (
+    !retreatEditions.some(edition => edition.slug === offering)
+    || (paymentPlan !== undecidedPayment && !retreatPaymentPlans.some(plan => plan.id === paymentPlan))
+  )) return response(400, 'payment_plan');
   const consentVersion = offering ? offeringConsentVersion : waitlistConsentVersion;
   if (input.consent !== consentVersion) return response(400, 'consent');
 
@@ -89,6 +95,31 @@ export async function onRequest({ request, env }: Context) {
     contact = phone.number;
   } else {
     return response(400, 'channel');
+  }
+
+  if (typeof offering === 'string' && typeof paymentPlan === 'string') {
+    const reference = 'SOMA-' + crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase();
+    try {
+      const row = await env.WAITLIST_DB.prepare(`
+        INSERT INTO offering_requests (offering, channel, contact, name, consent_version, reference, payment_plan)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (offering, channel, contact) DO UPDATE SET
+          name = offering_requests.name,
+          consented_at = CASE WHEN offering_requests.consent_version <> excluded.consent_version
+            THEN excluded.consented_at ELSE offering_requests.consented_at END,
+          consent_version = excluded.consent_version,
+          reference = COALESCE(offering_requests.reference, excluded.reference),
+          payment_plan = COALESCE(offering_requests.payment_plan, excluded.payment_plan)
+        RETURNING reference, payment_plan AS paymentPlan
+      `).bind(offering, channel, contact, name, consentVersion, reference, paymentPlan).first<{ reference: string; paymentPlan: string }>();
+      if (!row) return response(503, 'unavailable');
+      return Response.json(row, {
+        status: row.reference === reference ? 201 : 200,
+        headers: { 'Cache-Control': 'no-store' },
+      });
+    } catch {
+      return response(503, 'unavailable');
+    }
   }
 
   const table = offering ? 'offering_requests' : 'waitlist_signups';
