@@ -35,11 +35,11 @@ export const teamMembers: TeamMember[] = [
     symbol: 'heart',
     tone: 'sage',
     photo: {
-      src: '/media/team/ronda-entre-arboles.webp',
-      alt: 'Personas sentadas en ronda entre los árboles durante un encuentro de SOMA.',
-      width: 628,
-      height: 1120,
-      position: 'center 53%',
+      src: '/media/team/nicole-rosignoli-miranda.webp',
+      alt: 'Retrato de Nicole Rosignoli Miranda.',
+      width: 1152,
+      height: 2048,
+      position: 'center 40%',
     },
   },
   {
