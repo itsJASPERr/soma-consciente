@@ -54,7 +54,7 @@ const calendar = [
   }] : []),
 ];
 ---
-<SiteLayout openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
+<SiteLayout revealHeader openJourney description="La consciencia se vive. Somos cuatro miradas unidas por un propósito: vivir cada día con más presencia, disfrute y conexión.">
   <section class="home-hero" aria-labelledby="participation-heading">
     {heroPhoto.src && (
       <img
@@ -75,9 +75,12 @@ const calendar = [
         <a class="home-hero__dates" href="#proximos-encuentros">Ver próximas fechas <span aria-hidden="true">↓</span></a>
       )}
     </div>
+    <a class="home-hero__down" href="#nuestros-valores" aria-label="Bajar a nuestros valores">
+      <span aria-hidden="true">↓</span>
+    </a>
   </section>
 
-  <ul class="home-values" aria-label="Nuestros valores" role="list">
+  <ul class="home-values" id="nuestros-valores" aria-label="Nuestros valores" role="list">
     <li>Presencia</li><li>Integración</li><li>Autonomía</li><li>Respeto</li><li>Comunidad</li>
   </ul>
 
@@ -147,7 +150,7 @@ const calendar = [
         })}
       </ul>
       <div class="home-base">
-        <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, Huerta Grande" width="1126" height="718" loading="lazy" decoding="async" />
+        <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, Huerta Grande" width="1570" height="1001" loading="lazy" decoding="async" />
         <div class="home-base__content">
           <p class="eyebrow">Nuestra base</p>
           <h3>Casa Sabia</h3>
@@ -203,7 +206,7 @@ const calendar = [
     display: grid;
     place-items: center;
     min-block-size: clamp(29rem, 70svh, 43rem);
-    padding: clamp(4rem, 9vw, 7rem) 1.25rem;
+    padding: clamp(5.25rem, 9vw, 7rem) 1.25rem max(5rem, 8vw);
     overflow: hidden;
     text-align: center;
     color: light-dark(#223d33, #fff1db);
@@ -216,6 +219,18 @@ const calendar = [
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .home-hero__photo { animation: home-photo-drift 5s ease-out both; }
+    .home-hero__down span { animation: home-scroll-nudge 2.8s ease-in-out; }
+  }
+  @keyframes home-photo-drift {
+    from { transform: translate(-1.25%, 1%) scale(1.05); }
+    to { transform: translate(1%, -1%) scale(1.1); }
+  }
+  @keyframes home-scroll-nudge {
+    0%, 58%, 100% { transform: translateY(0); }
+    75% { transform: translateY(5px); }
   }
   .home-hero::after {
     content: '';
@@ -250,7 +265,23 @@ const calendar = [
     text-decoration: underline;
     text-underline-offset: .28em;
   }
+  .home-hero__down {
+    position: absolute;
+    inset: auto auto clamp(.75rem, 2.7vh, 1.65rem) 50%;
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: light-dark(#f7f1e8b3, #18261cbf);
+    font-size: 1.25rem;
+    line-height: 1;
+    transform: translateX(-50%);
+  }
+  .home-hero__down:hover { background: light-dark(#f7f1e8, #172820); }
   .home-values {
+    scroll-margin-block-start: 6rem;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -446,7 +477,7 @@ const calendar = [
     color: var(--pine-dark);
     font: 400 clamp(1.27rem, 2.45vw, 1.8rem)/1.22 var(--font-display);
   }
-  #proximos-encuentros { scroll-margin-block-start: 1.6rem; }
+  #proximos-encuentros { scroll-margin-block-start: 7rem; }
   .home-calendar__list {
     display: grid;
     gap: .8rem;
@@ -591,7 +622,7 @@ const calendar = [
     .nucleus-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
-    .home-hero { min-block-size: clamp(24rem, 62svh, 32rem); padding-block: 3.4rem; }
+    .home-hero { min-block-size: clamp(24rem, 62svh, 32rem); padding-block: 5.1rem 4.65rem; }
     .home-hero h1 { font-size: clamp(2.3rem, 11.6vw, 4.2rem); }
     .home-library__reading--split { grid-template-columns: minmax(0, 1fr); }
     .program-preview > :is(.eyebrow, h2, .program-preview__intro) {

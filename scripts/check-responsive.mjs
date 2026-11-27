@@ -176,6 +176,8 @@ try{
   const homeLibrary = page.locator('.home-library');
   assert.equal(await homeLibrary.locator('img').count(), 1);
   await homeLibrary.getByRole('link', { name: /Una pausa de presencia/ }).waitFor();
+  await page.getByRole('link', { name: 'Bajar a nuestros valores' }).click();
+  await page.waitForURL('**/#nuestros-valores');
   await page.getByRole('link', { name: 'Ver próximas fechas' }).click();
   await page.waitForURL('**/#proximos-encuentros');
   const hasUmami = (await page.locator('script[data-website-id]').count()) === 1;
@@ -183,8 +185,14 @@ try{
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
     assert.equal(await link.getAttribute('data-umami-event-placement'), hasUmami ? placement : null);
   };
+  const verifyHeaderCta = async () => {
+    const cta = page.locator('.header-cta');
+    assert.equal((await cta.textContent()).trim(), 'Ver encuentros ↗');
+    assert.equal(await cta.getAttribute('href'), '/encuentros/');
+    await verifyRetreatCta(cta, 'listing', 'site_header');
+  };
   const homeCalendar = page.locator('.home-calendar');
-  await verifyRetreatCta(page.locator('.header-cta'), 'listing', 'site_header');
+  await verifyHeaderCta();
   await verifyRetreatCta(homeCalendar.locator('h3 a[href="/encuentros/retiro-enero-2027/"]'), 'details', 'home_calendar_title');
   const homeDetails = homeCalendar.getByRole('link', { name: 'Ver el encuentro' });
   await verifyRetreatCta(homeDetails, 'details', 'home_calendar_link');
@@ -193,7 +201,7 @@ try{
   const retreatHero = page.locator('.retreat-hero');
   const scheduleLink = retreatHero.getByRole('link', { name: 'Ver el cronograma' });
   await verifyRetreatCta(scheduleLink, 'schedule', 'retreat_hero');
-  await verifyRetreatCta(page.locator('.header-cta'), 'registration', 'retreat_header');
+  await verifyHeaderCta();
   assert.equal(await page.locator('[data-retreat-pricing]').count(), hasUmami ? 1 : 0);
   await scheduleLink.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/#cronograma');
@@ -255,7 +263,7 @@ try{
   await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
   const cardRegistration = eventCard.getByRole('link', { name: 'Solicitar inscripción' });
   await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration');
-  await verifyRetreatCta(page.locator('.header-cta'), 'whatsapp', 'events_header');
+  await verifyHeaderCta();
   const encounterLink = new URL(await cardRegistration.getAttribute('href'));
   assert.equal(encounterLink.origin, 'https://wa.me');
   assert.match(encounterLink.searchParams.get('text'), /23 y 24 de enero/);
@@ -293,7 +301,7 @@ try{
     await page.locator('#' + id + ':target').getByRole('heading', { name }).waitFor();
   }
   const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
-  await verifyRetreatCta(page.locator('.header-cta'), 'details', 'team_header');
+  await verifyHeaderCta();
   await verifyRetreatCta(teamRetreat, 'details', 'team_footer');
   await teamRetreat.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/');

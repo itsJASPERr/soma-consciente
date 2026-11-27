@@ -1,15 +1,14 @@
 ---
 import Brand from './Brand.astro';
 import { Icon } from 'astro-icon/components';
-import type { AnalyticsLinkAttributes } from '../lib/analytics';
+import { retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
 
 interface Props {
-  action?: { label: string; href: string; analytics?: AnalyticsLinkAttributes };
   reveal?: boolean;
 }
 
-const { action, reveal = false } = Astro.props;
+const { reveal = false } = Astro.props;
 const links = [
   { label: 'Encuentros', href: '/encuentros/' },
   { label: 'Círculos', href: '/acompanamiento/#circulos' },
@@ -26,7 +25,7 @@ const links = [
     <nav class="desktop-nav" aria-label="Navegación principal">
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
-    {action && <a class="header-cta" href={action.href} {...(action.analytics ?? {})}>{action.label} <span aria-hidden="true">↗</span></a>}
+    <a class="header-cta" href={path('/encuentros/')} {...retreatCta('listing', 'site_header')}>Ver encuentros <span aria-hidden="true">↗</span></a>
     <button class="theme-toggle" type="button" aria-label="Modo oscuro" title="Modo oscuro" data-theme-toggle hidden>
       <Icon name="iconoir:half-moon" size={20} class="theme-toggle__moon" aria-hidden="true" />
       <Icon name="iconoir:sun-light" size={20} class="theme-toggle__sun" aria-hidden="true" />
@@ -44,17 +43,22 @@ const links = [
     (() => {
       const header = document.querySelector('[data-reveal-header]');
       if (!header) return;
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let revealed = false;
       const update = () => {
-        const show = reduce || window.scrollY > 8 || header.querySelector('details[open]') || header.matches(':focus-within');
-        header.classList.add('site-header--reveal');
-        header.classList.toggle('is-visible', show);
+        if (motion.matches || window.scrollY > 8 || header.matches(':focus-within')) revealed = true;
+        header.classList.toggle('is-visible', revealed);
       };
+
+      header.classList.add('site-header--reveal');
       update();
+      window.setTimeout(() => {
+        revealed = true;
+        update();
+      }, 4000);
       window.addEventListener('scroll', update, { passive: true });
-      header.addEventListener('toggle', update, true);
       header.addEventListener('focusin', update);
-      header.addEventListener('focusout', () => requestAnimationFrame(update));
+      motion.addEventListener('change', update);
     })();
   </script>
 )}

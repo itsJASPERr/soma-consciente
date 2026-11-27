@@ -71,7 +71,7 @@ try {
         const programIssues = await program.evaluate(async (section, names) => {
           const problems = [];
           const title = section.querySelector('h2');
-          const logo = section.querySelector('.program-preview__mark img');
+          const logo = section.querySelector('.program-preview__emblem img');
           const themes = [...section.querySelectorAll('.program-preview__themes li')];
           if (title?.textContent.trim() !== 'Cuatro miradas, un núcleo') problems.push('incorrect methodology title');
           if (themes.map(theme => theme.textContent.trim()).join('|') !== names.join('|')) {
@@ -94,9 +94,12 @@ try {
           }
           if (logo) {
             const logoBounds = logo.getBoundingClientRect();
-            const panelBounds = section.querySelector('.program-preview').getBoundingClientRect();
-            if (Math.abs((logoBounds.left + logoBounds.right) - (panelBounds.left + panelBounds.right)) > 2) {
-              problems.push('SOMA logo is not centered in the program announcement');
+            const shapeBounds = section.querySelector('.program-preview__shape')?.getBoundingClientRect();
+            if (!shapeBounds ||
+                Math.abs((logoBounds.left + logoBounds.right) - (shapeBounds.left + shapeBounds.right)) > 2 ||
+                Math.abs((logoBounds.top + logoBounds.bottom) - (shapeBounds.top + shapeBounds.bottom)) > 2 ||
+                logo.closest('.program-preview__window')) {
+              problems.push('SOMA logo must be centered on the landscape and outside its crop');
             }
           }
           return problems;

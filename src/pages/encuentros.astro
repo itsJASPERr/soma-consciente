@@ -41,19 +41,12 @@ const retreatEvents: Offering[] = encounter
       url: date.url,
     }))
   : [];
-const link = encounter && offeringUrl(encounter);
-const message = link?.startsWith('https://wa.me/') ? new URL(link).searchParams.get('text') : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [encounter, door].some(offer => offer && !offeringUrl(offer));
-const action = encounter && link ? {
-  label: encounter.action,
-  href: link,
-  analytics: link.startsWith('https://wa.me/') ? retreatCta('whatsapp', 'events_header') : undefined,
-} : undefined;
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 23 y 24 de enero de 2027 en Casa Sabia, Huerta Grande, e incluye cuatro encuentros grupales de integración online." openJourney journeyAction={action}>
+<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 23 y 24 de enero de 2027 en Casa Sabia, Huerta Grande, e incluye cuatro encuentros grupales de integración online." openJourney>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
@@ -64,20 +57,15 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
           <ul class="retreat-areas" aria-label="Cuatro áreas del retiro">
             {areas.map((area) => (
               <li>
-                <SomaAulaSymbol symbol={area.symbol} />
+                <span class="retreat-areas__symbol" data-symbol={area.symbol} aria-hidden="true">
+                  <SomaAulaSymbol symbol={area.symbol} />
+                </span>
                 <span>{area.name}</span>
               </li>
             ))}
           </ul>
         </div>
-        <EditorialPhoto image={fire} class="journey-photo--campfire" priority>
-          {message && (
-            <figcaption class="event-message">
-              <span class="eyebrow">Mensaje preparado para Yanina</span>
-              <p>«{message}»</p>
-            </figcaption>
-          )}
-        </EditorialPhoto>
+        <EditorialPhoto image={fire} class="journey-photo--campfire" priority />
       </div>
       <div class="container retreat-dates">
         <h2>Próximas fechas</h2>
@@ -191,7 +179,20 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     line-height: 1.3;
     text-align: center;
   }
-  .retreat-areas :global(img) { width: 3.4rem; height: 3.4rem; }
+  .retreat-areas__symbol {
+    display: grid;
+    place-items: center;
+    inline-size: 3.65rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--symbol-paper, #f3ecde);
+  }
+  .retreat-areas__symbol[data-symbol='heart'] { --symbol-paper: #e5eadc; }
+  .retreat-areas__symbol[data-symbol='sound'] { --symbol-paper: #f3e1d6; }
+  .retreat-areas__symbol[data-symbol='body'] { --symbol-paper: #efe3db; }
+  .retreat-areas__symbol[data-symbol='horse'] { --symbol-paper: #f5e8cb; }
+  .retreat-areas__symbol :global(img) { inline-size: 76%; block-size: auto; }
+  .retreat-areas__symbol[data-symbol='horse'] :global(img) { filter: brightness(.86); }
   .retreat-dates { padding-block: clamp(1.5rem, 4vw, 3rem) 0; }
   .retreat-dates > h2, .other-events > h2 { margin-bottom: .85rem; color: var(--pine-dark); font-size: clamp(2rem, 4vw, 3rem); }
   .other-events { padding-block: clamp(1rem, 3vw, 2rem) clamp(1.5rem, 4vw, 3rem); }
@@ -319,18 +320,6 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
   .event-benefit p { margin: 0; }
   .event-benefit .journey-link { margin-top: .28rem; font-size: .89rem; }
   .event-note { margin: .55rem 0 0; color: var(--muted); font-size: .9rem; }
-  .event-message {
-    position: absolute;
-    z-index: 3;
-    inset: auto 0 -.25rem auto;
-    inline-size: min(73%, 19rem);
-    padding: .75rem 1rem;
-    border-inline-start: 2px solid #9f7546;
-    color: var(--pine-dark);
-    background: var(--cream);
-    box-shadow: 0 12px 24px #342a1b20;
-  }
-  .event-message p { font: 1.04rem/1.35 var(--font-display); margin: .3rem 0 0; }
   .continuity { padding-block: clamp(1.75rem, 3.7vw, 3rem); }
   .continuity.journey-hero--photo { grid-template-columns: minmax(0,.75fr) minmax(0,1.25fr); }
   .continuity h2 { font-size: clamp(1.85rem, 3.7vw, 3.6rem); margin-block-end: .6rem; }
@@ -341,7 +330,6 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     .event-card__photo img { aspect-ratio: 2.05; }
     .event-card__photo::before { inset: 5% 10% 5% 4%; }
     .event-card__actions :global(.btn) { flex: 1 1 auto; }
-    .event-message { position: relative; inset: auto; margin: -.75rem 0 0 auto; inline-size: min(89%, 19rem); }
     .continuity.journey-hero--photo { grid-template-columns: minmax(0,1fr); }
     .continuity > div { grid-row: 1; }
     .continuity :global(.journey-photo) { max-inline-size: 26rem; }
