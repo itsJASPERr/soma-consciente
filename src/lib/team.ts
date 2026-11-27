@@ -41,10 +41,10 @@ export const teamMembers: TeamMember[] = [
     tone: 'sage',
     photo: {
       src: '/media/team/nicole-rosignoli-miranda.webp',
-      alt: 'Retrato de Nicole Rosignoli Miranda.',
-      width: 1152,
-      height: 2048,
-      position: 'center 40%',
+      alt: 'Nicole Rosignoli Miranda sentada con las piernas cruzadas entre los árboles.',
+      width: 1067,
+      height: 1600,
+      position: 'center 62%',
     },
   },
   {
