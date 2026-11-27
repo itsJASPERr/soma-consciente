@@ -90,10 +90,7 @@
 }
 .journey-photo--wide .journey-photo__image { aspect-ratio: 1.75; }
 .journey-photo--circle .journey-photo__image { aspect-ratio: 1.1; }
-.journey-photo--campfire .journey-photo__image {
-  aspect-ratio: 1.45;
-  object-position: 62% center;
-}
+.journey-photo--encounters .journey-photo__image { aspect-ratio: 1.45; }
 .journey-photo__emblem {
   position: absolute;
   z-index: 3;

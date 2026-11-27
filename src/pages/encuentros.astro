@@ -20,13 +20,13 @@ const areas = ['nicole', 'jasper', 'yanina', 'nico']
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [...retreatEditions, door].some(offer => offer && !offeringUrl(offer));
-const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
+const encountersPhoto = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const circlePhoto = getOnlineCirclePhoto(home);
 ---
 <SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. Consultá las próximas fechas en Casa Sabia, Huerta Grande. Cada retiro incluye cuatro encuentros grupales de integración online." openJourney>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
-      <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
+      <div class:list={['container', 'journey-hero', { 'journey-hero--photo': encountersPhoto.src }]}>
         <div class="journey-hero__copy">
           <span class="eyebrow">Encuentros presenciales</span>
           <h1 id="encuentro-title">{encounter.title}</h1>
@@ -42,7 +42,7 @@ const circlePhoto = getOnlineCirclePhoto(home);
             ))}
           </ul>
         </div>
-        <EditorialPhoto image={fire} class="journey-photo--campfire" priority />
+        <EditorialPhoto image={encountersPhoto} class="journey-photo--encounters" priority />
       </div>
       <div class="container retreat-dates">
         <h2>Próximas fechas</h2>
