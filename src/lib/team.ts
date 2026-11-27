@@ -89,11 +89,11 @@ export const teamMembers: TeamMember[] = [
     symbol: 'sound',
     tone: 'clay',
     photo: {
-      src: '/media/team/tambor-artesanal.webp',
-      alt: 'Detalle de manos tocando un tambor artesanal.',
-      width: 1120,
-      height: 747,
-      position: 'center 53%',
+      src: '/media/team/jasper-meyer.webp',
+      alt: 'Jasper Meyer con los ojos cerrados y una guitarra entre el follaje.',
+      width: 533,
+      height: 947,
+      position: 'center 27%',
     },
   },
 ];
