@@ -1,7 +1,7 @@
 import { configuredPassword, isAuthorized } from '../../lib/mensajes-access.ts';
 import { readRequestBytes } from '../../lib/request-bytes.ts';
 import {
-  replyConfig, replyMaxLength, replyRecipient, replyWindowSeconds, sendReply, sendTimeoutMs,
+  checkReplyConnection, replyConfig, replyMaxLength, replyRecipient, replyWindowSeconds, sendReply, sendTimeoutMs,
 } from '../../lib/whatsapp-replies.ts';
 import type { ReplyEnv } from '../../lib/whatsapp-replies.ts';
 
@@ -73,11 +73,15 @@ function displayReply(reply: ReplyRow) {
 export async function onRequestGet(context: Context) {
   const denied = await accessError(context);
   if (denied) return denied;
-  const { env } = context;
+  const { request, env } = context;
+  const config = replyConfig(env);
+  if (new URL(request.url).searchParams.get('check') === 'connection') {
+    if (!config) return json({ error: 'replies_disabled' }, 503);
+    return json(await checkReplyConnection(config));
+  }
   const db = env.WAITLIST_DB;
   if (!db) return json({ error: 'unavailable' }, 503);
 
-  const config = replyConfig(env);
   const now = Math.floor(Date.now() / 1000);
   try {
     const [inbound, outbound] = await Promise.all([
@@ -165,8 +169,10 @@ export async function onRequestPost(context: Context) {
     }
 
     const result = await sendReply(config, recipient, replyTo, text);
-    const saved = await db.prepare('UPDATE whatsapp_outbound_replies SET status = ?, wa_message_id = ? '
-      + 'WHERE request_id = ? RETURNING ' + replyFields).bind(result.status, result.platformId, id)
+    const saved = await db.prepare('UPDATE whatsapp_outbound_replies SET status = ?, wa_message_id = ?, '
+      + 'meta_http_status = ?, meta_error_code = ?, meta_error_subcode = ? WHERE request_id = ? RETURNING ' + replyFields)
+      .bind(result.status, result.platformId, result.meta?.httpStatus ?? null, result.meta?.errorCode ?? null,
+        result.meta?.errorSubcode ?? null, id)
       .first<ReplyRow>();
     return saved ? acknowledge(saved) : json({ error: 'unavailable' }, 503);
   } catch {
