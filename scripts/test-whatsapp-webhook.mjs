@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequestGet, onRequestHead, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
@@ -9,6 +10,7 @@ import { mensajesCookie, passwordToken } from '../functions/lib/mensajes-access.
 const origin = 'https://soma-consciente.com';
 const path = '/api/whatsapp/webhook';
 const verifyToken = 'verify+token/fixture';
+const appSecret = 'meta-app-secret-fixture';
 const database = new DatabaseSync(':memory:');
 for (const file of [
   '0001_waitlist.sql',
@@ -27,7 +29,18 @@ const countMessages = database.prepare('SELECT COUNT(*) AS total FROM whatsapp_i
 
 const env = {
   WHATSAPP_VERIFY_TOKEN: verifyToken,
+  WHATSAPP_APP_SECRET: appSecret,
   WAITLIST_DB: {
+    async batch(statements) {
+      database.exec('BEGIN');
+      try {
+        for (const statement of statements) await statement.run();
+        database.exec('COMMIT');
+      } catch (error) {
+        database.exec('ROLLBACK');
+        throw error;
+      }
+    },
     prepare(sql) {
       const statement = database.prepare(sql);
       return {
@@ -68,12 +81,17 @@ async function verify(params, bindings = env) {
   return response;
 }
 
+function signature(body) {
+  return 'sha256=' + createHmac('sha256', appSecret).update(body).digest('hex');
+}
+
 async function post(body, overrides = {}, bindings = env) {
+  const raw = typeof body === 'string' ? body : JSON.stringify(body);
   const response = await onRequestPost({
     request: new Request(origin + path, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...overrides },
-      body: typeof body === 'string' ? body : JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json', 'X-Hub-Signature-256': signature(raw), ...overrides },
+      body: raw,
     }),
     env: bindings,
   });
@@ -117,6 +135,7 @@ try {
   }
   const example = readFileSync(new URL('../.env.example', import.meta.url), 'utf8');
   assert.match(example, /^WHATSAPP_VERIFY_TOKEN=$/m);
+  assert.match(example, /^WHATSAPP_APP_SECRET=$/m);
   assert.match(example, /^WHATSAPP_PHONE_NUMBER_ID=$/m);
   assert.match(example, /^MENSJAES_PASSWORD=$/m);
 
@@ -177,14 +196,20 @@ try {
   const statuses = envelope(undefined, {
     statuses: [{ id: 'wamid.STATUS', status: 'delivered', timestamp: '1710000002', recipient_id: '5491112345678' }],
   });
-  assert.equal((await post(statuses, {}, {})).status, 200);
+  const signatureOnly = { WHATSAPP_APP_SECRET: appSecret };
+  assert.equal((await post(statuses, {}, signatureOnly)).status, 200);
+  assert.equal((await post(statuses, {}, {})).status, 503);
   assert.equal(countMessages.get().total, 0);
   assert.equal((await post('{')).status, 400);
   assert.equal((await post(envelope([textMessage]), { 'Content-Type': 'text/plain' })).status, 415);
   assert.equal((await post('{' + 'a'.repeat(1_048_576))).status, 413);
-  assert.equal((await post(envelope([{ from: '5491112345678', timestamp: '1', type: 'text' }]))).status, 400);
+  assert.equal((await post({ ...envelope([textMessage]), object: 'not_whatsapp' })).status, 400);
+  assert.equal((await post(envelope([{ from: '5491112345678', timestamp: '1', type: 'text' }]))).status, 200);
+  assert.equal((await post(envelope([textMessage]), { 'X-Hub-Signature-256': '' })).status, 401);
+  const raw = JSON.stringify(envelope([textMessage]));
+  assert.equal((await post(raw + ' ', { 'X-Hub-Signature-256': signature(raw) })).status, 401);
   assert.equal(countMessages.get().total, 0);
-  assert.equal((await post(envelope([textMessage]), {}, {})).status, 503);
+  assert.equal((await post(envelope([textMessage]), {}, signatureOnly)).status, 503);
 
   assert.equal((await post(envelope([textMessage, imageMessage, textMessage]))).status, 200);
   assert.equal((await post(envelope([{ ...textMessage, text: { body: 'changed' } }]))).status, 200);
@@ -207,12 +232,32 @@ try {
   assert.equal(selectMessages.all()[0].received_at, receivedAt);
   assert.equal(countMessages.get().total, 2);
 
+  const identifierOnly = {
+    id: 'wamid.ID_ONLY',
+    from_user_id: 'US.00000000000000001',
+    timestamp: '1710000003',
+    type: 'text',
+    text: { body: 'Consulta en español: ¿cómo me anoto? 🌿' },
+  };
+  const captioned = {
+    ...imageMessage,
+    id: 'wamid.CAPTION',
+    image: { ...imageMessage.image, caption: 'Mi foto' },
+  };
+  const mixed = envelope([{ type: 'text' }, identifierOnly]);
+  mixed.entry[0].changes.push(envelope([captioned]).entry[0].changes[0]);
+  assert.equal((await post(JSON.stringify(mixed, null, 2))).status, 200);
+  const mixedRows = selectMessages.all();
+  assert.equal(mixedRows.length, 4);
+  assert.equal(mixedRows[2].from_wa_id, identifierOnly.from_user_id);
+  assert.equal(mixedRows[2].text_body, identifierOnly.text.body);
+  assert.equal(mixedRows[3].text_body, captioned.image.caption);
+
   const failing = {
     ...env,
     WAITLIST_DB: {
-      prepare() {
-        return { bind: () => ({ run: () => { throw new Error('d1 unavailable'); } }) };
-      },
+      ...env.WAITLIST_DB,
+      batch: () => { throw new Error('d1 unavailable'); },
     },
   };
   assert.equal((await post(envelope([textMessage]), {}, failing)).status, 503);
@@ -236,9 +281,9 @@ try {
   assert.equal(listed.headers.get('Cache-Control'), 'no-store');
   assert.deepEqual(await listed.json(), {
     messages: [
-      { from_wa_id: '5491100000002', wa_timestamp: '300', text_body: '  después  ' },
-      { from_wa_id: '5491100000003', wa_timestamp: '300', text_body: null },
-      { from_wa_id: '5491100000001', wa_timestamp: '100', text_body: 'primero' },
+      { wa_message_id: 'newer-same-second', from_wa_id: '5491100000002', wa_timestamp: '300', text_body: '  después  ' },
+      { wa_message_id: 'same-second-early', from_wa_id: '5491100000003', wa_timestamp: '300', text_body: null },
+      { wa_message_id: 'older', from_wa_id: '5491100000001', wa_timestamp: '100', text_body: 'primero' },
     ],
   });
   database.exec('DELETE FROM whatsapp_inbound_messages');
@@ -287,7 +332,7 @@ try {
   });
   assert.equal(inbox.status, 200);
   assert.equal(await inbox.text(), 'inbox-page');
-  console.log('PASS: WhatsApp webhook verifies the hub challenge and stores inbound messages once.');
+  console.log('PASS: signed WhatsApp deliveries store once, including sender IDs, mixed batches and media captions.');
 } finally {
   database.close();
 }
