@@ -3,423 +3,349 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 ---
 <SiteLayout
   title="Mensajes de WhatsApp"
-  description="Mensajes de WhatsApp recibidos por SOMA, del más reciente al más antiguo."
+  description="Conversaciones de WhatsApp de SOMA, agrupadas por remitente."
   noIndex
 >
-  <section class="page-hero">
+  <section class="section wa-inbox" data-whatsapp-inbox aria-labelledby="inbox-title">
     <div class="container">
-      <span class="eyebrow">WhatsApp</span>
-      <h1>Mensajes recibidos</h1>
-      <p>Del más reciente al más antiguo.</p>
-    </div>
-  </section>
-  <section class="section section--tight">
-    <div class="container">
-      <div class="wa-inbox">
-        <div class="inbox-controls">
-          <p class="message-status" data-status role="status">Cargando mensajes…</p>
-          <button class="inbox-refresh" data-refresh type="button" hidden>Actualizar</button>
+      <header class="inbox-heading">
+        <div>
+          <span class="eyebrow">WhatsApp</span>
+          <h1 id="inbox-title">Mensajes</h1>
         </div>
-        <p class="message-empty" data-empty role="status" hidden>Todavía no hay mensajes.</p>
-        <div class="message-list" data-messages></div>
-        <template id="message-template">
-          <details class="message">
-            <summary>
-              <span class="message__meta">
-                <time></time>
-                <span class="message__sender"></span>
-              </span>
-            </summary>
-            <p class="message__text"></p>
-            <section class="reply-history" data-reply-history hidden>
-              <h3>Respuestas</h3>
-              <ul></ul>
-            </section>
-            <p class="reply-notice" data-reply-note hidden></p>
-            <form class="reply-form" data-reply-form hidden>
-              <label>Responder
-                <textarea name="reply" rows="3" maxlength="4096" required></textarea>
-              </label>
-              <div class="reply-actions">
-                <button class="reply-send" type="submit">Enviar respuesta</button>
-                <p class="reply-notice" data-reply-status role="status"></p>
-              </div>
-            </form>
-          </details>
-        </template>
+        <div class="inbox-actions" data-inbox-actions hidden>
+          <label class="inbox-auto-refresh">
+            <input type="checkbox" role="switch" autocomplete="off" data-auto-refresh />
+            <span class="inbox-switch-track" aria-hidden="true"></span>
+            <span>Autoactualizar</span>
+          </label>
+          <button class="inbox-button" type="button" data-refresh>Actualizar</button>
+        </div>
+      </header>
+      <p class="inbox-status" data-status role="status">Cargando mensajes…</p>
+
+      <div class="inbox-layout" data-inbox-layout hidden>
+        <aside class="inbox-senders" aria-labelledby="inbox-senders-title">
+          <h2 id="inbox-senders-title">Remitentes</h2>
+          <ul class="sender-list" data-senders></ul>
+        </aside>
+
+        <section class="inbox-conversation" id="whatsapp-conversation" aria-labelledby="chat-title">
+          <header class="chat-heading">
+            <button class="chat-back" type="button" data-back><span aria-hidden="true">←</span> Remitentes</button>
+            <h2 id="chat-title" data-chat-title tabindex="-1"></h2>
+            <a class="inbox-button" target="_blank" rel="noopener noreferrer" data-whatsapp hidden>
+              Responder en WhatsApp <span aria-hidden="true">↗</span>
+            </a>
+          </header>
+
+          <ol class="chat-timeline" aria-label="Mensajes de la conversación" tabindex="0" data-timeline></ol>
+
+          <p class="chat-note" data-reply-note hidden></p>
+          <form class="reply-form" data-reply-form hidden>
+            <label for="chat-reply">Responder</label>
+            <textarea id="chat-reply" name="reply" rows="2" maxlength="4096" required></textarea>
+            <div class="reply-actions">
+              <p data-reply-status role="status"></p>
+              <button class="inbox-button reply-send" type="submit" disabled>Enviar respuesta</button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
   </section>
 </SiteLayout>
 
 <script>
-  import { path } from '../lib/paths';
-
-  type Reply = {
-    request_id: string;
-    in_reply_to: string;
-    text_body: string;
-    status: 'sending' | 'accepted' | 'failed' | 'unknown';
-    created_at: string;
-  };
-  const statuses: Record<Reply['status'], string> = {
-    sending: 'Enviando…',
-    accepted: 'Aceptada por WhatsApp',
-    failed: 'WhatsApp rechazó la respuesta',
-    unknown: 'Envío sin confirmar. Revisalo en WhatsApp antes de reenviar.',
-  };
-  const errors: Record<string, string> = {
-    unauthorized: 'Volvé a cargar la página e ingresá la contraseña.',
-    reply_window_closed: 'La ventana de 24 horas cerró. WhatsApp requiere una plantilla aprobada.',
-    replies_disabled: 'El envío no está habilitado en este entorno.',
-    message_unavailable: 'El mensaje ya no está disponible para responder.',
-  };
-
-  const status = document.querySelector<HTMLElement>('[data-status]');
-  const empty = document.querySelector<HTMLElement>('[data-empty]');
-  const list = document.querySelector('[data-messages]');
-  const refresh = document.querySelector<HTMLButtonElement>('[data-refresh]');
-  const template = document.querySelector<HTMLTemplateElement>('#message-template');
-  const inboxUrl = path('/api/whatsapp/messages');
-  const formatter = new Intl.DateTimeFormat('es-AR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Argentina/Buenos_Aires',
-  });
-  const attempts = new Map<string, { id: string; text: string }>();
-  let sending = false;
-
-  function showStatus(text: string) {
-    if (!status) return;
-    status.hidden = false;
-    status.textContent = text;
-  }
-
-  function displayHistory(view: DocumentFragment, history: Reply[]) {
-    const panel = view.querySelector<HTMLElement>('[data-reply-history]');
-    const entries = panel?.querySelector('ul');
-    if (!panel || !entries || history.length === 0) return;
-    for (const reply of history) {
-      const li = document.createElement('li');
-      const description = document.createElement('p');
-      description.textContent = reply.text_body;
-      const label = document.createElement('small');
-      const time = new Date(reply.created_at);
-      const date = Number.isNaN(time.getTime()) ? '' : ' · ' + formatter.format(time);
-      label.textContent = statuses[reply.status] + date;
-      li.append(description, label);
-      entries.append(li);
-    }
-    panel.hidden = false;
-  }
-
-  function prepareReply(view: DocumentFragment, id: string, until: unknown, enabled: boolean, draft: string) {
-    const form = view.querySelector<HTMLFormElement>('[data-reply-form]');
-    const note = view.querySelector<HTMLElement>('[data-reply-note]');
-    const textarea = form?.querySelector('textarea');
-    const button = form?.querySelector('button');
-    const feedback = form?.querySelector('[data-reply-status]');
-    if (!form || !note || !textarea || !button || !feedback) return;
-    if (!enabled || typeof until !== 'number' || until * 1000 <= Date.now()) {
-      note.textContent = !enabled ? 'El envío no está habilitado en este entorno.'
-        : typeof until === 'number' ? 'La ventana de 24 horas cerró. WhatsApp requiere una plantilla aprobada.'
-        : 'Este mensaje no está disponible para responder desde SOMA.';
-      note.hidden = false;
-      return;
-    }
-
-    form.hidden = false;
-    textarea.value = draft;
-    form.addEventListener('submit', async event => {
-      event.preventDefault();
-      if (sending || refresh?.disabled) return;
-      const text = textarea.value.trim();
-      if (!text) {
-        feedback.textContent = 'Escribí una respuesta.';
-        textarea.focus();
-        return;
-      }
-
-      const previous = attempts.get(id);
-      const requestId = previous?.text === text ? previous.id : crypto.randomUUID();
-      attempts.set(id, { id: requestId, text });
-      sending = true;
-      button.disabled = true;
-      textarea.readOnly = true;
-      feedback.textContent = 'Enviando…';
-      let updated = false;
-      try {
-        const response = await fetch(inboxUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ request_id: requestId, in_reply_to: id, text }),
-        });
-        const data: { error?: string; reply?: Reply } = await response.json();
-        if (!response.ok || !data.reply) {
-          feedback.textContent = errors[data.error ?? ''] ?? 'No pudimos confirmar el envío. Revisá el historial.';
-          return;
-        }
-        updated = true;
-        attempts.delete(id);
-        feedback.textContent = statuses[data.reply.status];
-        if (data.reply.status !== 'failed') textarea.value = '';
-      } catch {
-        feedback.textContent = 'No pudimos confirmar el envío. Actualizá el historial antes de volver a intentar.';
-      } finally {
-        sending = false;
-        button.disabled = false;
-        textarea.readOnly = false;
-        if (updated) void loadMessages();
-      }
-    });
-  }
-
-  async function loadMessages() {
-    if (!status || !empty || !list || !refresh || !template || refresh.disabled || sending) return;
-    refresh.disabled = true;
-    try {
-      const response = await fetch(inboxUrl, { cache: 'no-store' });
-      if (response.status === 401 || response.status === 403) {
-        list.replaceChildren();
-        attempts.clear();
-        empty.hidden = true;
-        showStatus(errors.unauthorized);
-        return;
-      }
-      if (!response.ok) throw new Error('unavailable');
-      const payload: { messages?: unknown; replies?: Reply[]; replies_enabled?: boolean } = await response.json();
-      if (!Array.isArray(payload.messages)) throw new Error('invalid response');
-
-      const history = new Map<string, Reply[]>();
-      for (const reply of payload.replies ?? []) {
-        const current = history.get(reply.in_reply_to) ?? [];
-        current.push(reply);
-        history.set(reply.in_reply_to, current);
-      }
-      const existing = new Map(
-        Array.from(list.querySelectorAll<HTMLDetailsElement>('details[data-message-id]'), details => [
-          details.dataset.messageId, { open: details.open, draft: details.querySelector('textarea')?.value ?? '' },
-        ]),
-      );
-      const next = document.createDocumentFragment();
-      for (const message of payload.messages) {
-        if (!message || typeof message !== 'object') continue;
-        const record = message as {
-          wa_message_id?: unknown; from_wa_id?: unknown; wa_timestamp?: unknown;
-          text_body?: unknown; reply_until?: unknown;
-        };
-        const view = template.content.cloneNode(true) as DocumentFragment;
-        const details = view.querySelector('details');
-        const time = view.querySelector('time');
-        const sender = view.querySelector('.message__sender');
-        const body = view.querySelector('.message__text');
-        if (details && typeof record.wa_message_id === 'string') {
-          const id = record.wa_message_id;
-          const before = existing.get(id);
-          details.dataset.messageId = id;
-          details.open = before?.open ?? false;
-          const replies = history.get(id) ?? [];
-          if (replies.some(reply => attempts.get(id)?.id === reply.request_id && reply.status !== 'failed')) {
-            attempts.delete(id);
-            if (before) before.draft = '';
-          }
-          displayHistory(view, replies);
-          prepareReply(view, id, record.reply_until, Boolean(payload.replies_enabled), before?.draft ?? '');
-        }
-        const seconds = typeof record.wa_timestamp === 'string' ? Number(record.wa_timestamp) : Number.NaN;
-        const date = Number.isFinite(seconds) ? new Date(seconds * 1000) : null;
-        if (time) {
-          if (date && !Number.isNaN(date.getTime())) {
-            time.dateTime = date.toISOString();
-            time.textContent = formatter.format(date);
-          } else {
-            time.textContent = typeof record.wa_timestamp === 'string' ? record.wa_timestamp : '';
-          }
-        }
-        if (sender) sender.textContent = typeof record.from_wa_id === 'string' ? record.from_wa_id : '';
-        if (body) {
-          if (typeof record.text_body === 'string' && record.text_body.length > 0) {
-            body.textContent = record.text_body;
-          } else {
-            body.textContent = 'Sin texto';
-            body.classList.add('message__text--empty');
-          }
-        }
-        next.append(view);
-      }
-      empty.hidden = next.childElementCount !== 0;
-      list.replaceChildren(next);
-      status.hidden = true;
-    } catch {
-      showStatus('No pudimos leer los mensajes.');
-    } finally {
-      refresh.disabled = false;
-    }
-  }
-
-  if (refresh) {
-    refresh.hidden = false;
-    refresh.addEventListener('click', loadMessages);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && !document.activeElement?.matches('.reply-form textarea')) {
-        void loadMessages();
-      }
-    });
-    void loadMessages();
-  }
+  import '../lib/whatsapp-inbox';
 </script>
 
 <style is:global>
-  .wa-inbox {
-    display: grid;
-    gap: 14px;
-    max-width: 720px;
+  .wa-inbox { padding-block: clamp(32px, 5vw, 64px); }
+  .wa-inbox [hidden] { display: none !important; }
+
+  .wa-inbox .inbox-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+    margin-block-end: 18px;
   }
-  .wa-inbox .inbox-controls {
+
+  .wa-inbox .inbox-heading h1 {
+    margin: 4px 0 0;
+    font-size: clamp(2.35rem, 5vw, 3.7rem);
+    line-height: 1;
+  }
+
+  .wa-inbox .inbox-actions,
+  .wa-inbox .inbox-auto-refresh {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
   }
-  .wa-inbox .inbox-refresh {
-    margin-inline-start: auto;
-    padding: 8px 15px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: #fffaf2;
-    color: var(--pine);
-    font: inherit;
+
+  .wa-inbox .inbox-auto-refresh {
+    position: relative;
+    min-block-size: 44px;
+    color: var(--ink);
+    font: 650 .875rem/1.3 var(--font-body);
     cursor: pointer;
   }
-  .wa-inbox .inbox-refresh:disabled {
-    opacity: .65;
-    cursor: wait;
-  }
-  .wa-inbox .message-status,
-  .wa-inbox .message-empty {
+
+  .wa-inbox .inbox-auto-refresh input {
+    position: absolute;
+    inset: 0 auto 0 0;
+    inline-size: 36px;
+    block-size: 100%;
     margin: 0;
-    color: var(--muted);
+    opacity: 0;
+    cursor: pointer;
   }
-  .wa-inbox .message {
-    background: #fffaf2;
+
+  .wa-inbox .inbox-switch-track {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 36px;
+    block-size: 22px;
+    padding: 2px;
+    border: 1px solid var(--sage);
+    border-radius: 999px;
+    background: var(--paper);
+  }
+
+  .wa-inbox .inbox-switch-track::before {
+    content: '';
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track { background: var(--pine); }
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track::before {
+    margin-inline-start: auto;
+    background: #fff;
+  }
+  .wa-inbox .inbox-auto-refresh input:focus-visible + .inbox-switch-track {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
+  }
+
+  .wa-inbox .inbox-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-block-size: 44px;
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--ink);
+    font: 650 .875rem/1.3 var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .wa-inbox .inbox-button:hover:not(:disabled) { border-color: var(--sage); }
+  .wa-inbox .inbox-button:disabled { opacity: .6; cursor: default; }
+  .wa-inbox :is(button, a, textarea, ol):focus-visible {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
+  }
+
+  .wa-inbox .inbox-status { margin: 0 0 12px; color: var(--muted); }
+
+  .wa-inbox .inbox-layout {
+    display: grid;
+    grid-template-columns: minmax(218px, .8fr) minmax(0, 2fr);
+    min-block-size: 480px;
+    block-size: clamp(480px, 69svh, 750px);
     border: 1px solid var(--line);
     border-radius: 18px;
     overflow: hidden;
+    background: var(--cream);
   }
-  .wa-inbox .message summary {
-    cursor: pointer;
-    list-style: none;
+
+  .wa-inbox .inbox-senders,
+  .wa-inbox .inbox-conversation {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
   }
-  .wa-inbox .message summary::-webkit-details-marker { display: none; }
-  .wa-inbox .message summary:hover { background: #f8f1e6; }
-  .wa-inbox .message__meta {
+
+  .wa-inbox .inbox-senders { border-inline-end: 1px solid var(--line); }
+
+  .wa-inbox .inbox-senders h2 {
+    margin: 0;
+    padding: 15px 18px;
+    border-block-end: 1px solid var(--line);
+    color: var(--ink);
+    font: 700 1rem/1.35 var(--font-body);
+  }
+
+  .wa-inbox .sender-list,
+  .wa-inbox .chat-timeline {
+    flex: 1;
+    min-block-size: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .wa-inbox .sender-list button {
+    display: grid;
+    gap: 3px;
+    inline-size: 100%;
+    padding: 12px 16px 12px 15px;
+    border: 0;
+    border-block-end: 1px solid var(--line);
+    border-inline-start: 3px solid transparent;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.35;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .wa-inbox .sender-list button:hover,
+  .wa-inbox .sender-list button[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--sage) 16%, var(--cream));
+  }
+
+  .wa-inbox .sender-list button[aria-pressed="true"] { border-inline-start-color: var(--pine); }
+  .wa-inbox .sender-list button:focus-visible { outline-offset: -3px; }
+  .wa-inbox .sender-list strong { overflow-wrap: anywhere; }
+
+  .wa-inbox .sender-preview {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: .875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wa-inbox .sender-time { color: var(--muted); font-size: .75rem; }
+
+  .wa-inbox .chat-heading {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px 18px;
-    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 18px;
+    border-block-end: 1px solid var(--line);
   }
-  .wa-inbox .message time {
-    font-weight: 700;
-    color: var(--pine);
-  }
-  .wa-inbox .message__sender {
-    color: var(--muted);
-    font-weight: 600;
-    overflow-wrap: anywhere;
-  }
-  .wa-inbox .message summary::after {
-    content: '';
-    width: 9px;
-    height: 9px;
-    border-right: 2px solid var(--terra);
-    border-bottom: 2px solid var(--terra);
-    transform: translateY(-2px) rotate(45deg);
-    flex: none;
-  }
-  .wa-inbox .message[open] summary::after {
-    transform: translateY(2px) rotate(225deg);
-  }
-  .wa-inbox .message__text {
+
+  .wa-inbox .chat-heading h2 {
     margin: 0;
-    padding: 0 20px 18px;
-    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font: 700 1.125rem/1.35 var(--font-body);
+  }
+
+  .wa-inbox .chat-back { display: none; }
+
+  .wa-inbox .chat-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 18px;
+    background: color-mix(in srgb, var(--paper) 66%, var(--cream));
+  }
+
+  .wa-inbox .chat-message {
+    max-inline-size: min(86%, 34rem);
+    padding: 8px 11px;
+    border-radius: 12px;
+    background: var(--white);
     overflow-wrap: anywhere;
   }
-  .wa-inbox .message__text--empty {
-    color: var(--muted);
-    font-style: italic;
+
+  .wa-inbox .chat-message--outbound {
+    align-self: flex-end;
+    background: color-mix(in srgb, var(--sage) 20%, var(--cream));
   }
-  .wa-inbox .reply-history,
+
+  .wa-inbox .chat-message p { margin: 0; white-space: pre-wrap; }
+  .wa-inbox .chat-message-empty { color: var(--muted); font-style: italic; }
+
+  .wa-inbox .chat-message-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    margin-block-start: 3px;
+    color: var(--muted);
+    font-size: .75rem;
+  }
+
   .wa-inbox .reply-form,
-  .wa-inbox .message > .reply-notice {
-    margin: 0 20px 16px;
-  }
-  .wa-inbox .reply-history {
-    border-top: 1px solid var(--line);
-    padding-top: 12px;
-  }
-  .wa-inbox .reply-history h3 {
-    margin: 0 0 8px;
-    font-size: .95rem;
-    font-weight: 650;
-  }
-  .wa-inbox .reply-history ul {
+  .wa-inbox .chat-note {
     margin: 0;
-    padding: 0 0 0 14px;
-    border-left: 2px solid var(--line);
-    list-style: none;
+    padding: 10px 18px 12px;
+    border-block-start: 1px solid var(--line);
   }
-  .wa-inbox .reply-history li + li { margin-top: 8px; }
-  .wa-inbox .reply-history p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .wa-inbox .reply-notice,
-  .wa-inbox .reply-history small {
+
+  .wa-inbox .chat-note,
+  .wa-inbox .reply-actions p {
+    margin: 0;
     color: var(--muted);
     font-size: .875rem;
   }
-  .wa-inbox .reply-form label {
-    display: block;
-    font-weight: 650;
-  }
+
+  .wa-inbox .reply-form label { display: block; font-weight: 700; }
   .wa-inbox .reply-form textarea {
     display: block;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 92px;
-    margin-top: 6px;
-    padding: 10px 12px;
+    inline-size: 100%;
+    min-block-size: 64px;
+    max-block-size: 180px;
+    margin-block: 4px 8px;
+    padding: 8px 10px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: var(--paper, #fffaf2);
+    background: var(--white);
     color: var(--ink);
     font: inherit;
-    font-weight: 400;
     resize: vertical;
   }
+
   .wa-inbox .reply-actions {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: flex-end;
     align-items: center;
-    gap: 8px 14px;
-    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
   }
-  .wa-inbox .reply-send {
-    padding: 8px 15px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--pine);
-    color: #fffaf2;
-    font: inherit;
-    cursor: pointer;
+
+  .wa-inbox .reply-actions p:empty { display: none; }
+  .wa-inbox .reply-send { border-color: transparent; background: var(--pine); color: #fff; }
+
+  @media (max-width: 700px) {
+    .wa-inbox .inbox-heading { flex-wrap: wrap; }
+    .wa-inbox .inbox-actions { flex: 1 1 100%; justify-content: space-between; }
+    .wa-inbox .inbox-layout { grid-template-columns: minmax(0, 1fr); }
+    .wa-inbox .inbox-senders { border-inline-end: 0; }
+    .wa-inbox .inbox-layout:not([data-viewing-chat]) .inbox-conversation,
+    .wa-inbox .inbox-layout[data-viewing-chat] .inbox-senders { display: none; }
+
+    .wa-inbox .chat-back {
+      display: block;
+      flex-basis: 100%;
+      padding: 7px 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: 650 .875rem var(--font-body);
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .wa-inbox :is(.chat-heading, .chat-timeline, .reply-form, .chat-note) { padding-inline: 12px; }
   }
-  .wa-inbox .reply-send:disabled { opacity: .65; cursor: wait; }
-  .wa-inbox .reply-actions p { margin: 0; }
 </style>
