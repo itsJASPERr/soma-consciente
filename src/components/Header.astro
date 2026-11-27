@@ -38,38 +38,76 @@ const links = [
     </details>
   </div>
 </header>
-<script>
-  const menu = document.querySelector<HTMLDetailsElement>('.site-header .mobile-nav');
-  menu?.querySelector('nav')?.addEventListener('click', event => {
-    if (event.target instanceof Element && event.target.closest('a')) menu.open = false;
-  });
-</script>
-{reveal && (
-  <script is:inline>
-    (() => {
-      const header = document.querySelector('[data-reveal-header]');
-      if (!header) return;
-      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      let revealed = false;
-      const update = () => {
-        if (motion.matches || window.scrollY > 8 || header.matches(':focus-within')) revealed = true;
-        header.classList.toggle('is-visible', revealed);
-      };
+<script is:inline>
+  (() => {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
 
+    const menu = header.querySelector('.mobile-nav');
+    menu?.querySelector('nav')?.addEventListener('click', event => {
+      if (event.target instanceof Element && event.target.closest('a')) menu.open = false;
+    });
+
+    const finishIntro = () => header.removeAttribute('data-intro-hidden');
+    if (header.hasAttribute('data-reveal-header')) {
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
       header.classList.add('site-header--reveal');
-      update();
-      window.setTimeout(() => {
-        revealed = true;
-        update();
-      }, 4000);
-      window.addEventListener('scroll', update, { passive: true });
-      header.addEventListener('focusin', update);
-      motion.addEventListener('change', update);
-    })();
-  </script>
-)}
+      if (!motion.matches && window.scrollY <= 8) {
+        header.setAttribute('data-intro-hidden', '');
+        window.setTimeout(finishIntro, 4000);
+        header.addEventListener('focusin', finishIntro, { once: true });
+        motion.addEventListener('change', finishIntro, { once: true });
+      }
+    }
+
+    // Ignore overscroll at either end of the page.
+    const scrollPosition = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      return Math.max(0, Math.min(window.scrollY, max));
+    };
+    let previousY = scrollPosition();
+    let turnY = previousY;
+    let direction = 0;
+
+    window.addEventListener('scroll', () => {
+      const y = scrollPosition();
+      const nextDirection = Math.sign(y - previousY);
+      if (!nextDirection) return;
+      if (nextDirection !== direction) {
+        turnY = previousY;
+        direction = nextDirection;
+      }
+      previousY = y;
+
+      if (y > 8 && header.hasAttribute('data-intro-hidden')) finishIntro();
+      if (y <= header.offsetHeight) {
+        header.removeAttribute('data-scroll-hidden');
+      } else if (Math.abs(y - turnY) >= 12) {
+        header.toggleAttribute('data-scroll-hidden', direction > 0);
+      }
+    }, { passive: true });
+  })();
+</script>
 
 <style>
+  .site-header { transition: transform .25s ease, opacity .55s ease; }
+  .site-header--reveal {
+    position: fixed;
+    inset-inline: 0;
+    z-index: 30;
+  }
+  .site-header[data-intro-hidden] {
+    opacity: 0;
+    transform: translateY(-.7rem);
+    pointer-events: none;
+  }
+  .site-header[data-scroll-hidden]:not(:has(.mobile-nav[open], :focus-visible)) {
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-header { transition: none; }
+  }
   .theme-toggle {
     flex: 0 0 auto;
     place-items: center;

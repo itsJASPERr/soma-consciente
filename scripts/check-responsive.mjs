@@ -146,6 +146,44 @@ try{
     }
     console.log('Checked '+width+'px across '+paths.length+' pages');
   }
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const pathname of ['/', '/encuentros/retiro-enero-2027/']) {
+      await page.goto(HOST + BASE + pathname);
+      const scrollTo = top => page.evaluate(top => window.scrollTo({ top, behavior: 'instant' }), top);
+      const waitForHeader = visible => page.waitForFunction(visible => {
+        const header = document.querySelector('.site-header');
+        const bounds = header.getBoundingClientRect();
+        const style = getComputedStyle(header);
+        return visible
+          ? Math.abs(bounds.top) < 1 && style.opacity === '1'
+          : bounds.bottom <= 1 && style.pointerEvents === 'none';
+      }, visible);
+      await scrollTo(48);
+      await waitForHeader(true);
+      await scrollTo(380);
+      await waitForHeader(false);
+      await scrollTo(340);
+      await waitForHeader(true);
+
+      if (width === 375) {
+        const menu = page.locator('.mobile-nav summary');
+        await menu.click();
+        await scrollTo(550);
+        await page.waitForFunction(() => document.querySelector('.site-header').hasAttribute('data-scroll-hidden'));
+        assert.equal(await menu.evaluate(summary => summary.parentElement.open), true);
+        await waitForHeader(true);
+        const { x, y, width, height } = await menu.boundingBox();
+        await page.mouse.click(x + width / 2, y + height / 2);
+        await waitForHeader(false);
+      }
+
+      await scrollTo(0);
+      await waitForHeader(true);
+    }
+  }
+  console.log('Checked header scroll behavior on mobile and desktop');
+
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
   const themeToggle = page.getByRole('button', { name: 'Modo oscuro' });
@@ -226,9 +264,9 @@ try{
   await page.waitForURL('**/encuentros/retiro-enero-2027/#cronograma');
   await page.locator('#cronograma:target').getByRole('heading', { name: 'Sábado 23' }).waitFor();
   await page.waitForFunction(() => {
-    const header = document.querySelector('.site-header').getBoundingClientRect();
+    const headerHeight = document.querySelector('.site-header').offsetHeight;
     const schedule = document.querySelector('#cronograma').getBoundingClientRect();
-    return Math.abs(header.top) < 1 && schedule.top >= header.bottom - 1 && schedule.top <= header.bottom + 16;
+    return schedule.top >= headerHeight - 1 && schedule.top <= headerHeight + 16;
   });
   await page.getByRole('heading', { name: 'Domingo 24' }).waitFor();
   const registrationJump = retreatHero.getByRole('link', { name: 'Consultar por un lugar' });

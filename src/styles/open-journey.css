@@ -11,31 +11,6 @@
   background: var(--cream);
 }
 .journey-page .values-list span { color: var(--pine-dark); }
-.site-header--reveal {
-  position: fixed;
-  inset-inline: 0;
-  top: 0;
-  z-index: 30;
-  transition: opacity .55s ease, transform .55s ease, background-color .55s ease;
-}
-.site-header--reveal:not(.is-visible) {
-  opacity: 0;
-  transform: translateY(-.7rem);
-  pointer-events: none;
-  border-bottom-color: transparent;
-}
-.site-header--reveal.is-visible,
-.site-header--reveal:focus-within,
-.site-header--reveal:has(details[open]) {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-  background: var(--header-surface);
-  border-bottom: 1px solid var(--line);
-}
-@media (prefers-reduced-motion: reduce) {
-  .site-header--reveal { transition: none; }
-}
 .journey-page .btn:not(.btn--outline, .btn--light, :disabled) {
   background: var(--rust-fill);
   color: var(--on-rust);
