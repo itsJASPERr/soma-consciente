@@ -53,11 +53,11 @@ export const teamMembers: TeamMember[] = [
     symbol: 'body',
     tone: 'earth',
     photo: {
-      src: '/media/team/practica-corporal.webp',
-      alt: 'Detalle de unas manos apoyadas sobre la espalda de una persona.',
-      width: 900,
-      height: 601,
-      position: 'center 50%',
+      src: '/media/team/yanina-noelia-landriel.webp',
+      alt: 'Yanina Noelia Landriel con sombrero y anteojos de sol entre los árboles.',
+      width: 640,
+      height: 640,
+      position: 'center 22%',
     },
   },
   {
