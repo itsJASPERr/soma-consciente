@@ -7,6 +7,10 @@ import { path } from '../../lib/paths';
 
 const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
 const registrationUrl = encounter ? offeringUrl(encounter) : undefined;
+const analyticsEnabled = import.meta.env.PROD && import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true';
+const whatsappEvent = analyticsEnabled && registrationUrl && new URL(registrationUrl, Astro.site).hostname === 'wa.me'
+  ? 'retreat_whatsapp_clicked'
+  : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = encounter && (registrationUrl || requestsEnabled);
 const date = encounter?.when || '23 y 24 de enero de 2027';
@@ -77,7 +81,11 @@ const registrationSteps = [
           <p class="retreat-hero__intro">Dos días para bajar el ritmo, mover el cuerpo y estar en la naturaleza.</p>
           <div class="retreat-actions">
             {canRegister && <a class="btn retreat-button" href="#participar">Consultar por un lugar <span aria-hidden="true">↗</span></a>}
-            <a class="retreat-link" href="#cronograma">Ver el cronograma <span aria-hidden="true">↓</span></a>
+            <a
+              class="retreat-link"
+              href="#cronograma"
+              data-umami-event={analyticsEnabled ? 'retreat_schedule_clicked' : undefined}
+            >Ver el cronograma <span aria-hidden="true">↓</span></a>
           </div>
         </div>
         <figure class="retreat-hero__image">
@@ -160,7 +168,7 @@ const registrationSteps = [
         <div class="retreat-price">
           <h2 id="inversion-title">Inversión</h2>
           <p>Incluye los dos días y los cuatro encuentros de integración online.</p>
-          <dl class="retreat-price__options">
+          <dl class="retreat-price__options" data-retreat-pricing={analyticsEnabled ? '' : undefined}>
             <div>
               <dt>Pago contado</dt>
               <dd><strong>ARS 450.000</strong></dd>
@@ -204,7 +212,13 @@ const registrationSteps = [
                 </li>
               ))}
             </ol>
-            <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} class="btn retreat-button" showArrow />
+            <OfferingAction
+              offer={encounter}
+              requestsEnabled={requestsEnabled}
+              class="btn retreat-button"
+              analyticsEvent={whatsappEvent}
+              showArrow
+            />
             {!registrationUrl && <SignupDialog />}
           </div>
           <figure class="retreat-join__image">
@@ -222,6 +236,36 @@ const registrationSteps = [
     )}
   </article>
 </SiteLayout>
+
+<script>
+  const pricing = import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true'
+    ? document.querySelector('[data-retreat-pricing]')
+    : null;
+
+  if (pricing) {
+    const observePricing = () => {
+      const { umami } = window as Window & {
+        umami?: { track(event: 'retreat_pricing_viewed'): unknown };
+      };
+      if (!umami || typeof IntersectionObserver === 'undefined') return;
+
+      const observer = new IntersectionObserver(async ([entry]) => {
+        if (!entry || entry.intersectionRatio < 0.5) return;
+        observer.disconnect();
+        try {
+          await umami.track('retreat_pricing_viewed');
+        } catch {
+          // The page remains usable if analytics is unavailable.
+        }
+      }, { threshold: 0.5 });
+      observer.observe(pricing);
+    };
+
+    // Wait for the deferred Umami script before checking for the tracker.
+    if (document.readyState === 'complete') observePricing();
+    else window.addEventListener('load', observePricing, { once: true });
+  }
+</script>
 
 <style>
   .retreat {

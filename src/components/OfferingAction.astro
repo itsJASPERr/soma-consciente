@@ -6,16 +6,17 @@ interface Props {
   requestsEnabled: boolean;
   class?: string;
   showArrow?: boolean;
+  analyticsEvent?: string;
 }
 
-const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false } = Astro.props;
+const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false, analyticsEvent } = Astro.props;
 const url = offeringUrl(offer);
 const hintId = url && offer.actionHint ? offer.slug + '-action-hint' : undefined;
 const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer.action;
 ---
 {url ? (
   <>
-    <a class={actionClass} href={url} aria-describedby={hintId}>
+    <a class={actionClass} href={url} aria-describedby={hintId} data-umami-event={analyticsEvent}>
       {label}
       {showArrow && <span aria-hidden="true">↗</span>}
     </a>

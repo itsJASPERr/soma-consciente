@@ -109,6 +109,23 @@ según el canal y la ubicación del enlace.
 
 [Enlace para la bio de Instagram](https://soma-consciente.com/?utm_source=instagram&utm_medium=social&utm_campaign=programa_online&utm_content=bio#programa-online)
 
+### Medición del retiro de enero de 2027
+
+En Umami, el embudo **Retiro de enero 2027 · Consultas por WhatsApp**
+parte de una visita a `/encuentros/retiro-enero-2027*` y llega al evento
+`retreat_whatsapp_clicked` en un máximo de 60 minutos. El evento mide el
+clic que abre WhatsApp desde la página del retiro. La confirmación del
+lugar se coordina con Yanina por separado.
+
+- `retreat_schedule_clicked` registra el clic en **Ver el cronograma**.
+- `retreat_pricing_viewed` se registra una vez por carga, cuando se ve al
+  menos la mitad del bloque que muestra los precios.
+
+Los eventos del retiro no agregan datos personales. Los enlaces de campaña
+deben llevar a la página del retiro para medir el recorrido en el sitio.
+
+[Enlace del retiro para la bio de Instagram](https://soma-consciente.com/encuentros/retiro-enero-2027/?utm_source=instagram&utm_medium=social&utm_campaign=retiro_enero_2027&utm_content=bio)
+
 ## Edición de contenido
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.
