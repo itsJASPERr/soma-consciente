@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
+import RetreatReel from '../components/RetreatReel.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SignupDialog from '../components/SignupDialog.astro';
 import { loadAulas, loadResources } from '../lib/content';
@@ -9,6 +10,7 @@ import { mediaUrl } from '../lib/media';
 import { retreatCta } from '../lib/analytics';
 import { offerings, retreatEditions } from '../lib/offerings';
 import { path } from '../lib/paths';
+import { retreatReels } from '../lib/retreat-reels';
 
 const aulas = await loadAulas();
 const themes = ['nicole', 'jasper', 'yanina', 'nico']
@@ -36,6 +38,8 @@ const nucleusStatements = [
   'Encuentros y experiencias',
 ];
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
+const [featuredRetreat] = retreatEditions;
+const [featuredReel] = retreatReels;
 const calendar = [
   ...retreatEditions.map((edition, index) => ({
     title: edition.title,
@@ -147,6 +151,20 @@ const calendar = [
           );
         })}
       </ul>
+      {featuredRetreat && (
+        <section class="home-impressions" aria-labelledby="home-impressions-title">
+          <div class="home-impressions__copy">
+            <h3 id="home-impressions-title">Así se vive un encuentro SOMA</h3>
+            <p>Un vistazo al movimiento, las rondas y el tiempo al aire libre en Huerta Grande.</p>
+            <a
+              class="journey-link"
+              href={path(featuredRetreat.href) + '#impresiones'}
+              {...retreatCta('details', 'home_impressions', featuredRetreat.pageSlug)}
+            >Ver más momentos <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="home-impressions__media"><RetreatReel reel={featuredReel} /></div>
+        </section>
+      )}
       <div class="home-base">
         <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, Huerta Grande" width="1570" height="1001" loading="lazy" decoding="async" />
         <div class="home-base__content">
@@ -524,6 +542,27 @@ const calendar = [
   }
   .home-calendar__venue { margin: 0; color: var(--muted); }
   .home-calendar__content .journey-link { text-decoration: underline; text-underline-offset: .2em; }
+
+  .home-impressions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    align-items: center;
+    gap: clamp(1.35rem, 5vw, 4rem);
+    padding-block: clamp(2.15rem, 5vw, 4rem);
+  }
+  .home-impressions h3 {
+    max-inline-size: 17ch;
+    margin: 0 0 .65rem;
+    color: var(--pine-dark);
+    font-size: clamp(2rem, 4.5vw, 3.7rem);
+    line-height: 1.03;
+  }
+  .home-impressions p { max-inline-size: 38ch; margin: 0 0 .8rem; color: var(--muted); }
+  .home-impressions__media { inline-size: min(100%, 13rem); }
+  @media (max-width: 42rem) {
+    .home-impressions { grid-template-columns: minmax(0, 1fr); }
+    .home-impressions__media { inline-size: min(100%, 13.5rem); justify-self: center; }
+  }
 
   .home-base {
     display: grid;

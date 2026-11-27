@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import OfferingAction from '../../components/OfferingAction.astro';
+import RetreatReel from '../../components/RetreatReel.astro';
 import RetreatTeam from '../../components/RetreatTeam.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
@@ -8,6 +9,7 @@ import { getOnlineCirclePhoto, loadHomepage } from '../../lib/home';
 import { offeringUrl, retreatEditions } from '../../lib/offerings';
 import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
+import { retreatReels } from '../../lib/retreat-reels';
 
 export const getStaticPaths = (() => retreatEditions.map(encounter => ({
   params: { retreat: encounter.pageSlug },
@@ -175,6 +177,15 @@ const registrationSteps = [
             </section>
           ))}
         </div>
+      </div>
+    </section>
+
+    <section id="impresiones" class="retreat-impressions" aria-labelledby="impresiones-title">
+      <div class="retreat-inner">
+        <h2 id="impresiones-title">Así se vive un encuentro SOMA</h2>
+        <ul class="retreat-impressions__reels" role="list">
+          {retreatReels.map(reel => <li><RetreatReel reel={reel} /></li>)}
+        </ul>
       </div>
     </section>
 
@@ -515,6 +526,35 @@ const registrationSteps = [
     line-height: 1.5;
   }
   .retreat-timeline p { font-size: .94rem; line-height: 1.42; }
+  .retreat-impressions {
+    padding-block: clamp(2.75rem, 6.5vw, 5.5rem);
+    border-block-end: 1px solid var(--retreat-line);
+  }
+  .retreat-impressions__reels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: clamp(1rem, 3.5vw, 2.65rem);
+    max-inline-size: 54rem;
+    margin: clamp(1.4rem, 4vw, 2.6rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (max-width: 42rem) {
+    .retreat-impressions__reels {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: min(74%, 15rem);
+      overflow-x: auto;
+      padding: .4rem .4rem .8rem;
+      margin-inline: -.4rem;
+      scroll-padding-inline: .4rem;
+      scroll-snap-type: x proximity;
+      scrollbar-width: thin;
+      scrollbar-color: var(--sage) transparent;
+    }
+    .retreat-impressions__reels > li { scroll-snap-align: start; }
+  }
   .retreat-integration {
     padding-block: clamp(2.65rem, 5.2vw, 4.4rem);
     background: var(--retreat-sand);
