@@ -34,12 +34,18 @@ const links = [
       const header = document.querySelector('[data-reveal-header]');
       if (!header) return;
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let revealed = false;
       const update = () => {
-        const show = reduce || window.scrollY > 8 || header.querySelector('details[open]') || header.matches(':focus-within');
+        if (window.scrollY > 8) revealed = true;
+        const show = reduce || revealed || header.querySelector('details[open]') || header.matches(':focus-within');
         header.classList.add('site-header--reveal');
         header.classList.toggle('is-visible', show);
       };
       update();
+      window.setTimeout(() => {
+        revealed = true;
+        update();
+      }, 4000);
       window.addEventListener('scroll', update, { passive: true });
       header.addEventListener('toggle', update, true);
       header.addEventListener('focusin', update);

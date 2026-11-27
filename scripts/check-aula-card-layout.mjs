@@ -94,9 +94,17 @@ try {
           }
           if (logo) {
             const logoBounds = logo.getBoundingClientRect();
+            const orbit = section.querySelector('.program-preview__orbit')?.getBoundingClientRect();
             const panelBounds = section.querySelector('.program-preview').getBoundingClientRect();
-            if (Math.abs((logoBounds.left + logoBounds.right) - (panelBounds.left + panelBounds.right)) > 2) {
-              problems.push('SOMA logo is not centered in the program announcement');
+            const orbitCenter = orbit ? orbit.left + orbit.width / 2 : 0;
+            const panelCenter = (panelBounds.left + panelBounds.right) / 2;
+            if (!orbit || Math.abs(orbitCenter - panelCenter) > 8) {
+              problems.push('the circular photograph is not centered');
+            }
+            const logoCenterX = (logoBounds.left + logoBounds.right) / 2;
+            const logoCenterY = (logoBounds.top + logoBounds.bottom) / 2;
+            if (orbit && (logoCenterX <= orbit.left + orbit.width * .55 || logoCenterY <= orbit.top + orbit.height * .55)) {
+              problems.push('SOMA logo should sit on the lower right of the circle');
             }
           }
           return problems;
