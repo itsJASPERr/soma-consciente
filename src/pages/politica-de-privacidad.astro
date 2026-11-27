@@ -1,0 +1,130 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const draftDate = '26 de noviembre de 2026';
+---
+<SiteLayout
+  title="Privacidad"
+  description="Borrador de la política de privacidad de SOMA CONSCIENTE: lista de espera en Cloudflare D1, chats de WhatsApp y mensajes entrantes del webhook."
+>
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Borrador de trabajo</span>
+      <h1>Privacidad</h1>
+      <p>Cómo trata datos el sitio público de SOMA CONSCIENTE, incluido el webhook de WhatsApp que se está sumando, y qué tiene que completar el equipo antes de publicar este texto.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container prose">
+      <aside class="privacy-draft" role="note">
+        <p><strong>Este texto es un borrador. No es asesoramiento legal.</strong> Describe el funcionamiento actual del sitio para que el equipo lo revise con quien asesore al proyecto. No está vigente. Los espacios marcados como <span class="privacy-blank">[completar: …]</span> son datos que este borrador no inventa.</p>
+        <p>Fecha del borrador: {draftDate}. Fecha de vigencia: <span class="privacy-blank">[completar: fecha en que este texto pase a ser la política publicada]</span>.</p>
+      </aside>
+
+      <h2>Quién publica el sitio</h2>
+      <p>El sitio público es SOMA CONSCIENTE, en <a href="https://soma-consciente.com/">soma-consciente.com</a>. El nombre del proyecto no reemplaza a la persona o razón social responsable de los datos.</p>
+      <ul>
+        <li>Responsable: <span class="privacy-blank">[completar: razón social o persona]</span></li>
+        <li>Domicilio: <span class="privacy-blank">[completar: domicilio]</span></li>
+        <li>Contacto para pedidos sobre tus datos: <span class="privacy-blank">[completar: correo o canal de contacto]</span></li>
+        <li>Delegado de protección de datos: <span class="privacy-blank">[completar: nombre y contacto, o indicar que no hay uno designado]</span></li>
+      </ul>
+
+      <h2>Qué podés mirar sin identificarte</h2>
+      <p>Las páginas de las Aulas, la Biblioteca, los encuentros y el resto del sitio se leen sin crear una cuenta. El sitio no tiene registro de usuarios.</p>
+      <p>En algunas lecciones hay un espacio para escribir una reflexión. Ese cuadro queda en tu navegador: el sitio no lo guarda ni lo envía.</p>
+
+      <h2>Lista de espera y solicitudes de contacto</h2>
+      <p>Si pedís que te avisemos del programa online, el formulario envía tu nombre, el medio que elegís y tu contacto a <code>POST /api/waitlist</code>. Esos datos se guardan en una base Cloudflare D1.</p>
+      <p>El formulario no se envía si no aceptás el texto que está en pantalla. Hoy ese texto es: «Acepto que SOMA CONSCIENTE guarde mi nombre y mis datos de contacto y me contacte por el medio que elegí para informarme sobre el programa y sus productos.»</p>
+      <p>La base guarda, para cada alta de la lista:</p>
+      <ul>
+        <li>tu nombre;</li>
+        <li>el canal, WhatsApp o correo electrónico;</li>
+        <li>el contacto: el teléfono en formato internacional o el correo en minúsculas;</li>
+        <li>la versión de ese texto de aceptación;</li>
+        <li>la fecha y hora en que quedó registrada la aceptación.</li>
+      </ul>
+      <p>El país que elegís solo sirve para validar el número. No se guarda como un dato aparte: queda incluido en el teléfono internacional.</p>
+      <p>Si la misma persona y el mismo canal ya estaban en la lista, se conserva un solo registro. Se completa el nombre si faltaba y se actualiza la versión del texto si aceptás una versión distinta.</p>
+      <p>El mismo formulario puede usarse cuando una propuesta no tiene un enlace directo. En ese caso la aceptación dice: «Acepto que SOMA CONSCIENTE guarde mi nombre y mis datos de contacto para responder a esta solicitud por el medio que elegí.» El registro agrega de qué propuesta se trata y se guarda aparte de la lista del programa. Hoy las propuestas publicadas abren WhatsApp, así que ese camino queda para una propuesta sin enlace.</p>
+      <p>Usamos esos datos para escribirte por el medio que elegiste, con el alcance del texto que aceptaste.</p>
+
+      <h2>Chats de WhatsApp que se abren desde el sitio</h2>
+      <p>Varios botones abren WhatsApp en otra página. Los de encuentros, círculo y Puerta Abierta abren un chat con Yanina. El del grupo abre una invitación al grupo de WhatsApp. El mensaje inicial de algunos enlaces ya viene escrito en la dirección del enlace.</p>
+      <p>Al seguir el enlace salís del sitio. La conversación sigue en WhatsApp, un servicio de Meta. El sitio no recibe una copia del chat por el solo hecho de haber abierto el enlace. Lo que escribas ahí lo trata WhatsApp según sus propias condiciones.</p>
+
+      <h2>Mensajes de WhatsApp que guarda el webhook</h2>
+      <p>El sitio suma un webhook para los mensajes entrantes de WhatsApp. Abrir un enlace, como se describe arriba, no envía el chat al sitio. Cuando el webhook está activo, guarda de cada mensaje que recibe:</p>
+      <ul>
+        <li>el identificador del mensaje en WhatsApp (wa id);</li>
+        <li>el remitente (sender);</li>
+        <li>la fecha y hora (timestamp);</li>
+        <li>el tipo de mensaje (type);</li>
+        <li>el texto (text);</li>
+        <li>el payload crudo (raw payload), tal como llega desde WhatsApp. Ese payload puede incluir más datos que el texto visible.</li>
+      </ul>
+      <p>Esos registros sirven para que el equipo pueda leer y responder los mensajes que llegan. Este borrador no fija la base jurídica ni el modo de informar a quien escribe: <span class="privacy-blank">[completar: base que se invoca para guardar estos mensajes y cómo se informa a quien escribe]</span>.</p>
+      <p>Dónde queda esa base, en qué país y quién del equipo puede leerla: <span class="privacy-blank">[completar: sistema, ubicación y personas con acceso]</span>.</p>
+
+      <h2>Visitas al sitio público</h2>
+      <p>En soma-consciente.com el sitio carga un script de Umami desde <code>cloud.umami.is</code> para contar visitas. Ese script no recibe el nombre ni el contacto del formulario. Si abrís la lista de espera se registra el evento <code>waitlist_opened</code>. Si el envío se confirma, se registra <code>waitlist_submitted</code> y solo el canal que elegiste, WhatsApp o correo.</p>
+      <p>Las vistas previas de trabajo no incluyen ese script. Umami conserva la medición en su propio servicio. Cuánto tiempo: <span class="privacy-blank">[completar: plazo, o la política de conservación que aplique Umami y que el equipo haya revisado]</span>.</p>
+
+      <h2>Quién más interviene</h2>
+      <p>Para funcionar, el sitio se apoya en estos servicios:</p>
+      <ul>
+        <li>Cloudflare Pages publica el sitio y atiende el formulario. La conexión puede dejar datos técnicos, como la dirección IP, en registros del proveedor.</li>
+        <li>Cloudflare D1 guarda los contactos de la lista y de las solicitudes.</li>
+        <li>Google entrega las tipografías (DM Sans y DM Serif Display). Tu navegador se las pide a Google, y esa solicitud puede incluir tu dirección IP.</li>
+        <li>WhatsApp (Meta) recibe el chat cuando abrís un enlace, y es el origen de los mensajes que el webhook guarda.</li>
+        <li>Umami cuenta las visitas del sitio público, como se describe arriba.</li>
+      </ul>
+      <p>La lista de contactos no se ofrece en venta desde el sitio. Otros destinatarios: <span class="privacy-blank">[completar: otros destinatarios, si los hay]</span>.</p>
+      <p>Algunos de estos proveedores pueden tratar datos fuera de Argentina. Países o regiones: <span class="privacy-blank">[completar: países o regiones de Cloudflare, Google, Meta y Umami que el equipo haya verificado]</span>.</p>
+      <p>Registros técnicos de conexión en Cloudflare: <span class="privacy-blank">[completar: si el equipo los consulta y durante cuánto tiempo se conservan]</span>.</p>
+
+      <h2>Durante cuánto tiempo</h2>
+      <p>Este borrador no fija plazos de conservación. Hasta que el equipo los complete y los aplique, no hay un período publicado.</p>
+      <ul>
+        <li>Contactos de la lista de espera: <span class="privacy-blank">[completar: plazo de conservación]</span></li>
+        <li>Solicitudes de una propuesta: <span class="privacy-blank">[completar: plazo de conservación]</span></li>
+        <li>Mensajes de WhatsApp guardados por el webhook, incluido el payload crudo: <span class="privacy-blank">[completar: plazo de conservación]</span></li>
+      </ul>
+
+      <h2>Pedidos sobre tus datos</h2>
+      <p>Podés pedir acceso, corrección o eliminación de los contactos que hayas enviado y de los mensajes de WhatsApp que el webhook haya guardado. El canal para hacerlo es el contacto de la sección «Quién publica el sitio», que todavía está vacío en este borrador.</p>
+      <p>Plazo y forma de respuesta: <span class="privacy-blank">[completar: cómo responde el equipo y en qué plazo]</span>.</p>
+      <p>El sitio está escrito en español para un público en Argentina. La Ley 25.326 de Protección de Datos Personales es la norma que el asesoramiento tiene que contrastar con este texto. Este borrador no la interpreta ni afirma que la base esté inscripta. Inscripción ante la Agencia de Acceso a la Información Pública: <span class="privacy-blank">[completar: si corresponde inscribir la base y, en ese caso, el número de registro]</span>.</p>
+      <p>Menores: <span class="privacy-blank">[completar: si el sitio se dirige a menores y qué ocurre si un menor envía datos]</span>.</p>
+
+      <h2>Cambios</h2>
+      <p>Cuando este texto deje de ser un borrador, el equipo tiene que quitar el aviso de la parte superior, completar los espacios pendientes y publicar la fecha de vigencia. Las versiones anteriores quedan a cargo del equipo: <span class="privacy-blank">[completar: dónde se conserva la versión anterior, si se decide guardar una]</span>.</p>
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  .privacy-draft {
+    border: 1px solid var(--line);
+    background: var(--surface-editorial);
+    border-radius: 17px;
+    padding: 22px 24px;
+    margin-bottom: 8px;
+  }
+  .privacy-draft p { margin: 0 0 12px; }
+  .privacy-draft p:last-child { margin-bottom: 0; }
+  .privacy-blank {
+    background: var(--surface-sand);
+    border-radius: 4px;
+    padding: 0 .25em;
+    overflow-wrap: anywhere;
+  }
+  .prose ul { padding-left: 1.2rem; }
+  .prose code {
+    font-size: .92em;
+    background: var(--surface-sand);
+    border-radius: 4px;
+    padding: 0 .25em;
+  }
+</style>

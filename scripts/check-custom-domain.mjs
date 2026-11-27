@@ -51,6 +51,13 @@ for (const sitemapURL of sitemapURLs) {
 for (const path of ['/', '/biblioteca/', '/aulas/']) {
   assert.ok(pageURLs.has(site + path), 'The sitemap is missing ' + path);
 }
+for (const path of ['/politica-de-privacidad/', '/terminos-y-condiciones/']) {
+  assert.ok(html.includes('href="' + path + '"'), 'The footer is missing ' + path);
+  assert.ok(existsSync(join('dist', path, 'index.html')), 'The footer links to a missing page: ' + path);
+}
+const terms = readFileSync(join('dist', 'terminos-y-condiciones', 'index.html'), 'utf8');
+assert.match(terms, /<meta name="robots" content="noindex"/);
+assert.ok(!pageURLs.has(site + '/terminos-y-condiciones/'), 'The sitemap must exclude the terms draft.');
 const missingPage = readFileSync('dist/404.html', 'utf8');
 assert.match(missingPage, /<meta name="robots" content="noindex"/);
 for (const errorPath of ['/404', '/404/', '/404.html']) {

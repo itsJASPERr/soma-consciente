@@ -1,0 +1,47 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { path } from '../lib/paths';
+---
+
+<SiteLayout
+  title="Términos y condiciones"
+  description="Borrador de los términos de uso del sitio de SOMA Consciente y de las consultas e inscripciones a sus encuentros."
+  noIndex
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Borrador de trabajo</p>
+      <h1>Términos y condiciones</h1>
+      <p>Uso del sitio, consultas e inscripciones a los encuentros y espacios de SOMA Consciente.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container prose">
+      <aside class="content-panel terms-draft" role="note">
+        <p><strong>Borrador para revisión. Sin vigencia.</strong> Quedan por confirmar la identidad y el domicilio de quien ofrece las actividades, el canal formal de contacto y las condiciones de cancelación y devolución.</p>
+      </aside>
+
+      <h2>El sitio y sus contenidos</h2>
+      <p>En este sitio podés explorar las Aulas, encontrar prácticas gratuitas en la Biblioteca y consultar por encuentros presenciales y espacios de integración. Los contenidos educativos y de bienestar no sustituyen la atención médica o psicológica individual.</p>
+
+      <h2>Consultas e inscripción</h2>
+      <p>Los botones de participación pueden abrir una conversación en WhatsApp con un mensaje sugerido. Podés editar el mensaje antes de enviarlo. Mandar una consulta o elegir una opción de pago en el sitio no confirma un cupo ni efectúa un cobro.</p>
+      <p>La inscripción se coordina con el equipo. Antes de abonar, revisá con el equipo la disponibilidad, el precio total, lo que incluye la actividad y las condiciones aplicables. Guardá la confirmación de tu inscripción y del pago.</p>
+
+      <h2>Precios y modalidades de pago</h2>
+      <p>Los precios publicados para el retiro están expresados en pesos argentinos. Si una opción se divide en cuotas, la página muestra el importe de cada pago y el total. La consulta por WhatsApp identifica la modalidad que elegiste. El equipo informa si corresponde aplicar un descuento y cómo se coordina el pago.</p>
+
+      <h2>Cambios, cancelaciones y devoluciones</h2>
+      <p>Para pedir un cambio o una cancelación, usá el canal por el que el equipo confirmó la inscripción. Queda pendiente definir y comunicar los plazos, las condiciones de devolución y qué ocurre si se reprograma o cancela una actividad.</p>
+      <p>Son aplicables los derechos que correspondan según la normativa de defensa del consumidor. <a href="https://www.argentina.gob.ar/normativa/nacional/ley-24240-638/actualizacion">Ley argentina 24.240</a>.</p>
+
+      <h2>Lista de espera y privacidad</h2>
+      <p>La lista de espera permite pedir que te avisemos cuando esté listo el programa online. Para conocer qué datos se tratan y cómo funcionan los enlaces externos, consultá la <a href={path('/politica-de-privacidad/')}>Política de privacidad</a>.</p>
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  .terms-draft { margin-bottom: 1.25rem; }
+  .terms-draft p { margin: 0; }
+</style>
