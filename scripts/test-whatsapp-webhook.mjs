@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { onRequestGet, onRequestHead, onRequestPost } from '../functions/api/whatsapp/webhook.ts';
 import { onRequestGet as listMessages } from '../functions/api/whatsapp/messages.ts';
+import { onRequestGet as openMensajes, onRequestPost as submitMensajes } from '../functions/mensajes.ts';
+import { mensajesCookie, passwordToken } from '../functions/lib/mensajes-access.ts';
 
 const origin = 'https://soma-consciente.com';
 const path = '/api/whatsapp/webhook';
@@ -108,12 +110,15 @@ try {
     '/api/whatsapp/webhook/',
     '/api/whatsapp/messages',
     '/api/whatsapp/messages/',
+    '/mensajes',
+    '/mensajes/',
   ]) {
     assert.ok(routes.include.includes(route), route);
   }
   const example = readFileSync(new URL('../.env.example', import.meta.url), 'utf8');
   assert.match(example, /^WHATSAPP_VERIFY_TOKEN=$/m);
   assert.match(example, /^WHATSAPP_PHONE_NUMBER_ID=$/m);
+  assert.match(example, /^MENSJAES_PASSWORD=$/m);
 
   const denied = await verify({
     'hub.mode': 'subscribe',
@@ -219,7 +224,14 @@ try {
   insert.run('older', '5491100000001', '100', 'text', 'primero', '{"id":"older"}', '2026-11-26T12:00:00.000Z');
   insert.run('newer-same-second', '5491100000002', '300', 'text', '  después  ', '{"id":"newer"}', '2026-11-26T12:00:02.000Z');
   insert.run('same-second-early', '5491100000003', '300', 'image', null, '{"id":"early"}', '2026-11-26T12:00:01.000Z');
-  const listed = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env });
+  const pagePassword = 'gate-fixture';
+  const gated = { ...env, MENSJAES_PASSWORD: pagePassword };
+  const authed = new Request(origin + '/api/whatsapp/messages', {
+    headers: { Cookie: mensajesCookie + '=' + await passwordToken(pagePassword) },
+  });
+  assert.equal((await listMessages({ request: authed, env })).status, 403);
+  assert.equal((await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env: gated })).status, 401);
+  const listed = await listMessages({ request: authed, env: gated });
   assert.equal(listed.status, 200);
   assert.equal(listed.headers.get('Cache-Control'), 'no-store');
   assert.deepEqual(await listed.json(), {
@@ -230,11 +242,51 @@ try {
     ],
   });
   database.exec('DELETE FROM whatsapp_inbound_messages');
-  const empty = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env });
+  const empty = await listMessages({ request: authed, env: gated });
   assert.equal(empty.status, 200);
   assert.deepEqual(await empty.json(), { messages: [] });
-  const unavailable = await listMessages({ request: new Request(origin + '/api/whatsapp/messages'), env: {} });
+  const unavailable = await listMessages({ request: authed, env: { MENSJAES_PASSWORD: pagePassword } });
   assert.equal(unavailable.status, 503);
+
+  const pageUrl = origin + '/mensajes/';
+  const locked = await openMensajes({ request: new Request(pageUrl), env });
+  assert.equal(locked.status, 403);
+  assert.equal((await locked.text()).includes('<form'), false);
+  const prompt = await openMensajes({ request: new Request(pageUrl), env: gated });
+  assert.equal(prompt.status, 200);
+  assert.match(await prompt.text(), /type="password"/);
+  const wrong = await submitMensajes({
+    request: new Request(pageUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'password=nope',
+    }),
+    env: gated,
+  });
+  assert.equal(wrong.status, 401);
+  assert.equal(wrong.headers.get('Set-Cookie'), null);
+  const signedIn = await submitMensajes({
+    request: new Request(pageUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'password=' + encodeURIComponent(pagePassword),
+    }),
+    env: gated,
+  });
+  assert.equal(signedIn.status, 303);
+  assert.equal(signedIn.headers.get('Location'), '/mensajes/');
+  const setCookie = signedIn.headers.get('Set-Cookie') ?? '';
+  assert.equal(setCookie.includes(pagePassword), false);
+  assert.match(setCookie, /HttpOnly/);
+  const inbox = await openMensajes({
+    request: new Request(pageUrl, { headers: { Cookie: setCookie.split(';')[0] } }),
+    env: {
+      ...gated,
+      ASSETS: { fetch: async () => new Response('inbox-page', { status: 200, headers: { 'content-type': 'text/html' } }) },
+    },
+  });
+  assert.equal(inbox.status, 200);
+  assert.equal(await inbox.text(), 'inbox-page');
   console.log('PASS: WhatsApp webhook verifies the hub challenge and stores inbound messages once.');
 } finally {
   database.close();
