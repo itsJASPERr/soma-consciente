@@ -30,6 +30,10 @@
 }
 :root[data-theme='light'] { color-scheme: light; }
 :root[data-theme='dark'] { color-scheme: dark; }
+::view-transition { pointer-events: none; }
+::view-transition-group(root) { animation-duration: .28s; animation-timing-function: ease-in-out; }
+::view-transition-old(theme-switch) { display: none; }
+::view-transition-new(theme-switch) { animation: none; }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-block-start:calc(var(--site-header-height) + .5rem)}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}

@@ -187,20 +187,24 @@ try{
 
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
-  const themeToggle = page.getByRole('button', { name: 'Modo oscuro' });
+  const themeToggle = page.getByRole('switch', { name: 'Modo oscuro' });
+  const waitForDarkMode = checked => page.waitForFunction(checked => (
+    document.querySelector('[data-theme-toggle]')?.getAttribute('aria-checked') === String(checked)
+  ), checked);
   await page.emulateMedia({ colorScheme: 'dark' });
-  await page.waitForFunction(() => document.querySelector('[data-theme-toggle]')?.getAttribute('aria-pressed') === 'true');
+  await waitForDarkMode(true);
   const darkBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
   await themeToggle.press('Space');
-  assert.equal(await themeToggle.getAttribute('aria-pressed'), 'false');
+  await waitForDarkMode(false);
   const lightBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
   assert.notEqual(lightBackground, darkBackground);
   await page.goto(HOST + BASE + '/biblioteca/');
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
   await themeToggle.click();
+  await waitForDarkMode(true);
   await page.reload();
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
-  assert.equal(await themeToggle.getAttribute('aria-pressed'), 'true');
+  await waitForDarkMode(true);
   await page.evaluate(() => localStorage.removeItem('soma-theme'));
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto(HOST + BASE + '/');

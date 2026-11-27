@@ -26,9 +26,11 @@ const links = [
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
     <a class="header-cta" href={path('/encuentros/')} {...retreatCta('listing', 'site_header')}>Ver encuentros <span aria-hidden="true">↗</span></a>
-    <button class="theme-toggle" type="button" aria-label="Modo oscuro" title="Modo oscuro" data-theme-toggle hidden>
-      <Icon name="iconoir:half-moon" size={20} class="theme-toggle__moon" aria-hidden="true" />
-      <Icon name="iconoir:sun-light" size={20} class="theme-toggle__sun" aria-hidden="true" />
+    <button class="theme-toggle" type="button" role="switch" aria-label="Modo oscuro" aria-checked="false" data-theme-toggle hidden>
+      <span class="theme-toggle__track" aria-hidden="true">
+        <Icon name="iconoir:sun-light" size={15} class="theme-toggle__sun" />
+        <Icon name="iconoir:half-moon" size={15} class="theme-toggle__moon" />
+      </span>
     </button>
     <details class="mobile-nav">
       <summary aria-label="Abrir menú de navegación">Menú <Icon name="iconoir:menu" size={20} aria-hidden="true"/></summary>
@@ -111,19 +113,46 @@ const links = [
   .theme-toggle {
     flex: 0 0 auto;
     place-items: center;
-    inline-size: 44px;
+    inline-size: 3.5rem;
     block-size: 44px;
     padding: 0;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: var(--cream);
-    color: var(--pine-dark);
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
     cursor: pointer;
   }
   .theme-toggle:not([hidden]) { display: grid; }
-  .theme-toggle:hover { background: var(--surface-sage); }
-  .theme-toggle[aria-pressed='false'] .theme-toggle__sun,
-  .theme-toggle[aria-pressed='true'] .theme-toggle__moon { display: none; }
+  .theme-toggle__track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    place-items: center;
+    inline-size: 100%;
+    block-size: 1.75rem;
+    border: 1px solid var(--sage);
+    border-radius: 999px;
+    background: var(--surface-sage);
+    color: var(--muted);
+  }
+  .theme-toggle:hover .theme-toggle__track { border-color: var(--pine); }
+  .theme-toggle__track::before {
+    content: '';
+    position: absolute;
+    inset-block: 2px;
+    inset-inline-start: 2px;
+    inline-size: calc(50% - 2px);
+    border-radius: 999px;
+    background: var(--pine-fill);
+  }
+  .theme-toggle[aria-checked='true'] .theme-toggle__track::before { transform: translateX(100%); }
+  .theme-toggle__sun, .theme-toggle__moon { position: relative; }
+  .theme-toggle[aria-checked='false'] .theme-toggle__sun,
+  .theme-toggle[aria-checked='true'] .theme-toggle__moon { color: var(--on-pine); }
+  @media (prefers-reduced-motion: no-preference) {
+    .theme-toggle { view-transition-name: theme-switch; }
+    .theme-toggle__track::before { transition: transform .28s cubic-bezier(.22, .61, .36, 1); }
+    .theme-toggle__sun, .theme-toggle__moon { transition: color .2s ease; }
+  }
   @media (max-width: 1150px) {
     .theme-toggle { margin-inline-start: auto; }
     .theme-toggle:not([hidden]) + .mobile-nav { margin-inline-start: 0; }
