@@ -1,367 +1,574 @@
 ---
 import OfferingAction from '../../components/OfferingAction.astro';
+import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { loadAulas } from '../../lib/content';
-import { loadHomepage } from '../../lib/home';
-import { mediaUrl } from '../../lib/media';
-import { offerings } from '../../lib/offerings';
+import { offeringUrl, offerings } from '../../lib/offerings';
 import { path } from '../../lib/paths';
 
-const home = await loadHomepage();
-const aulas = await loadAulas();
-const nico = aulas.find((aula) => aula.slug === 'nico');
 const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
+const registrationUrl = encounter ? offeringUrl(encounter) : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
+const canRegister = encounter && (registrationUrl || requestsEnabled);
+const date = encounter?.when || '23 y 24 de enero de 2027';
+const venue = encounter?.venue || 'Casa Sabia · La Falda, Córdoba';
 
-const horses = mediaUrl(nico?.coverImage);
-const morning = mediaUrl(home.heroImage);
-const hills = mediaUrl(home.nucleoImage);
-const circle = mediaUrl(home.onlineImage);
+type ScheduleEntry = {
+  text: string;
+} & ({ time: string; end?: string } | { label: string });
 
-const saturday = [
-  { time: '09:00', text: 'Llegada, caminata y movimiento con Nicky.' },
-  { time: 'Por la mañana', text: 'Charla y práctica de respiración con Yani.' },
-  { time: '13:30', text: 'Almuerzo liviano.' },
-  { time: '16:00 a 19:00', text: 'Baño de sonido y vivencia con caballos, en Casa Sabia.' },
-  { time: '20:00', text: 'Merienda.' },
-  { time: '22:30', text: 'Cena al disco y fogón. Risotto de hongos y verduras.' },
-  { time: 'Después de cenar', text: 'Guitarra con Pedro, baile y peña.' },
+const days: {
+  id: string;
+  title: string;
+  photo: string;
+  alt: string;
+  schedule: ScheduleEntry[];
+}[] = [
+  {
+    id: 'sabado',
+    title: 'Sábado 23',
+    photo: 'caminata-en-el-campo',
+    alt: 'Un grupo reunido a la sombra de los árboles al borde del campo',
+    schedule: [
+      { time: '09:00', text: 'Llegada, caminata y movimiento con Nicky.' },
+      { label: 'Por la mañana', text: 'Charla y práctica de respiración con Yani.' },
+      { time: '13:30', text: 'Almuerzo liviano.' },
+      { time: '16:00', end: '19:00', text: 'Baño de sonido y vivencia con caballos en Casa Sabia.' },
+      { time: '20:00', text: 'Merienda.' },
+      { time: '22:30', text: 'Cena al disco y fogón. Opción de risotto de hongos y verduras.' },
+      { label: 'Después de cenar', text: 'Guitarra con Pedro, baile y peña.' },
+    ],
+  },
+  {
+    id: 'domingo',
+    title: 'Domingo 24',
+    photo: 'encuentro-con-caballos',
+    alt: 'Personas y caballos reunidos en un claro junto al bosque',
+    schedule: [
+      { time: '08:00', text: 'Desayuno.' },
+      { time: '09:30', text: 'Salida al campo.' },
+      { time: '10:30', text: 'Actividad con caballos en el corral.' },
+      { time: '13:30', text: 'Almuerzo junto al arroyo.' },
+      { label: 'Después de almorzar', text: 'Círculo de palabra.' },
+      { time: '19:00', text: 'Merienda libre y cierre.' },
+    ],
+  },
 ];
 
-const sunday = [
-  { time: '08:00', text: 'Desayuno.' },
-  { time: '09:30', text: 'Salida al campo.' },
-  { time: '10:30', text: 'Actividad con caballos en el corral.' },
-  { time: '13:30', text: 'Almuerzo junto al arroyo.' },
-  { time: 'Después de almorzar', text: 'Círculo de palabra.' },
-  { time: '19:00', text: 'Merienda libre y cierre.' },
-];
-
-const payments = [
-  { label: 'Un pago', amount: '$610.000', note: 'El total del retiro.' },
-  { label: '2 cuotas', amount: '$330.000', note: 'Total $660.000.' },
-  { label: '3 cuotas', amount: '$230.000', note: 'Total $690.000.' },
-  { label: '4 cuotas', amount: '$185.000', note: 'Total $740.000.' },
+const registrationSteps = [
+  'Escribile a Yanina para consultar disponibilidad.',
+  'Elegí cómo pagar y mencioná si venís con alguien o con tu carpa.',
+  'Coordiná el pago con Yanina y confirmá tu lugar con ella.',
 ];
 ---
 <SiteLayout
-  title="Retiro de enero en Casa Sabia"
-  description="Retiro SOMA Consciente, sábado 23 y domingo 24 de enero de 2027 en Casa Sabia, La Falda. El precio incluye los dos días y cuatro encuentros grupales de integración online."
+  title="Retiro SOMA · Cuerpo, respiración y naturaleza"
+  description={'Retiro SOMA Consciente, ' + date + ' en ' + venue + '. Dos días de prácticas y cuatro encuentros grupales de integración online.'}
   openJourney
+  journeyAction={canRegister ? { label: 'Consultar por un lugar', href: '#participar' } : undefined}
 >
   <article class="retreat">
-    <header class="retreat-cover">
-      <p class="eyebrow">Retiro presencial</p>
-      <h1>Cuerpo, respiración <em>y naturaleza</em></h1>
-      <p class="retreat-cover__date">23 y 24 de enero de 2027</p>
-      <p class="retreat-cover__place">Casa Sabia · La Falda, Córdoba</p>
-      {horses && (
-        <img
-          class="retreat-cover__photo"
-          src={horses}
-          alt={nico?.coverAlt || 'Encuentro con un caballo'}
-          width="1200"
-          height="800"
-        />
-      )}
-      <a class="retreat-cover__more" href="#sabado">
-        <span>Deslizá para ver el cronograma</span>
-        <span aria-hidden="true">→</span>
-      </a>
+    <header class="retreat-hero">
+      <div class="retreat-inner retreat-hero__layout">
+        <div class="retreat-hero__copy">
+          <p class="retreat-label">Retiro presencial</p>
+          <h1>Cuerpo, respiración <em>y naturaleza</em></h1>
+          <p class="retreat-hero__date">{date}</p>
+          <p class="retreat-hero__place">{venue}</p>
+          <p class="retreat-hero__intro">Dos días para bajar el ritmo, mover el cuerpo y estar en la naturaleza.</p>
+          <div class="retreat-actions">
+            {canRegister && <a class="btn retreat-button" href="#participar">Consultar por un lugar <span aria-hidden="true">↗</span></a>}
+            <a class="retreat-link" href="#cronograma">Ver el cronograma <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <figure class="retreat-hero__image">
+          <img
+            src={path('/media/retreat/caballos-en-el-bosque.webp')}
+            alt="Una persona sentada cerca de varios caballos en un claro del bosque"
+            width="1280"
+            height="718"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </figure>
+      </div>
     </header>
 
-    <section class="retreat-day" aria-labelledby="sabado-title">
-      <p class="eyebrow">Cronograma</p>
-      <h2 id="sabado-title">Sábado 23</h2>
-      <p class="retreat-day__meta">Enero 2027 · Casa Sabia</p>
-      {morning && <img class="retreat-day__photo" src={morning} alt="Luz de amanecer sobre las montañas" width="1600" height="1000" />}
-      <ol class="timeline">
-        {saturday.map((item) => (
-          <li>
-            <time>{item.time}</time>
-            <span class="timeline__dot" aria-hidden="true"></span>
-            <p>{item.text}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-
-    <section class="retreat-day" aria-labelledby="domingo-title">
-      <p class="eyebrow">Cronograma</p>
-      <h2 id="domingo-title">Domingo 24</h2>
-      <p class="retreat-day__meta">Enero 2027 · Casa Sabia</p>
-      {hills && <img class="retreat-day__photo" src={hills} alt="Montañas y bosques entre la bruma" width="1100" height="733" />}
-      <ol class="timeline">
-        {sunday.map((item) => (
-          <li>
-            <time>{item.time}</time>
-            <span class="timeline__dot" aria-hidden="true"></span>
-            <p>{item.text}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-
-    <section class="retreat-after" aria-labelledby="integracion-title">
-      <p class="eyebrow">Integración</p>
-      <p class="retreat-after__kicker">Después del fin de semana</p>
-      <h2 id="integracion-title">La experiencia <em>sigue.</em></h2>
-      <div class="retreat-after__row">
-        <div>
-          <p class="retreat-after__count">4</p>
-          <p class="retreat-after__label">encuentros grupales de integración online</p>
-          <p>Para compartir lo vivido y llevarlo a lo cotidiano.</p>
-          <p class="retreat-after__included">Incluidos en el retiro</p>
+    <section id="cronograma" class="retreat-schedule" aria-labelledby="cronograma-title">
+      <div class="retreat-inner">
+        <div class="retreat-section-head">
+          <p class="retreat-label">Cronograma</p>
+          <h2 id="cronograma-title">Dos días en Casa Sabia</h2>
         </div>
-        {circle && <img src={circle} alt="Cuaderno sobre una mesa, para lo que queda del encuentro" width="1600" height="1000" />}
+        <div class="retreat-days">
+          {days.map((day) => (
+            <section id={day.id} class="retreat-day" aria-labelledby={day.id + '-title'}>
+              <h3 id={day.id + '-title'}>{day.title}</h3>
+              <img
+                class="retreat-day__photo"
+                src={path('/media/retreat/' + day.photo + '.webp')}
+                alt={day.alt}
+                width="840"
+                height="471"
+                loading="lazy"
+                decoding="async"
+              />
+              <ol class="retreat-timeline" role="list">
+                {day.schedule.map((item) => (
+                  <li>
+                    <span class="retreat-timeline__when">
+                      {'time' in item ? (
+                        <>
+                          <time datetime={item.time}>{item.time}</time>
+                          {item.end && <> a <time datetime={item.end}>{item.end}</time></>}
+                        </>
+                      ) : item.label}
+                    </span>
+                    <p>{item.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
       </div>
     </section>
 
-    <section class="retreat-price" aria-labelledby="precio-title">
-      <h2 id="precio-title">Inversión</h2>
-      <ul>
-        {payments.map((payment) => (
-          <li>
-            <span>{payment.label}</span>
-            <strong>{payment.amount}</strong>
-            <small>{payment.note}</small>
-          </li>
-        ))}
-      </ul>
-      <p>El primer pago reserva el lugar. El resto es mensual y tiene que estar pago antes del retiro. El precio incluye los dos días y cuatro encuentros grupales de integración online.</p>
+    <section class="retreat-integration" aria-labelledby="integracion-title">
+      <div class="retreat-inner retreat-integration__layout">
+        <div class="retreat-integration__copy">
+          <p class="retreat-label">Después del fin de semana</p>
+          <h2 id="integracion-title">La experiencia <em>sigue.</em></h2>
+          <p class="retreat-integration__count"><strong>4</strong> encuentros grupales de integración online</p>
+          <p>Están incluidos en el retiro. Nos volvemos a encontrar para compartir lo vivido y llevarlo a lo cotidiano.</p>
+          <a class="retreat-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+        </div>
+        <figure class="retreat-integration__image">
+          <img
+            src={path('/media/retreat/circulo-entre-arboles.webp')}
+            alt="Un grupo sentado en círculo entre los árboles"
+            width="471"
+            height="840"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
     </section>
 
-    <section class="retreat-close">
-      <h2>Nos vemos <em>en La Falda.</em></h2>
-      <p class="retreat-cover__date">23 y 24 de enero de 2027</p>
-      <p class="retreat-cover__place">Casa Sabia · La Falda, Córdoba</p>
-      <p class="retreat-close__ask">Consultá por tu lugar.</p>
-      {encounter && (
-        <div class="retreat-close__action">
-          <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} showArrow />
-          <a class="journey-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
+    <section id="inversion" class="retreat-pricing" aria-labelledby="inversion-title">
+      <div class="retreat-inner retreat-pricing__layout">
+        <div class="retreat-price">
+          <h2 id="inversion-title">Inversión</h2>
+          <p>Incluye los dos días y los cuatro encuentros de integración online.</p>
+          <dl class="retreat-price__options">
+            <div>
+              <dt>Pago contado</dt>
+              <dd><strong>ARS 450.000</strong></dd>
+            </div>
+            <div>
+              <dt>Pago en cuotas</dt>
+              <dd>
+                <strong>2 × ARS 250.000</strong>
+                <span>Total ARS 500.000</span>
+              </dd>
+            </div>
+          </dl>
         </div>
-      )}
+        <div class="retreat-discounts">
+          <h3 class="retreat-label">Descuentos</h3>
+          <dl>
+            <div>
+              <dt>10%</dt>
+              <dd>Si venís con un amigo o una amiga.</dd>
+            </div>
+            <div>
+              <dt>ARS 50.000</dt>
+              <dd>Si venís con tu carpa.</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
     </section>
+
+    {canRegister && encounter && (
+      <section id="participar" class="retreat-join" aria-labelledby="participar-title">
+        <div class="retreat-inner retreat-join__layout">
+          <div class="retreat-join__copy">
+            <p class="retreat-label">Inscripción</p>
+            <h2 id="participar-title">Cómo participar</h2>
+            <ol class="retreat-steps" role="list">
+              {registrationSteps.map((step, index) => (
+                <li>
+                  <span aria-hidden="true">{index + 1}</span>
+                  <p>{step}</p>
+                </li>
+              ))}
+            </ol>
+            <OfferingAction offer={encounter} requestsEnabled={requestsEnabled} class="btn retreat-button" showArrow />
+            {!registrationUrl && <SignupDialog />}
+          </div>
+          <figure class="retreat-join__image">
+            <img
+              src={path('/media/retreat/caballos-y-grupo.webp')}
+              alt="Dos personas de pie frente a varios caballos en el campo"
+              width="404"
+              height="720"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+        </div>
+      </section>
+    )}
   </article>
 </SiteLayout>
 
 <style>
   .retreat {
-    width: min(40rem, calc(100% - 2rem));
+    --retreat-paper: #f6f1e7;
+    --retreat-sand: #efe4cf;
+    --retreat-card: #fcf8ef;
+    --retreat-pine: #203b31;
+    --retreat-ink: #263a31;
+    --retreat-clay: #944a36;
+    --retreat-muted: #425950;
+    --retreat-line: #d9c7a9;
+    --retreat-gold: #e7c488;
+    background: var(--retreat-paper);
+    color: var(--retreat-ink);
+  }
+  .retreat :is(h1, h2, h3, p, figure, ol, dl, dt, dd) { margin: 0; }
+  .retreat :is(h1, h2, h3) { color: var(--retreat-pine); }
+  .retreat h1 { font-size: clamp(2.65rem, 4.7vw, 4rem); line-height: .98; }
+  .retreat h2 { font-size: clamp(2rem, 4.5vw, 3.9rem); line-height: 1.01; }
+  .retreat h3 { font-size: clamp(1.8rem, 3.5vw, 2.75rem); line-height: 1.04; }
+  .retreat em { color: var(--retreat-clay); }
+  .retreat section[id] { scroll-margin-block-start: 6.5rem; }
+  .retreat-inner {
+    width: min(1140px, calc(100% - clamp(2rem, 7vw, 6rem)));
     margin-inline: auto;
-    padding-block: clamp(1.6rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem);
   }
-  .retreat-cover h1,
-  .retreat-day h2,
-  .retreat-after h2,
-  .retreat-close h2,
-  .retreat-price h2 {
-    margin: 0;
-    color: var(--pine-dark);
-    font-weight: 400;
-  }
-  .retreat-cover h1 {
-    max-inline-size: 11ch;
-    font-size: clamp(2.8rem, 7vw, 4.4rem);
-    line-height: 0.95;
-  }
-  .retreat em {
-    font-style: italic;
-    color: var(--terra);
-  }
-  .retreat-cover__date {
-    margin: 1rem 0 0;
-    color: var(--pine-dark);
-    font-size: 1.2rem;
-    font-weight: 700;
-  }
-  .retreat-cover__place {
-    margin: .25rem 0 0;
-    color: #4d564a;
-  }
-  .retreat-cover__photo {
-    display: block;
-    width: min(86%, 26rem);
-    aspect-ratio: 1.55;
-    margin: 1.6rem auto -2rem;
-    object-fit: cover;
-    border-radius: 50%;
-    position: relative;
-    z-index: 1;
-  }
-  .retreat-cover__more {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 3.3rem 1.4rem 1.15rem;
-    border-radius: 0 0 7rem 7rem;
-    background: #2f4a3f;
-    color: #f6f1e7;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .retreat-day { padding-top: clamp(2.4rem, 6vw, 3.6rem); }
-  .retreat-day h2 { font-size: clamp(2.4rem, 6vw, 3.6rem); }
-  .retreat-day__meta {
-    margin: .35rem 0 0;
-    color: #6a6258;
-    font-size: .78rem;
-    font-weight: 700;
+  .retreat p { line-height: 1.55; }
+  .retreat .retreat-label {
+    color: var(--retreat-clay);
+    font: 700 .73rem/1.45 var(--font-body, sans-serif);
     letter-spacing: .16em;
     text-transform: uppercase;
+  }
+  .retreat-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    padding-block: clamp(2.6rem, 7vw, 7rem) clamp(3.3rem, 8vw, 6.5rem);
+    border-bottom: 1px solid var(--retreat-line);
+  }
+  .retreat-hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -32% -12% auto auto;
+    width: min(59vw, 64rem);
+    height: 92%;
+    background: var(--retreat-sand);
+    border-radius: 20% 0 35% 65%;
+    transform: rotate(15deg);
+  }
+  .retreat-hero__layout {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.65rem, 4vw, 4.5rem);
+  }
+  .retreat-hero__copy h1 { margin-top: .75rem; }
+  .retreat-hero__copy h1 em { display: block; }
+  .retreat-hero__copy .retreat-hero__date {
+    margin-top: clamp(1.15rem, 2.7vw, 1.65rem);
+    font-size: clamp(1.06rem, 1.9vw, 1.38rem);
+    font-weight: 700;
+  }
+  .retreat-hero__copy .retreat-hero__place { color: var(--retreat-muted); }
+  .retreat-hero__copy .retreat-hero__intro {
+    max-inline-size: 32ch;
+    margin-top: .8rem;
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+  }
+  .retreat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .45rem 1.1rem;
+    margin-top: 1.25rem;
+  }
+  .retreat :global(.retreat-button) {
+    min-block-size: 44px;
+    gap: .65rem;
+    background: var(--retreat-pine);
+  }
+  .retreat :global(.retreat-button:hover) { background: #152d24; }
+  .retreat-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45em;
+    min-block-size: 44px;
+    color: var(--retreat-pine);
+    font-size: .92rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .25em;
+  }
+  .retreat a:focus-visible, .retreat button:focus-visible {
+    outline: 2px solid var(--retreat-clay);
+    outline-offset: 4px;
+  }
+  .retreat-hero__image,
+  .retreat-integration__image,
+  .retreat-join__image { position: relative; isolation: isolate; }
+  .retreat-hero__image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.56;
+    object-fit: cover;
+    border-radius: 56% 40% 42% 46% / 59% 50% 49% 43%;
+  }
+  .retreat-hero__image::before,
+  .retreat-hero__image::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    inset: .25rem .2rem -.75rem -.65rem;
+    border: 1px solid #aa8852;
+    border-radius: 56% 40% 42% 46% / 59% 50% 49% 43%;
+  }
+  .retreat-hero__image::after {
+    inset: .7rem -.65rem -.42rem .25rem;
+    border-color: #b8836a;
+    transform: rotate(3deg);
+  }
+  .retreat-schedule {
+    padding-block: clamp(2.9rem, 6vw, 5.25rem);
+    background: linear-gradient(var(--retreat-paper), #f4ecde);
+  }
+  .retreat-section-head { margin-bottom: clamp(1.25rem, 3vw, 2.2rem); }
+  .retreat-section-head h2, .retreat-integration h2, .retreat-join h2 { margin-top: .55rem; }
+  .retreat-days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1rem, 2.8vw, 2.1rem);
+  }
+  .retreat-day {
+    min-inline-size: 0;
+    padding: clamp(1.05rem, 3vw, 2rem);
+    background: var(--retreat-card);
+    border: 1px solid var(--retreat-line);
+    border-radius: 1.35rem;
   }
   .retreat-day__photo {
     display: block;
     width: 100%;
-    aspect-ratio: 2.1;
-    margin-top: 1.1rem;
+    height: auto;
+    margin-block: 1rem 1.2rem;
+    aspect-ratio: 3.25;
     object-fit: cover;
-    border-radius: 1.4rem;
+    object-position: center 49%;
+    border-radius: 27% 9% 27% 12% / 62% 27% 59% 36%;
   }
-  .timeline {
-    --time: 8.4rem;
+  #domingo .retreat-day__photo { object-position: center 42%; }
+  .retreat-timeline { list-style: none; padding: 0; }
+  .retreat-timeline li {
     position: relative;
-    margin: 1.3rem 0 0;
-    padding: 0;
-    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr);
+    column-gap: .85rem;
+    min-block-size: 2.8rem;
+    padding: 0 0 .8rem .8rem;
+    border-left: 1px solid var(--retreat-line);
   }
-  .timeline::before {
+  .retreat-timeline li:last-child {
+    min-block-size: 0;
+    border-color: transparent;
+    padding-bottom: 0;
+  }
+  .retreat-timeline li::before {
     content: "";
     position: absolute;
-    top: .45rem;
-    bottom: .45rem;
-    left: calc(var(--time) + .7rem + .35rem);
-    width: 1px;
-    background: #e4d3c4;
-    transform: translateX(-50%);
-  }
-  .timeline li {
-    display: grid;
-    grid-template-columns: var(--time) .7rem minmax(0, 1fr);
-    gap: .7rem;
-    align-items: start;
-    padding-bottom: 1.15rem;
-  }
-  .timeline time {
-    color: var(--terra);
-    font-size: .86rem;
-    font-weight: 700;
-    line-height: 1.3;
-    text-align: right;
-    white-space: nowrap;
-  }
-  .timeline__dot {
-    width: .55rem;
-    height: .55rem;
-    margin-top: .28rem;
+    top: .43rem;
+    left: -.23rem;
+    width: .4rem;
+    height: .4rem;
+    background: var(--retreat-clay);
     border-radius: 50%;
-    background: var(--terra);
-    justify-self: center;
-    position: relative;
-    z-index: 1;
   }
-  .timeline p { margin: 0; line-height: 1.35; }
-  .retreat-after { padding-top: clamp(2.6rem, 6vw, 4rem); }
-  .retreat-after__kicker {
-    margin: .8rem 0 .2rem;
-    color: #6a6258;
-    font-size: .78rem;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-  }
-  .retreat-after h2 { font-size: clamp(2.3rem, 5vw, 3.3rem); }
-  .retreat-after__row {
-    display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 1rem;
-    align-items: center;
-    margin-top: 1rem;
-  }
-  .retreat-after__count {
-    margin: 0;
-    color: var(--pine-dark);
-    font-family: var(--font-display);
-    font-size: clamp(4.5rem, 12vw, 6.5rem);
-    line-height: .85;
-  }
-  .retreat-after__label {
-    margin: .2rem 0 .6rem;
-    color: var(--pine-dark);
-    font-weight: 700;
-  }
-  .retreat-after p { margin: 0; }
-  .retreat-after__included {
-    display: inline-block;
-    margin-top: .9rem;
-    padding: .35rem .7rem;
-    border-radius: 999px;
-    background: #efe4d2;
-    color: var(--pine-dark);
+  .retreat-timeline__when {
+    color: var(--retreat-clay);
     font-size: .82rem;
     font-weight: 700;
+    line-height: 1.5;
   }
-  .retreat-after img {
+  .retreat-timeline p { font-size: .94rem; line-height: 1.42; }
+  .retreat-integration {
+    padding-block: clamp(2.65rem, 5.2vw, 4.4rem);
+    background: var(--retreat-sand);
+    border-block: 1px solid var(--retreat-line);
+  }
+  .retreat-integration__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    gap: clamp(1.4rem, 6vw, 5rem);
+    align-items: center;
+  }
+  .retreat-integration__copy > p:not(.retreat-label) { max-inline-size: 39ch; }
+  .retreat-integration__copy .retreat-integration__count {
+    display: flex;
+    align-items: center;
+    gap: .7em;
+    max-inline-size: 20em;
+    margin-block: .7rem .55rem;
+    color: var(--retreat-pine);
+    font-size: clamp(1.08rem, 2vw, 1.36rem);
+    font-weight: 700;
+    line-height: 1.23;
+  }
+  .retreat-integration__count strong {
+    color: var(--retreat-clay);
+    font: 400 clamp(3.1rem, 7vw, 5.1rem)/1 var(--font-display);
+  }
+  .retreat-integration__copy .retreat-link { margin-top: .45rem; }
+  .retreat-integration__image { width: min(100%, 18rem); justify-self: center; }
+  .retreat-integration__image img {
+    display: block;
     width: 100%;
-    aspect-ratio: .82;
+    height: auto;
+    aspect-ratio: .87;
     object-fit: cover;
-    border-radius: 50% 50% 42% 42%;
+    object-position: center 62%;
+    border-radius: 47% 54% 43% 46% / 56% 45% 55% 45%;
+  }
+  .retreat-integration__image::before,
+  .retreat-join__image::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    inset: .2rem -.55rem -.45rem .3rem;
+    border: 1px solid #aa8852;
+    border-radius: 49% 50% 44% 46% / 56% 45% 55% 45%;
+  }
+  .retreat-pricing { padding-block: clamp(2.75rem, 6vw, 5.25rem) 0; }
+  .retreat-pricing__layout {
+    overflow: clip;
+    border: 1px solid var(--retreat-line);
+    border-radius: 1.55rem;
+    background: var(--retreat-sand);
   }
   .retreat-price {
-    margin-top: clamp(2.2rem, 5vw, 3.2rem);
-    padding: 1.4rem 1.2rem 1.3rem;
-    border-radius: 1.4rem;
-    background: #2f4a3f;
-    color: #f6f1e7;
+    position: relative;
+    isolation: isolate;
+    padding: clamp(1.25rem, 4.2vw, 3.15rem);
+    background: var(--retreat-pine);
+    color: var(--retreat-paper);
   }
-  .retreat-price h2 { color: #f6f1e7; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .retreat-price ul {
+  .retreat-price::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -15% -5% auto auto;
+    width: min(26vw, 18rem);
+    height: 140%;
+    border: 1px solid #a18a5d;
+    border-radius: 50%;
+    transform: rotate(-25deg);
+    opacity: .65;
+  }
+  .retreat-price h2 { color: inherit; }
+  .retreat-price > p { margin-top: .65rem; }
+  .retreat-price__options,
+  .retreat-discounts dl {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .9rem 1rem;
-    margin: 1rem 0 0;
-    padding: 0;
-    list-style: none;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: .9rem 1.25rem;
   }
-  .retreat-price li { min-width: 0; }
-  .retreat-price span {
-    display: block;
-    color: #c9a96b;
-    font-size: .75rem;
+  .retreat-price .retreat-price__options { margin-top: 1.45rem; }
+  .retreat-price__options dt {
+    color: var(--retreat-gold);
+    font-size: .74rem;
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
   }
-  .retreat-price strong {
+  .retreat-price__options dd { margin-top: .2rem; }
+  .retreat-price__options strong,
+  .retreat-discounts dt {
     display: block;
-    margin-top: .15rem;
-    font-family: var(--font-display);
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
-    font-weight: 400;
+    font: 400 clamp(1.55rem, 4vw, 3.3rem)/1.15 var(--font-display);
   }
-  .retreat-price small { color: #f6f1e7; }
-  .retreat-price p { margin: 1rem 0 0; max-inline-size: 46ch; line-height: 1.45; }
-  .retreat-close { padding-top: clamp(2.4rem, 6vw, 3.6rem); }
-  .retreat-close h2 { font-size: clamp(2.4rem, 6vw, 3.5rem); }
-  .retreat-close__ask {
-    margin: 1.2rem 0 .8rem;
-    color: var(--pine-dark);
-    font-family: var(--font-display);
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
-  }
-  .retreat-close__action {
-    display: flex;
-    flex-wrap: wrap;
+  .retreat-price__options span { display: block; margin-top: .2rem; font-size: .92rem; }
+  .retreat-discounts { padding: clamp(1.15rem, 3vw, 2rem) clamp(1.25rem, 4.2vw, 3.15rem); }
+  .retreat-discounts dl { margin-top: .5rem; }
+  .retreat-discounts dt { color: var(--retreat-clay); font-size: clamp(1.45rem, 3.2vw, 2.5rem); }
+  .retreat-discounts dd { margin-top: .25rem; line-height: 1.4; }
+  .retreat-join { padding-block: clamp(2.8rem, 6vw, 5rem); }
+  .retreat-join__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .75fr);
+    gap: clamp(1.4rem, 5vw, 3.5rem);
     align-items: center;
-    gap: .8rem 1.1rem;
   }
-  @media (max-width: 640px) {
-    .timeline { --time: 7.2rem; }
-    .timeline time { white-space: normal; }
-    .retreat-after__row,
-    .retreat-price ul { grid-template-columns: 1fr; }
-    .retreat-after img { max-height: 16rem; aspect-ratio: 1.4; border-radius: 1.6rem; }
+  .retreat-join__copy .retreat-steps {
+    display: grid;
+    gap: .65rem;
+    margin-block: 1.1rem 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+  .retreat-steps li {
+    display: grid;
+    grid-template-columns: 1.62rem 1fr;
+    align-items: start;
+    gap: .65rem;
+  }
+  .retreat-steps span {
+    display: grid;
+    place-items: center;
+    width: 1.62rem;
+    aspect-ratio: 1;
+    margin-top: .03rem;
+    border-radius: 50%;
+    background: var(--retreat-pine);
+    color: var(--retreat-paper);
+    font-size: .82rem;
+    font-weight: 700;
+  }
+  .retreat-join__copy :global(.offering-action-hint) {
+    max-inline-size: 37ch;
+    margin-top: .55rem;
+  }
+  .retreat-join__image { width: min(100%, 18rem); justify-self: center; }
+  .retreat-join__image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.1;
+    object-fit: cover;
+    object-position: center 55%;
+    border-radius: 55% 43% 48% 40% / 55% 51% 48% 42%;
+  }
+
+  @media (max-width: 51rem) {
+    .retreat-hero__layout,
+    .retreat-days { grid-template-columns: 1fr; }
+    .retreat-hero__image { width: min(100%, 34rem); justify-self: center; }
+    .retreat-hero::before { width: 66vw; height: 63%; }
+    .retreat-hero { padding-bottom: 2.65rem; }
+  }
+  @media (max-width: 32rem) {
+    .retreat-integration__layout,
+    .retreat-join__layout { grid-template-columns: 1fr; }
+    .retreat-integration__image,
+    .retreat-join__image { width: min(82%, 15.5rem); }
+    .retreat-price__options { grid-template-columns: 1fr; }
+    .retreat-timeline li { grid-template-columns: minmax(0, 4.65rem) minmax(0, 1fr); gap: .55rem; }
+    .retreat-timeline__when { font-size: .77rem; }
   }
 </style>
