@@ -1,5 +1,4 @@
 ---
-import { Icon } from 'astro-icon/components';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import ProgramWaitlist from '../components/ProgramWaitlist.astro';
 import ResourceList from '../components/ResourceList.astro';
@@ -81,13 +80,16 @@ const calendar = [
       <p class="eyebrow">Un camino integrado</p>
       <h2 id="metodologia-title">Cuatro miradas, un núcleo</h2>
       <p class="program-preview__intro">Donde las distintas miradas se encuentran hay un espacio para cocrear propuestas que conectan cuerpo, emoción, consciencia y naturaleza sin perder la singularidad de cada disciplina. Compartimos desde el lugar de nuestra propia práctica.</p>
-      <div class="program-preview__composition" style={landscape ? `--nucleus-image: url("${landscape}")` : undefined}>
-        <div class="program-preview__mark">
-          <img src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
+      <div class="program-preview__composition">
+        <div class="program-preview__shape">
+          <div class="program-preview__window">
+            {landscape && <img class="program-preview__landscape" src={landscape} alt="" loading="lazy" decoding="async" />}
+            <img class="program-preview__emblem" src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" loading="lazy" decoding="async" />
+          </div>
         </div>
         <ul class="program-preview__themes" role="list" aria-label="Perspectivas de nuestra metodología">
-          {themes.map(({ name, symbol }) => (
-            <li><span aria-hidden="true"><SomaAulaSymbol symbol={symbol} /></span>{name}</li>
+          {themes.map(({ slug, name, symbol }) => (
+            <li class={`program-preview__theme--${slug}`}><span aria-hidden="true"><SomaAulaSymbol symbol={symbol} /></span>{name}</li>
           ))}
         </ul>
       </div>
@@ -133,27 +135,41 @@ const calendar = [
           <p>Fechas para encontrarnos en persona y seguir lo vivido en la integración.</p>
         </div>
       </div>
-      <ul class="home-calendar__list">
-        {calendar.map((event) => (
-          <li>
-            <div>
-              <h3><a href={event.href} {...(event.href === retreatPath ? retreatCta('details', 'home_calendar_title') : {})}>{event.title}</a></h3>
-              <p>
-                {event.when && <span><Icon name="iconoir:calendar" size={18} aria-hidden="true" />{event.when}</span>}
-                {event.venue && <span><Icon name="iconoir:map-pin" size={18} aria-hidden="true" />{event.venue}</span>}
-              </p>
-            </div>
-            <a class="journey-link" href={event.href} {...(event.href === retreatPath ? retreatCta('details', 'home_calendar_link') : {})}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
-          </li>
-        ))}
+      <ul class="home-calendar__list" role="list">
+        {calendar.map((event) => {
+          const featured = event.href === retreatPath;
+          return (
+            <li class:list={['home-calendar__event', { 'home-calendar__event--featured': featured }]}>
+              {featured && (
+                <img
+                  class="home-calendar__photo"
+                  src={path('/media/retreat/caballos-en-el-bosque.webp')}
+                  alt="Una persona sentada frente a varios caballos en el bosque"
+                  width="1280"
+                  height="718"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <div class="home-calendar__content">
+                <div>
+                  {event.when && <p class="home-calendar__date">{event.when}</p>}
+                  <h3><a href={event.href} {...(featured ? retreatCta('details', 'home_calendar_title') : {})}>{event.title}</a></h3>
+                  {event.venue && <p class="home-calendar__venue">{event.venue}</p>}
+                </div>
+                <a class={featured ? 'btn btn--rust' : 'journey-link'} href={event.href} {...(featured ? retreatCta('details', 'home_calendar_link') : {})}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
+              </div>
+            </li>
+          );
+        })}
       </ul>
       <div class="home-base">
-        <div>
+        <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, Huerta Grande" width="1126" height="718" loading="lazy" decoding="async" />
+        <div class="home-base__content">
           <p class="eyebrow">Nuestra base</p>
           <h3>Casa Sabia</h3>
-          <p>Huerta Grande, Córdoba. Desde aquí salen los encuentros presenciales.</p>
+          <p><strong>Huerta Grande, Córdoba.</strong> Desde aquí salen los encuentros presenciales.</p>
         </div>
-        <img src={path('/media/photography/casa-sabia.jpg')} alt="Casa de piedra con pileta y jardín en Casa Sabia, Huerta Grande" width="1126" height="718" loading="lazy" decoding="async" />
       </div>
     </section>
   )}
@@ -239,65 +255,107 @@ const calendar = [
     text-wrap: pretty;
   }
   .program-preview__composition {
-    --orbit: min(22rem, 46vw);
-    display: grid;
-    grid-template-columns: minmax(8.5rem, 1fr) var(--orbit) minmax(8.5rem, 1fr);
-    grid-template-rows: auto var(--orbit) auto;
-    align-items: center;
-    justify-items: center;
-    gap: .85rem clamp(.6rem, 2vw, 1.4rem);
-    max-inline-size: 62rem;
-    margin: clamp(1.8rem, 4vw, 3rem) auto 1.2rem;
+    position: relative;
+    isolation: isolate;
+    max-inline-size: 51rem;
+    block-size: clamp(22rem, 55vw, 28.5rem);
+    margin: clamp(.65rem, 2vw, 1.4rem) auto 1.2rem;
+    background: radial-gradient(ellipse at 47% 53%, #e7e9da 0%, transparent 60%);
   }
-  .program-preview__mark {
-    grid-column: 2;
-    grid-row: 2;
+  .program-preview__shape {
+    --nucleus-shape: 57% 42% 50% 46% / 54% 38% 62% 45%;
+    position: absolute;
+    isolation: isolate;
+    inset: 50% auto auto 48%;
+    inline-size: 59%;
+    aspect-ratio: 1.42;
+    transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .program-preview__shape::before,
+  .program-preview__shape::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+  }
+  .program-preview__shape::before {
+    inset: -5% -4% -5% -5%;
+    border: 1px solid #aa8b51;
+    border-radius: 49% 45% 48% 44% / 56% 50% 55% 43%;
+    transform: rotate(9deg);
+  }
+  .program-preview__shape::after {
+    inset: 8% -7% -7% -4%;
+    border: 1px solid #869484;
+    border-radius: 46% 55% 45% 49% / 49% 39% 60% 47%;
+    background: #e6e5d3;
+    transform: rotate(-9deg);
+  }
+  .program-preview__window {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
     display: grid;
     place-items: center;
-    inline-size: 100%;
-    aspect-ratio: 1;
-    padding: clamp(.7rem, 2vw, 1.3rem);
-    border: 1px solid #a77d47;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle, rgba(251, 248, 241, .18) 0 34%, rgba(23, 56, 47, .16) 100%),
-      var(--nucleus-image) center / cover no-repeat,
-      #f6efe3;
-    box-shadow: 0 0 0 .7rem rgba(255, 250, 240, .55);
+    overflow: hidden;
+    border-radius: var(--nucleus-shape);
+    background: #eee5d2;
   }
-  .program-preview__mark img {
+  .program-preview__landscape {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: 50% 54%;
+    transform: rotate(8deg) scale(1.12);
+  }
+  .program-preview__emblem {
     display: block;
-    inline-size: 68%;
+    inline-size: 43%;
     block-size: auto;
-    padding: .45rem;
-    border-radius: 50%;
-    background: rgba(251, 248, 241, .94);
+    padding: 3.5%;
+    border-radius: 57% 43% 49% 53% / 47% 58% 42% 53%;
+    background: rgba(250, 243, 224, .94);
+    transform: rotate(8deg);
   }
   .program-preview__themes {
-    display: contents;
+    position: absolute;
+    inset: 0;
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .program-preview__themes li {
+    position: absolute;
+    inset: var(--theme-y) auto auto var(--theme-x);
     display: grid;
     justify-items: center;
-    gap: .35rem;
-    min-inline-size: 0;
-    max-inline-size: 11rem;
+    gap: .32rem;
+    inline-size: 24%;
+    max-inline-size: 9.15rem;
     color: var(--pine-dark);
-    font-size: clamp(.82rem, 1.2vw, .98rem);
+    font-size: clamp(.78rem, 1.45vw, .94rem);
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.27;
     text-align: center;
     text-wrap: balance;
+    transform: translate(-50%, -50%);
   }
-  .program-preview__themes li:nth-child(1) { grid-column: 2; grid-row: 1; }
-  .program-preview__themes li:nth-child(2) { grid-column: 3; grid-row: 2; }
-  .program-preview__themes li:nth-child(3) { grid-column: 2; grid-row: 3; }
-  .program-preview__themes li:nth-child(4) { grid-column: 1; grid-row: 2; }
-  .program-preview__themes li span { inline-size: 2.6rem; }
-  .program-preview__themes li :global(img) { display: block; inline-size: 100%; block-size: auto; }
+  .program-preview__theme--nicole { --theme-x: 20%; --theme-y: 10%; --theme-tint: #e5eadc; }
+  .program-preview__theme--jasper { --theme-x: 88%; --theme-y: 28%; --theme-tint: #f1dfd3; }
+  .program-preview__theme--yanina { --theme-x: 79%; --theme-y: 87%; --theme-tint: #efe3d7; }
+  .program-preview__theme--nico { --theme-x: 12%; --theme-y: 75%; --theme-tint: #f4e7cb; }
+  .program-preview__themes li span {
+    display: grid;
+    place-items: center;
+    inline-size: clamp(2rem, 5vw, 2.65rem);
+    aspect-ratio: 1;
+    padding: .18rem;
+    border-radius: 53% 43% 51% 45%;
+    background: var(--theme-tint);
+  }
+  .program-preview__themes li :global(img) { display: block; inline-size: 79%; block-size: auto; }
   .nucleus-points {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -360,72 +418,130 @@ const calendar = [
   .home-library__intro p { max-inline-size: 42ch; margin: 0; }
   .home-calendar { margin-block-end: var(--journey-spacing); }
   .home-calendar__list {
+    display: grid;
+    gap: .8rem;
     margin: .4rem 0 0;
     padding: 0;
     list-style: none;
   }
-  .home-calendar__list li {
+  .home-calendar__event {
+    padding-block: 1rem;
+    border-block-start: 1px solid var(--journey-rule);
+  }
+  .home-calendar__event--featured {
+    display: grid;
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid var(--journey-rule);
+    border-radius: 1.15rem;
+    background: #faf5e9;
+  }
+  .home-calendar__photo {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    min-block-size: 13rem;
+    aspect-ratio: 1.85;
+    object-fit: cover;
+    object-position: 54% 45%;
+  }
+  .home-calendar__content {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: .7rem 1.4rem;
-    padding-block: 1rem;
-    border-block-start: 1px solid var(--journey-rule);
+    gap: .65rem 1.4rem;
   }
-  .home-calendar__list h3 { margin: 0 0 .3rem; color: var(--pine-dark); font-size: clamp(1.35rem, 2vw, 1.8rem); }
-  .home-calendar__list h3 a:hover { text-decoration: underline; }
-  .home-calendar__list p {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .25rem 1rem;
+  .home-calendar__event--featured .home-calendar__content {
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 1rem;
+    padding: clamp(1.15rem, 3.4vw, 2.5rem);
+  }
+  .home-calendar__content h3 {
+    margin: .2rem 0 .3rem;
+    color: var(--pine-dark);
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+  }
+  .home-calendar__event--featured h3 { font-size: clamp(1.65rem, 3.4vw, 3rem); }
+  .home-calendar__content h3 a:hover { text-decoration: underline; }
+  .home-calendar__date {
     margin: 0;
-    color: #4d564a;
+    color: #8b4935;
+    font-size: .9rem;
+    font-weight: 700;
   }
-  .home-calendar__list p span { display: inline-flex; align-items: center; gap: .4rem; }
-  .home-calendar__list :global(svg) { color: var(--terra); }
+  .home-calendar__venue { margin: 0; color: #4d564a; }
+  .home-calendar__content .journey-link { text-decoration: underline; text-underline-offset: .2em; }
+  .home-calendar__content .btn--rust { background: #8e472f; }
+  .home-calendar__content .btn--rust:hover { background: #783a29; }
+
   .home-base {
     display: grid;
-    grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr);
-    align-items: center;
-    gap: clamp(1.2rem, 4vw, 3rem);
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
+    overflow: hidden;
     margin-top: clamp(1.6rem, 4vw, 2.8rem);
-    padding-top: clamp(1.2rem, 3vw, 2rem);
-    border-top: 1px solid var(--journey-rule);
+    border-radius: 1.15rem;
+    background: #203b31;
+    color: #f6f0e3;
   }
-  .home-base h3 {
-    margin: .15rem 0 .45rem;
-    color: var(--pine-dark);
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-  }
-  .home-base p:not(.eyebrow) { margin: 0; max-inline-size: 32ch; }
   .home-base img {
     display: block;
     inline-size: 100%;
-    block-size: auto;
+    block-size: 100%;
     aspect-ratio: 1.57;
     object-fit: cover;
-    border-radius: 1.5rem;
   }
-  @media (max-width: 740px) {
-    .home-base { grid-template-columns: minmax(0, 1fr); }
+  .home-base__content {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    display: grid;
+    align-content: center;
+    gap: .45rem;
+    padding: clamp(1.25rem, 4.3vw, 3.6rem);
   }
+  .home-base__content::after {
+    content: '';
+    position: absolute;
+    inset: 48% -28% -54% 57%;
+    z-index: -1;
+    border: 1px solid #9e885a;
+    border-radius: 50%;
+    opacity: .68;
+    transform: rotate(-27deg);
+  }
+  .home-base__content .eyebrow { margin: 0; color: #e4c38b; }
+  .home-base h3 {
+    margin: 0;
+    color: inherit;
+    font-size: clamp(2rem, 4vw, 3.6rem);
+  }
+  .home-base p:not(.eyebrow) { margin: 0; max-inline-size: 32ch; }
+  .home-base strong { display: block; margin-block-end: .25rem; }
+
   @media (max-width: 760px) {
-    .program-preview__composition {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .program-preview__mark { inline-size: min(78%, 16rem); }
-    .program-preview__themes {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: .9rem .7rem;
-      inline-size: min(100%, 28rem);
-      margin-top: 1.1rem;
-    }
-    .program-preview__themes li:nth-child(n) { grid-column: auto; grid-row: auto; max-inline-size: none; }
     .nucleus-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 600px) {
+    .program-preview > :is(.eyebrow, h2, .program-preview__intro) {
+      margin-inline: 0;
+      text-align: start;
+    }
+    .program-preview h2 { text-wrap: wrap; }
+    .program-preview__composition { block-size: clamp(20.3rem, 84vw, 23rem); }
+    .program-preview__shape { inset: 51% auto auto 47%; inline-size: 64%; aspect-ratio: 1.25; }
+    .program-preview__themes li { inline-size: 32%; }
+    .program-preview__theme--nicole { --theme-x: 21%; --theme-y: 12%; }
+    .program-preview__theme--jasper { --theme-x: 82%; --theme-y: 19%; }
+    .program-preview__theme--yanina { --theme-x: 77%; --theme-y: 87%; }
+    .program-preview__theme--nico { --theme-x: 19%; --theme-y: 83%; }
+    .home-calendar__event--featured,
+    .home-base { grid-template-columns: minmax(0, 1fr); }
+    .home-calendar__photo { min-block-size: 0; block-size: auto; }
+    .home-base img { block-size: auto; }
   }
   @media (max-width: 420px) {
     .nucleus-points { grid-template-columns: minmax(0, 1fr); }
