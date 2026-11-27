@@ -14,13 +14,23 @@ const BASE='';
 const paths=[
  '/',
  '/encuentros/',
- '/mensajes/',
+ '/encuentros/retiro-enero-2027/',
+ '/encuentros/retiro-febrero-2027/',
  '/acompanamiento/',
+ '/enfoque/',
+ '/nucleo/',
+ '/equipo/',
+ '/mensajes/',
+ '/politica-de-privacidad/',
+ '/terminos-y-condiciones/',
+ '/biblioteca/',
+ '/biblioteca/pausa-de-presencia/',
+ '/aulas/',
  '/aulas/jasper/',
  '/aulas/jasper/musica-medicina/',
  '/aulas/jasper/musica-medicina/escuchar/que-es-la-musica/'
 ];
-const widths=[320,375,480,768,1024];
+const widths=[320,375,480,768,1024,1440];
 const server=spawn('./node_modules/.bin/astro',['preview','--host','127.0.0.1','--port','4321'],{stdio:['ignore','pipe','pipe'],env:process.env});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',d=>{output+=String(d).slice(-4000);});
@@ -59,11 +69,12 @@ try{
         const interesting=[
           '.site-header .brand',
           '.site-header .mobile-nav summary',
-          '.participation-hero h1','.participation-feature__date','.participation-feature__venue','.participation-feature .btn',
-          '.participation-row h2','.participation-row .btn','.participation-row .text-link',
+          '.home-hero h1','.home-calendar h3','.home-calendar .journey-link',
+          '.theme-toggle','.program-preview__themes li','.home-library h3',
+          '.journey-hero h1','.journey-row h2','.journey-resource-list a',
           '.offering h3','.offering__action .btn','.offering__panel',
           '#programa-online-title','.program-waitlist .btn',
-          '.page-hero h1','.aula-hero h1','.course-hero h1',
+          '.page-hero h1','.aula-hero h1','.course-hero h1','.wa-inbox h1',
           '.lesson-heading h1','.lesson-mobile-outline summary',
           '.section-head h2','.course-outline__heading-copy strong'
         ];
@@ -82,6 +93,10 @@ try{
               problems.push(selector+'['+i+'] content='+el.scrollWidth+'/'+el.clientWidth);
             }
           }
+        }
+        const homeHero = document.querySelector('.home-hero');
+        if (homeHero && homeHero.getBoundingClientRect().height < window.innerHeight - 1) {
+          problems.push('homepage hero is shorter than the viewport');
         }
         const feature = document.querySelector('.participation-feature');
         if (feature && viewport <= 680) {
@@ -121,6 +136,7 @@ try{
     }
     if(width<=1150){
       await page.goto(HOST+BASE+'/',{waitUntil:'load'});
+      await page.evaluate(() => window.scrollTo(0, 48));
       await page.locator('.mobile-nav summary').click();
       const nav=page.locator('.mobile-nav nav');
       if(!await nav.isVisible()) errors.push(width+' hamburger menu does not open');
@@ -131,26 +147,284 @@ try{
     }
     console.log('Checked '+width+'px across '+paths.length+' pages');
   }
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const pathname of ['/', '/encuentros/retiro-enero-2027/']) {
+      await page.goto(HOST + BASE + pathname);
+      const scrollTo = top => page.evaluate(top => window.scrollTo({ top, behavior: 'instant' }), top);
+      const waitForHeader = visible => page.waitForFunction(visible => {
+        const header = document.querySelector('.site-header');
+        const bounds = header.getBoundingClientRect();
+        const style = getComputedStyle(header);
+        return visible
+          ? Math.abs(bounds.top) < 1 && style.opacity === '1'
+          : bounds.bottom <= 1 && style.pointerEvents === 'none';
+      }, visible);
+      await scrollTo(48);
+      await waitForHeader(true);
+      await scrollTo(380);
+      await waitForHeader(false);
+      await scrollTo(340);
+      await waitForHeader(true);
+
+      if (width === 375) {
+        const menu = page.locator('.mobile-nav summary');
+        await menu.click();
+        await scrollTo(550);
+        await page.waitForFunction(() => document.querySelector('.site-header').hasAttribute('data-scroll-hidden'));
+        assert.equal(await menu.evaluate(summary => summary.parentElement.open), true);
+        await waitForHeader(true);
+        const { x, y, width, height } = await menu.boundingBox();
+        await page.mouse.click(x + width / 2, y + height / 2);
+        await waitForHeader(false);
+      }
+
+      await scrollTo(0);
+      await waitForHeader(true);
+    }
+  }
+  console.log('Checked header scroll behavior on mobile and desktop');
+
   await page.setViewportSize({width:375,height:900});
   await page.goto(HOST+BASE+'/');
-  await page.getByRole('link', { name: 'Ver el encuentro' }).click();
-  assert.equal(new URL(page.url()).hash, '#encuentro-enero');
+  const themeToggle = page.getByRole('switch', { name: 'Modo oscuro' });
+  const waitForDarkMode = checked => page.waitForFunction(checked => (
+    document.querySelector('[data-theme-toggle]')?.getAttribute('aria-checked') === String(checked)
+  ), checked);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await waitForDarkMode(true);
+  const darkBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
+  await themeToggle.press('Space');
+  await waitForDarkMode(false);
+  const lightBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
+  assert.notEqual(lightBackground, darkBackground);
+  await page.goto(HOST + BASE + '/biblioteca/');
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+  await themeToggle.click();
+  await waitForDarkMode(true);
+  await page.reload();
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+  await waitForDarkMode(true);
+  await page.evaluate(() => localStorage.removeItem('soma-theme'));
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto(HOST + BASE + '/');
+
+  const homeMethod = page.locator('#metodologia');
+  const emblem = homeMethod.locator('.program-preview__emblem img');
+  await emblem.scrollIntoViewIfNeeded();
+  assert(await emblem.evaluate(async image => {
+    await image.decode();
+    const imageBounds = image.getBoundingClientRect();
+    const holder = image.parentElement;
+    const holderBounds = holder.getBoundingClientRect();
+    return image.naturalWidth === 520 && image.naturalHeight === 405
+      && !image.closest('.program-preview__window')
+      && getComputedStyle(image).objectFit === 'contain'
+      && imageBounds.left > holderBounds.left && imageBounds.top > holderBounds.top
+      && imageBounds.right < holderBounds.right && imageBounds.bottom < holderBounds.bottom;
+  }), 'The original SOMA logo fits inside its frame outside the landscape crop');
+  const homeLibrary = page.locator('.home-library');
+  assert.equal(await homeLibrary.locator('img').count(), 1);
+  await homeLibrary.getByRole('link', { name: /Una pausa de presencia/ }).waitFor();
+  await page.getByRole('link', { name: 'Bajar a nuestros valores' }).click();
+  await page.waitForURL('**/#nuestros-valores');
+  assert.equal(await page.locator('.home-hero a[href="#proximos-encuentros"]').count(), 0);
+  const hasUmami = (await page.locator('script[data-website-id]').count()) === 1;
+  const januaryEdition = 'retiro-enero-2027';
+  const februaryEdition = 'retiro-febrero-2027';
+  const februaryPath = '/encuentros/' + februaryEdition + '/';
+  const verifyRetreatCta = async (link, action, placement, edition) => {
+    assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
+    assert.equal(await link.getAttribute('data-umami-event-placement'), hasUmami ? placement : null);
+    assert.equal(await link.getAttribute('data-umami-event-retreat_edition'), hasUmami && edition ? edition : null);
+  };
+  const verifyHeaderCta = async () => {
+    const cta = page.locator('.header-cta');
+    assert.equal((await cta.textContent()).trim(), 'Ver encuentros ↗');
+    assert.equal(await cta.getAttribute('href'), '/encuentros/');
+    await verifyRetreatCta(cta, 'listing', 'site_header');
+  };
+  const homeCalendar = page.locator('.home-calendar');
+  await verifyHeaderCta();
+  const january = homeCalendar.locator('.home-calendar__event--featured');
+  const february = homeCalendar.locator('.home-calendar__event').filter({ hasText: '15 y 16 de febrero de 2027' });
+  await verifyRetreatCta(january.locator('h3 a'), 'details', 'home_calendar_title', januaryEdition);
+  const februaryHomeLink = february.getByRole('link', { name: 'Ver el encuentro' });
+  await verifyRetreatCta(februaryHomeLink, 'details', 'home_calendar_link', februaryEdition);
+  assert.equal(await februaryHomeLink.getAttribute('href'), februaryPath);
+  await februaryHomeLink.click();
+  await page.waitForURL('**' + februaryPath);
+  await page.getByText('15 y 16 de febrero de 2027', { exact: true }).waitFor();
+  await page.goto(HOST + BASE + '/');
+  const homeDetails = january.getByRole('link', { name: 'Ver el encuentro' });
+  await verifyRetreatCta(homeDetails, 'details', 'home_calendar_link', januaryEdition);
+  await homeDetails.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/');
+  const retreatHero = page.locator('.retreat-hero');
+  const scheduleLink = retreatHero.getByRole('link', { name: 'Ver el cronograma' });
+  await verifyRetreatCta(scheduleLink, 'schedule', 'retreat_hero', januaryEdition);
+  await verifyHeaderCta();
+  assert.equal(await page.locator('[data-retreat-pricing]').count(), hasUmami ? 1 : 0);
+  await scheduleLink.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/#cronograma');
+  await page.locator('#cronograma:target').getByRole('heading', { name: 'Sábado 23' }).waitFor();
+  await page.waitForFunction(() => {
+    const headerHeight = document.querySelector('.site-header').offsetHeight;
+    const schedule = document.querySelector('#cronograma').getBoundingClientRect();
+    return schedule.top >= headerHeight - 1 && schedule.top <= headerHeight + 16;
+  });
+  await page.getByRole('heading', { name: 'Domingo 24' }).waitFor();
+  const registrationJump = retreatHero.getByRole('link', { name: 'Consultar por un lugar' });
+  await verifyRetreatCta(registrationJump, 'registration', 'retreat_hero', januaryEdition);
+  await registrationJump.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/#participar');
+  const registration = page.locator('#participar:target').getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(registration, 'whatsapp', 'retreat_registration', januaryEdition);
+  const retreatLink = new URL(await registration.getAttribute('href'));
+  assert.equal(retreatLink.origin, 'https://wa.me');
+  assert.match(retreatLink.searchParams.get('text'), /23 y 24 de enero/);
+  const pricing = page.locator('#inversion');
+  await retreatHero.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
+  for (const [label, id, amount, total, message] of [
+    ['Pago único', 'single', '$610.000', null, 'pago único de $610.000'],
+    ['2 pagos', '2_payments', '2 × $330.000', 'Total $660.000', '2 cuotas de $330.000 (total $660.000)'],
+    ['3 pagos', '3_payments', '3 × $230.000', 'Total $690.000', '3 cuotas de $230.000 (total $690.000)'],
+    ['4 pagos', '4_payments', '4 × $185.000', 'Total $740.000', '4 cuotas de $185.000 (total $740.000)'],
+  ]) {
+    const plan = pricing.getByRole('article', { name: label, exact: true });
+    await plan.getByText(amount, { exact: true }).waitFor();
+    if (total) await plan.getByText(total, { exact: true }).waitFor();
+    const cta = plan.getByRole('link', { name: 'Consultar por WhatsApp · ' + label, exact: true });
+    assert.equal((await cta.textContent()).trim(), 'WhatsApp ↗');
+    await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing', januaryEdition);
+    assert.equal(await cta.getAttribute('data-umami-event-payment_plan'), hasUmami ? id : null);
+    const url = new URL(await cta.getAttribute('href'));
+    assert.equal(url.origin, retreatLink.origin);
+    assert.equal(url.pathname, retreatLink.pathname);
+    const text = url.searchParams.get('text');
+    assert.ok(text.startsWith(retreatLink.searchParams.get('text')));
+    assert.ok(text.includes(message));
+  }
+  for (const text of [
+    'Dos días de retiro.',
+    'Todas las comidas y bebidas.',
+    'Una noche de alojamiento en las habitaciones de Casa Sabia.',
+    'Cuatro encuentros grupales de integración online después del retiro.',
+    '10% de descuento',
+    '$50.000 de descuento',
+  ]) {
+    await pricing.getByText(text, { exact: true }).waitFor();
+  }
+  await page.goto(HOST+BASE+'/encuentros/');
   const encounter = page.locator('article#encuentro-enero');
-  await encounter.getByRole('heading', { name: 'Qué incluye' }).waitFor();
-  await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
-  const encounterLink = new URL(await encounter.getByRole('link', { name: 'Solicitar inscripción' }).getAttribute('href'));
+  const eventCard = encounter.locator('.event-card--featured');
+  const eventPhoto = eventCard.getByRole('img', { name: /caballos en un claro del bosque/ });
+  await eventPhoto.scrollIntoViewIfNeeded();
+  await eventPhoto.evaluate(image => image.decode());
+  const cardDetails = eventCard.getByRole('link', { name: 'Ver programa y precios' });
+  await verifyRetreatCta(cardDetails, 'details', 'event_card_details', januaryEdition);
+  await cardDetails.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/');
+  await page.goto(HOST+BASE+'/encuentros/');
+  await eventCard.getByRole('heading', { name: 'Qué incluye' }).waitFor();
+  await eventCard.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
+  await eventCard.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
+  const cardRegistration = eventCard.getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration', januaryEdition);
+  await verifyHeaderCta();
+  const encounterLink = new URL(await cardRegistration.getAttribute('href'));
   assert.equal(encounterLink.origin, 'https://wa.me');
-  assert.match(encounterLink.searchParams.get('text'), /15 y 16 de enero de 2027/);
+  assert.match(encounterLink.searchParams.get('text'), /23 y 24 de enero/);
   const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
   assert.equal(doorLink.pathname, encounterLink.pathname);
   assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
-  await encounter.getByRole('link', { name: 'Conocer los círculos' }).click();
+  const februaryCard = encounter.locator('#encuentro-febrero');
+  const februaryDetails = februaryCard.getByRole('link', { name: 'Ver programa y precios' });
+  const februaryRegistration = februaryCard.getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(februaryDetails, 'details', 'event_card_details', februaryEdition);
+  await verifyRetreatCta(februaryRegistration, 'whatsapp', 'event_card_registration', februaryEdition);
+  const februaryRegistrationUrl = new URL(await februaryRegistration.getAttribute('href'));
+  assert.equal(februaryRegistrationUrl.pathname, encounterLink.pathname);
+  const februaryMessage = februaryRegistrationUrl.searchParams.get('text');
+  assert.match(februaryMessage, /15 y 16 de febrero/);
+  await februaryDetails.click();
+  await page.waitForURL('**' + februaryPath);
+  await page.getByRole('heading', { name: 'Lunes 15' }).waitFor();
+  await page.getByRole('heading', { name: 'Martes 16' }).waitFor();
+  const februaryJoin = page.locator('#participar').getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(februaryJoin, 'whatsapp', 'retreat_registration', februaryEdition);
+  assert.equal(await februaryJoin.getAttribute('href'), februaryRegistrationUrl.href);
+  const februaryPricing = page.locator('.retreat-plan__action');
+  assert.equal(await februaryPricing.count(), 4);
+  await page.getByText('$610.000', { exact: true }).waitFor();
+  await page.getByText('Total $740.000', { exact: true }).waitFor();
+  for (const link of await februaryPricing.all()) {
+    await verifyRetreatCta(link, 'whatsapp', 'retreat_pricing', februaryEdition);
+    const inquiry = new URL(await link.getAttribute('href')).searchParams.get('text');
+    assert.ok(inquiry.startsWith(februaryMessage + ' Me interesa '));
+  }
+  await page.goto(HOST + BASE + '/encuentros/');
+  await eventCard.getByRole('link', { name: 'Conocer los círculos' }).click();
   assert.equal(new URL(page.url()).hash, '#circulos');
-  const circleLink = new URL(await page.getByRole('link', { name: 'Quiero participar' }).getAttribute('href'));
+  await verifyRetreatCta(page.getByRole('link', { name: 'Ver fechas del retiro' }), 'listing', 'integration_page');
+  await page.getByText('Una vez por semana', { exact: true }).waitFor();
+  assert.equal(await page.getByText('ARS 20.000 por mes', { exact: true }).count(), 0);
+  const circleCta = page.getByRole('link', { name: 'Quiero participar' });
+  assert.equal(await circleCta.getAttribute('data-umami-event'), null);
+  const circleLink = new URL(await circleCta.getAttribute('href'));
   assert.equal(circleLink.pathname, encounterLink.pathname);
   assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const mobileMenu = page.locator('.mobile-nav');
+  await mobileMenu.locator('summary').click();
+  await mobileMenu.getByRole('link', { name: 'Comunidad', exact: true }).click();
+  await page.waitForURL('**/acompanamiento/#grupo-whatsapp');
+  await mobileMenu.locator('nav').waitFor({ state: 'hidden' });
   const groupLink = new URL(await page.getByRole('link', { name: 'Unirme al grupo' }).getAttribute('href'));
   assert.equal(groupLink.origin, 'https://chat.whatsapp.com');
+  const teamMembers = [
+    ['Nicole Rosignoli Miranda', 'Nicole', 'nicole'],
+    ['Yanina Noelia Landriel', 'Yanina', 'yanina'],
+    ['Nico Pacha', 'Nico Pacha', 'nico-pacha'],
+    ['Jasper Meyer', 'Jasper', 'jasper'],
+  ];
+  await page.goto(HOST+BASE+'/encuentros/retiro-enero-2027/');
+  const retreatTeam = page.getByRole('region', { name: 'Quiénes te acompañan.' });
+  for (const [name, , id] of teamMembers) {
+    assert.equal(await retreatTeam.getByRole('link', { name }).getAttribute('href'), '/equipo/#' + id);
+  }
+  await retreatTeam.getByRole('link', { name: 'Nicole Rosignoli Miranda' }).click();
+  await page.waitForURL('**/equipo/#nicole');
+  await page.locator('#nicole:target').getByRole('heading', { name: 'Nicole Rosignoli Miranda' }).waitFor();
+  const teamIndex = page.getByRole('navigation', { name: 'Integrantes de SOMA' });
+  for (const [name, shortName, id] of teamMembers) {
+    await teamIndex.getByRole('link', { name: shortName, exact: true }).click();
+    await page.waitForURL('**/equipo/#' + id);
+    await page.locator('#' + id + ':target').getByRole('heading', { name }).waitFor();
+  }
+  const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
+  await verifyHeaderCta();
+  await verifyRetreatCta(teamRetreat, 'details', 'team_footer', januaryEdition);
+  await teamRetreat.click();
+  await page.waitForURL('**/encuentros/retiro-enero-2027/');
+
+  await page.goto(HOST+BASE+'/enfoque/');
+  const content = page.locator('main');
+  await content.getByRole('link', { name: 'Ir a la Biblioteca' }).click();
+  await page.waitForURL('**/biblioteca/');
+  await content.getByRole('link', { name: 'Leer práctica: Una pausa de presencia', exact: true }).click();
+  await page.waitForURL('**/biblioteca/pausa-de-presencia/');
+  await content.getByRole('heading', { name: 'Detenerse' }).waitFor();
+  await content.getByRole('link', { name: 'Volver a la Biblioteca' }).click();
+  await page.waitForURL('**/biblioteca/');
+
+  await page.goto(HOST+BASE+'/nucleo/');
+  await content.getByRole('link', { name: 'Conocer al equipo' }).click();
+  await page.waitForURL('**/equipo/');
+  await content.getByRole('heading', { name: 'Nicole Rosignoli Miranda' }).waitFor();
+  await content.getByRole('link', { name: 'Descubrir el Núcleo' }).click();
+  await content.getByRole('link', { name: 'Conocer las Aulas' }).click();
+  await page.waitForURL('**/aulas/');
+  await content.getByRole('link', { name: 'Ir a la Biblioteca' }).waitFor();
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });

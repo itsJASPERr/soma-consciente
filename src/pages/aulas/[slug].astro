@@ -19,7 +19,12 @@ const courses = (await loadCourses()).filter(c=>c.aula===aula.slug);
 const sections = await loadSections();
 const lessons = await loadLessons();
 ---
-<SiteLayout title={aula.name} description={aula.description}>
+<SiteLayout
+  title={aula.name}
+  description={aula.description}
+  noIndex={aula.launchStatus === 'upcoming' && courses.length === 0}
+  breadcrumbs={[{ name: 'Aulas', href: '/aulas/' }]}
+>
   <div class:list={['aula-page-theme','aula-page-theme--'+aula.theme,'aula-page-theme--symbol-'+aula.symbol]}>
     <section class="aula-hero">
       <div class="container aula-hero__grid">

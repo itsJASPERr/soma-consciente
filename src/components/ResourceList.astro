@@ -1,0 +1,137 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Resource } from '../lib/content';
+import { mediaUrl } from '../lib/media';
+import { path } from '../lib/paths';
+
+interface Props {
+  resources: Resource[];
+  cards?: boolean;
+}
+
+const { resources, cards = false } = Astro.props;
+---
+{cards ? (
+  <ul class="resource-cards">
+    {resources.map((resource) => {
+      const href = path('/biblioteca/' + resource.slug + '/');
+      const photo = mediaUrl(resource.image);
+      return (
+        <li class="resource-card">
+          <div class="resource-card__photo">
+            {photo && <img src={photo} alt={resource.imageAlt || resource.title} width="900" height="560" loading="lazy" decoding="async" />}
+            <span class="resource-card__category">{resource.category}</span>
+          </div>
+          <div class="resource-card__body">
+            <h3><a href={href}>{resource.title}</a></h3>
+            <p>{resource.summary}</p>
+            <a class="journey-link" href={href}>Explorar recurso <span aria-hidden="true">↗</span></a>
+            <p class="resource-card__meta">
+              <span><Icon name="iconoir:language" size={18} aria-hidden="true" /> Español</span>
+              <span><Icon name="iconoir:clock" size={18} aria-hidden="true" /> Lectura y práctica · {resource.duration}</span>
+            </p>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+) : (
+  <ul class="journey-resource-list">
+    {resources.map((resource) => (
+      <li>
+        <div>
+          <h3><a href={path('/biblioteca/' + resource.slug + '/')}>{resource.title}</a></h3>
+          <p>{resource.summary}</p>
+        </div>
+        <span>{resource.duration}</span>
+        <a
+          class="journey-link"
+          href={path('/biblioteca/' + resource.slug + '/')}
+          aria-label={'Leer práctica: ' + resource.title}
+        >Leer práctica <span aria-hidden="true">↗</span></a>
+      </li>
+    ))}
+  </ul>
+)}
+
+<style>
+  .resource-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .resource-card {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 1.35rem;
+    background: var(--surface-editorial);
+  }
+  .resource-card__photo {
+    position: relative;
+    min-block-size: 11rem;
+    background: var(--surface-sand);
+  }
+  .resource-card__photo img {
+    display: block;
+    inline-size: 100%;
+    block-size: 12.5rem;
+    object-fit: cover;
+  }
+  .resource-card__category {
+    position: absolute;
+    left: .75rem;
+    bottom: .75rem;
+    max-inline-size: calc(100% - 1.5rem);
+    padding: .32rem .7rem;
+    border-radius: 999px;
+    background: var(--cream);
+    color: var(--pine-dark);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .resource-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .55rem;
+    padding: 1.15rem 1.2rem 1.25rem;
+  }
+  .resource-card h3 {
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(1.45rem, 2vw, 1.85rem);
+    text-wrap: balance;
+  }
+  .resource-card h3 a { color: inherit; text-decoration: none; }
+  .resource-card h3 a:hover { text-decoration: underline; }
+  .resource-card__body > p {
+    margin: 0;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .resource-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .9rem;
+    margin-top: .15rem;
+    color: var(--muted);
+    font-size: .9rem;
+  }
+  .resource-card__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .resource-card__meta :global(svg) { flex: none; color: var(--terra); }
+  @media (max-width: 860px) {
+    .resource-cards { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

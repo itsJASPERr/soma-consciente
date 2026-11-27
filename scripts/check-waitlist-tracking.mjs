@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { waitlistConsentText, waitlistConsentVersion } from '../src/lib/waitlist-consent.ts';
 
 export async function checkWaitlistTracking(page, baseURL, { required }) {
   await page.addInitScript(() => {
@@ -16,7 +17,7 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
     assert.equal(route.request().method(), 'POST');
     const payload = route.request().postDataJSON();
     assert.equal(payload.offering, undefined);
-    assert.equal(payload.consent, '2');
+    assert.equal(payload.consent, waitlistConsentVersion);
     programSubmissions += 1;
     await route.fulfill({ status: programSubmissions === 1 ? 503 : 204 });
   });
@@ -31,10 +32,26 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   const events = () => page.evaluate(() => window.waitlistTestEvents);
   const opened = { event: 'waitlist_opened' };
   const submit = form.getByRole('button', { name: 'Avisame cuando esté listo' });
+  const opener = page.locator('#programa-online #program-launch-open');
+  const pagePosition = () => opener.evaluate(button => {
+    const { top, left } = button.closest('#programa-online').getBoundingClientRect();
+    return { scrollY: window.scrollY, width: document.body.clientWidth, top, left };
+  });
+  const positionOpener = async () => {
+    await opener.evaluate(button => button.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    return pagePosition();
+  };
+  const assertFocus = id => page.waitForFunction(target => document.activeElement?.id === target, id);
   assert.deepEqual(await events(), []);
-  await page.locator('#programa-online #program-launch-open').click();
-  await form.getByText(/para informarme sobre el programa y sus productos/).waitFor();
-  await page.getByRole('dialog', { name: 'Nuestro programa online' }).waitFor();
+  const mobilePosition = await positionOpener();
+  await opener.click();
+  await form.getByText(waitlistConsentText, { exact: true }).waitFor();
+  const dialog = page.getByRole('dialog', { name: 'Nuestro programa online' });
+  await dialog.waitFor();
+  await assertFocus('program-launch-title');
+  assert.deepEqual(await pagePosition(), mobilePosition, 'Opening the sheet must leave the page in place.');
+  const sheet = await dialog.boundingBox();
+  assert.ok(sheet.y + sheet.height >= page.viewportSize().height - 14, 'The mobile program overlay should align to the bottom.');
   assert.ok(await form.getByRole('radio', { name: 'WhatsApp' }).isChecked());
   const country = form.getByRole('button', { name: 'Código de país, Argentina (+54)' });
   await country.click();
@@ -53,16 +70,35 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   await form.getByRole('checkbox').check();
 
   await submit.click();
-  await page.getByText('No pudimos guardar tu solicitud.').waitFor();
+  await dialog.getByRole('status').filter({ hasText: 'No pudimos guardar tu solicitud.' }).waitFor();
+  assert.equal(await dialog.locator('#program-launch-result').getAttribute('data-state'), 'error');
   assert.equal(programSubmissions, 1);
   assert.deepEqual(await events(), [opened], 'A failed submission must not record a conversion.');
 
   await submit.click();
-  await page.getByText('Gracias. Te avisaremos por el medio que elegiste.').waitFor();
+  await dialog.getByRole('status').filter({ hasText: 'Gracias. Te avisaremos por el medio que elegiste.' }).waitFor();
+  assert.equal(await dialog.locator('#program-launch-result').getAttribute('data-state'), 'success');
   assert.equal(programSubmissions, 2);
   assert.deepEqual(await events(), [
     opened,
     { event: 'waitlist_submitted', properties: { channel: 'email' } },
   ]);
-  console.log('Program waitlist consent, payload and analytics verified.');
+  await dialog.getByRole('button', { name: 'Cerrar' }).click();
+  await dialog.waitFor({ state: 'hidden' });
+  await assertFocus('program-launch-open');
+  assert.deepEqual(await pagePosition(), mobilePosition, 'Closing the sheet must preserve the scroll position.');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const desktopPosition = await positionOpener();
+  await opener.click();
+  await dialog.waitFor();
+  assert.deepEqual(await pagePosition(), desktopPosition, 'Opening the desktop dialog must leave the page in place.');
+  const desktopSheet = await dialog.boundingBox();
+  const viewport = page.viewportSize();
+  const center = desktopSheet.x + desktopSheet.width / 2;
+  assert.ok(Math.abs(center - viewport.width / 2) < 80, 'The desktop program overlay should sit in the center.');
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({ state: 'hidden' });
+  await assertFocus('program-launch-open');
+  assert.deepEqual(await pagePosition(), desktopPosition, 'Closing with Escape must preserve the scroll position.');
+  console.log('Program waitlist position, focus, consent, payload and analytics verified.');
 }

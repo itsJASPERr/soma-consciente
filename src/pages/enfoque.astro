@@ -1,18 +1,62 @@
 ---
+import EditorialPhoto from '../components/EditorialPhoto.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { loadHomepage } from '../lib/home';
+import { mediaUrl } from '../lib/media';
 import { path } from '../lib/paths';
+
+const home = await loadHomepage();
+const landscape = { src: mediaUrl(home.nucleoImage), alt: home.nucleoAlt };
+const principles = [
+  { title: 'Presencia y escucha', description: 'Prestar atención a lo que sentimos y necesitamos en cada momento.' },
+  { title: 'Autonomía y cuidado', description: 'Respetar el ritmo y las decisiones de cada persona.' },
+  { title: 'Integración cotidiana', description: 'Encontrar formas de llevar a lo cotidiano lo vivido en los encuentros.' },
+  { title: 'Diálogo entre saberes', description: 'Reconocer los aportes y los límites de cada práctica.' }
+];
 ---
-<SiteLayout title="Nuestro enfoque">
-  <section class="page-hero"><div class="container"><span class="eyebrow">Nuestra mirada</span><h1>Conocer, sentir, integrar.</h1><p>Nos encontramos en vivencias y retiros presenciales. Los círculos de integración online ofrecen un espacio para elaborar lo vivido con presencia, cuidado y respeto por el ritmo de cada persona.</p></div></section>
-  <section class="section"><div class="container intro-grid">
-    <div class="prose"><h2>No hay un único camino.</h2><p>SOMA nace del encuentro entre psicología, prácticas corporales, música, integración de experiencias y vínculo con caballos y naturaleza. Cada lenguaje aporta algo distinto; ninguno pretende explicarlo todo.</p><p>Buscamos abrir espacios donde las personas puedan explorar preguntas, reconocer recursos propios y elegir con más consciencia cómo vivir y vincularse.</p></div>
-    <blockquote>“La persona permanece en el centro. Las prácticas están al servicio de su proceso.”</blockquote>
-  </div></section>
-  <section class="section--tight"><div class="container"><div class="feature-grid">
-    <div class="feature-card"><span class="eyebrow">01</span><h3>Presencia y escucha</h3><p>Detenernos, prestar atención y reconocer lo que está vivo en cada momento.</p></div>
-    <div class="feature-card"><span class="eyebrow">02</span><h3>Autonomía y cuidado</h3><p>Acompañar sin imponer interpretaciones, resultados ni tiempos ajenos.</p></div>
-    <div class="feature-card"><span class="eyebrow">03</span><h3>Integración cotidiana</h3><p>Conectar experiencias significativas con vínculos, decisiones y acciones sostenibles.</p></div>
-    <div class="feature-card"><span class="eyebrow">04</span><h3>Diálogo entre saberes</h3><p>Reconocer la procedencia y los límites de cada práctica y disciplina.</p></div>
-  </div></div></section>
-  <section class="section"><div class="container"><h2>Explorá por dónde comenzar.</h2><div class="btn-row"><a class="btn" href={path('/encuentros/')}>Conocer los encuentros ↗</a><a class="btn btn--outline" href={path('/biblioteca/')}>Ir a la Biblioteca ↗</a></div></div></section>
+<SiteLayout
+  title="Nuestro enfoque de bienestar e integración"
+  description="Conocé cómo SOMA reúne psicología, prácticas corporales, música y encuentros con caballos desde la presencia, el cuidado y el respeto por el ritmo de cada persona."
+  openJourney
+>
+  <section class:list={['container', 'journey-hero', { 'journey-hero--photo': landscape.src }]}>
+    <div class="journey-hero__copy">
+      <span class="eyebrow">Nuestra mirada</span>
+      <h1>Conocer, sentir, integrar.</h1>
+      <p class="journey-lead">Creamos espacios para estar presentes, disfrutar y compartir lo que nos pasa. También hacemos lugar a lo incómodo, con cuidado y respeto por el ritmo de cada persona.</p>
+      <div class="journey-actions">
+        <a class="btn" href={path('/encuentros/')}>Conocer los encuentros <span aria-hidden="true">↗</span></a>
+        <a class="btn btn--outline" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <EditorialPhoto image={landscape} priority />
+  </section>
+  <section class="journey-band">
+    <div class="container journey-band__one">
+      <blockquote class="journey-band__quote">La persona permanece en el centro. Las prácticas están al servicio de su proceso.</blockquote>
+    </div>
+  </section>
+  <section class="container principles" aria-label="Principios de SOMA">
+    {principles.map(({ title, description }) => (
+      <div><h2>{title}</h2><p>{description}</p></div>
+    ))}
+  </section>
 </SiteLayout>
+
+<style>
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 1rem clamp(1rem, 3vw, 2rem);
+    padding-block: var(--journey-spacing);
+  }
+  .principles > div { border-block-start: 1px solid var(--journey-rule); padding-block-start: .85rem; }
+  .principles h2 { font-size: clamp(1.4rem, 2vw, 2.05rem); color: var(--pine-dark); margin-block-end: .45rem; }
+  .principles p { margin: 0; }
+  @media (max-width: 780px) {
+    .principles { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 430px) {
+    .principles { grid-template-columns: minmax(0,1fr); }
+  }
+</style>

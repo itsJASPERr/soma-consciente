@@ -1,12 +1,85 @@
 ---
-import SiteLayout from '../../layouts/SiteLayout.astro';
 import AulaCard from '../../components/AulaCard.astro';
+import SomaAulaSymbol from '../../components/SomaAulaSymbol.astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
 import { loadAulas } from '../../lib/content';
-const aulas = await loadAulas();
 import { path } from '../../lib/paths';
+
+const aulas = await loadAulas();
+const upcoming = aulas.filter(aula => aula.launchStatus === 'upcoming');
+const available = aulas.filter(aula => aula.launchStatus !== 'upcoming');
 ---
-<SiteLayout title="Las cuatro Aulas">
-  <section class="page-hero"><div class="container"><span class="eyebrow">Cuatro voces · Cuatro caminos</span><h1>Entrá por la puerta que hoy resuene con vos.</h1><p>Cada Aula contiene la mirada, las herramientas y las experiencias de una persona del equipo. Podés explorar una, varias o todas, a tu propio ritmo.</p></div></section>
-  <section class="section"><div class="container"><div class="aula-grid">{aulas.map((aula,index)=><AulaCard aula={aula} index={index}/>)}</div></div></section>
-  <section class="section--tight digital-band"><div class="container"><span class="eyebrow">Lo que nos une</span><h2>Los caminos se encuentran en el Núcleo.</h2><p class="section-intro">Las Aulas conservan su identidad; el Núcleo abre la posibilidad de crear experiencias y propuestas compartidas.</p><a class="btn" href={path('/nucleo/')}>Conocer el Núcleo ↗</a></div></section>
+<SiteLayout
+  title="Las cuatro Aulas de SOMA"
+  description="Conocé los recorridos de SOMA en psicología y presencia, música e integración, cuerpo y movimiento, y vínculo con caballos."
+  openJourney
+>
+  <section class="container journey-hero journey-hero--photo journey-hero--profile">
+    <div class="journey-hero__copy">
+      <span class="eyebrow">Aulas</span>
+      {available.length > 0 ? (
+        <>
+          <h1>Las cuatro Aulas</h1>
+          <p class="journey-lead">Cada Aula reúne la mirada y las herramientas de una persona del equipo. Elegí un recorrido disponible o explorá la Biblioteca.</p>
+        </>
+      ) : (
+        <>
+          <h1>Cuatro recorridos en preparación.</h1>
+          <p class="journey-lead">Las cuatro perspectivas de SOMA dan forma a recorridos que estamos desarrollando. Mientras tanto, podés explorar las prácticas abiertas de la Biblioteca.</p>
+        </>
+      )}
+    </div>
+    <img class="journey-emblem" src={path('/media/soma-original-emblem.png')} alt="Emblema original de SOMA CONSCIENTE" width="520" height="405" />
+  </section>
+  {available.length > 0 && (
+    <section class="container aula-directory" aria-label="Aulas disponibles">
+      <div class="aula-grid">
+        {available.map((aula, index) => <AulaCard aula={aula} index={index} />)}
+      </div>
+    </section>
+  )}
+  {upcoming.length > 0 && (
+    <ul class="container aula-upcoming-list" aria-label="Aulas en desarrollo">
+      {upcoming.map(aula => (
+        <li>
+          <div class="aula-upcoming" role="link" aria-disabled="true">
+            <span aria-hidden="true"><SomaAulaSymbol symbol={aula.symbol} /></span>
+            <div><h2>{aula.name}</h2><p>En desarrollo</p></div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+  <section class="container journey-row">
+    <div><h2>Empezá por una práctica abierta</h2><a class="journey-link" href={path('/nucleo/')}>Conocer el Núcleo <span aria-hidden="true">↗</span></a></div>
+    <a class="btn" href={path('/biblioteca/')}>Ir a la Biblioteca <span aria-hidden="true">↗</span></a>
+  </section>
 </SiteLayout>
+
+<style>
+  .aula-directory { margin-block-end: var(--journey-spacing); }
+  .aula-upcoming-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    column-gap: clamp(1.2rem, 4vw, 3rem);
+    list-style: none;
+    padding: 0;
+    margin-block: 0;
+  }
+  .aula-upcoming {
+    display: grid;
+    grid-template-columns: 2.65rem minmax(0,1fr);
+    align-items: center;
+    gap: .72rem;
+    padding-block: .9rem;
+    border-block-start: 1px solid var(--journey-rule);
+    filter: grayscale(1);
+    color: var(--muted);
+  }
+  .aula-upcoming :global(img) { display: block; inline-size: 100%; block-size: auto; }
+  .aula-upcoming h2 { font-size: clamp(1.35rem, 2.25vw, 2.15rem); margin-block-end: .25rem; }
+  .aula-upcoming p { margin: 0; }
+  @media (max-width: 680px) {
+    .aula-upcoming-list { grid-template-columns: minmax(0,1fr); }
+  }
+</style>

@@ -1,4 +1,5 @@
 ---
+import type { AnalyticsLinkAttributes } from '../lib/analytics';
 import { offeringUrl, type Offering } from '../lib/offerings';
 
 interface Props {
@@ -6,16 +7,17 @@ interface Props {
   requestsEnabled: boolean;
   class?: string;
   showArrow?: boolean;
+  analytics?: AnalyticsLinkAttributes;
 }
 
-const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false } = Astro.props;
+const { offer, requestsEnabled, class: actionClass = 'btn', showArrow = false, analytics = {} } = Astro.props;
 const url = offeringUrl(offer);
 const hintId = url && offer.actionHint ? offer.slug + '-action-hint' : undefined;
 const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer.action;
 ---
 {url ? (
   <>
-    <a class={actionClass} href={url} aria-describedby={hintId}>
+    <a class={actionClass} href={url} aria-describedby={hintId} {...analytics}>
       {label}
       {showArrow && <span aria-hidden="true">↗</span>}
     </a>
@@ -47,7 +49,12 @@ const label = url && offer.slug === 'grupo-whatsapp' ? 'Unirme al grupo' : offer
     font-size: .85rem;
     line-height: 1.4;
   }
-  button.text-link { appearance: none; }
+  button.text-link, button.journey-link {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
   .text-link {
     background: transparent;
     border: 0;

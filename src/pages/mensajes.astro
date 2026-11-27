@@ -5,6 +5,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
   title="Mensajes de WhatsApp"
   description="Conversaciones de WhatsApp de SOMA, agrupadas por remitente."
   noIndex
+  openJourney
 >
   <section class="section wa-inbox" data-whatsapp-inbox aria-labelledby="inbox-title">
     <div class="container">
@@ -61,7 +62,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 </script>
 
 <style is:global>
-  .wa-inbox { padding-block: clamp(32px, 5vw, 64px); }
+  .wa-inbox { padding-block: var(--journey-spacing); }
   .wa-inbox [hidden] { display: none !important; }
 
   .wa-inbox .inbox-heading {
@@ -69,12 +70,13 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     justify-content: space-between;
     align-items: end;
     gap: 12px;
-    margin-block-end: 18px;
+    margin-block-end: clamp(1.15rem, 3vw, 2rem);
   }
 
   .wa-inbox .inbox-heading h1 {
     margin: 4px 0 0;
-    font-size: clamp(2.35rem, 5vw, 3.7rem);
+    color: var(--pine-dark);
+    font-size: clamp(2.65rem, 5vw, 4.15rem);
     line-height: 1;
   }
 
@@ -123,13 +125,16 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     background: var(--muted);
   }
 
-  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track { background: var(--pine); }
+  .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track {
+    border-color: var(--pine-fill);
+    background: var(--pine-fill);
+  }
   .wa-inbox .inbox-auto-refresh input:checked + .inbox-switch-track::before {
     margin-inline-start: auto;
-    background: #fff;
+    background: var(--on-pine);
   }
   .wa-inbox .inbox-auto-refresh input:focus-visible + .inbox-switch-track {
-    outline: 2px solid var(--sage);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 
@@ -142,17 +147,20 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     padding: 7px 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: var(--white);
-    color: var(--ink);
-    font: 650 .875rem/1.3 var(--font-body);
+    background: var(--cream);
+    color: var(--pine-dark);
+    font: 700 .875rem/1.3 var(--font-body);
     text-decoration: none;
     cursor: pointer;
   }
 
-  .wa-inbox .inbox-button:hover:not(:disabled) { border-color: var(--sage); }
+  .wa-inbox .inbox-button:hover:not(:disabled) {
+    border-color: var(--sage);
+    background: var(--surface-sage);
+  }
   .wa-inbox .inbox-button:disabled { opacity: .6; cursor: default; }
   .wa-inbox :is(button, a, textarea, ol):focus-visible {
-    outline: 2px solid var(--sage);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 
@@ -164,9 +172,9 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     min-block-size: 480px;
     block-size: clamp(480px, 69svh, 750px);
     border: 1px solid var(--line);
-    border-radius: 18px;
+    border-radius: 1.35rem;
     overflow: hidden;
-    background: var(--cream);
+    background: var(--surface-editorial);
   }
 
   .wa-inbox .inbox-senders,
@@ -215,7 +223,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 
   .wa-inbox .sender-list button:hover,
   .wa-inbox .sender-list button[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--sage) 16%, var(--cream));
+    background: var(--surface-sage);
   }
 
   .wa-inbox .sender-list button[aria-pressed="true"] { border-inline-start-color: var(--pine); }
@@ -257,7 +265,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     align-items: flex-start;
     gap: 10px;
     padding: 16px 18px;
-    background: color-mix(in srgb, var(--paper) 66%, var(--cream));
+    background: var(--paper);
   }
 
   .wa-inbox .chat-message {
@@ -270,7 +278,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 
   .wa-inbox .chat-message--outbound {
     align-self: flex-end;
-    background: color-mix(in srgb, var(--sage) 20%, var(--cream));
+    background: var(--surface-sage);
   }
 
   .wa-inbox .chat-message p { margin: 0; white-space: pre-wrap; }
@@ -324,7 +332,8 @@ import SiteLayout from '../layouts/SiteLayout.astro';
   }
 
   .wa-inbox .reply-actions p:empty { display: none; }
-  .wa-inbox .reply-send { border-color: transparent; background: var(--pine); color: #fff; }
+  .wa-inbox .reply-send { border-color: transparent; background: var(--pine-fill); color: var(--on-pine); }
+  .wa-inbox .reply-send:hover:not(:disabled) { border-color: transparent; background: var(--pine-fill-hover); }
 
   @media (max-width: 700px) {
     .wa-inbox .inbox-heading { flex-wrap: wrap; }
@@ -337,6 +346,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
     .wa-inbox .chat-back {
       display: block;
       flex-basis: 100%;
+      min-block-size: 44px;
       padding: 7px 0;
       border: 0;
       background: transparent;

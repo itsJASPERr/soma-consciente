@@ -37,6 +37,15 @@ content:
         label: Descripción de la imagen online
         type: string
         required: true
+      - name: onlineCircleImage
+        label: Foto del círculo de integración online
+        type: image
+      - name: onlineCircleAlt
+        label: Descripción accesible de la foto del círculo
+        type: string
+      - name: onlineCirclePosition
+        label: Encuadre de la foto del círculo (CSS object-position)
+        type: string
       - name: encountersImage
         label: Imagen de Encuentros
         type: image
@@ -68,10 +77,28 @@ content:
           - { name: description, label: Descripción, type: text, required: true }
           - { name: venue, label: Sede, type: string }
           - { name: details, label: Lugar, precio o beneficio incluido, type: string }
+          - { name: homeNote, label: Beneficio destacado en la portada, type: string }
+          - { name: context, label: Información para participantes, type: text }
           - { name: action, label: Texto del botón, type: string, required: true }
           - { name: actionHint, label: Qué pasa al abrir el enlace directo, type: text }
           - { name: followUp, label: Próximo paso al enviar la solicitud, type: text }
           - { name: url, label: Enlace directo de inscripción o invitación, type: string }
+          - name: dates
+            label: Fechas de este encuentro
+            type: object
+            list: true
+            fields:
+              - { name: slug, label: Identificador de inscripción, type: string, required: true }
+              - { name: pageSlug, label: Identificador de la página del retiro, type: string, required: true }
+              - { name: startDate, label: Primer día (AAAA-MM-DD), type: string, required: true }
+              - { name: endDate, label: Último día (AAAA-MM-DD), type: string, required: true }
+              - { name: language, label: Idioma, type: string }
+              - { name: when, label: Fecha, type: string, required: true }
+              - { name: venue, label: Lugar, type: string, required: true }
+              - { name: details, label: Qué incluye, type: text, required: true }
+              - { name: action, label: Texto del botón, type: string, required: true }
+              - { name: actionHint, label: Qué pasa al abrir el enlace, type: text }
+              - { name: url, label: Enlace de inscripción, type: string, required: true }
 
   - name: aulas
     label: Las cuatro Aulas

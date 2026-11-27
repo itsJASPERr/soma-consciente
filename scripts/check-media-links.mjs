@@ -6,7 +6,7 @@ const files=[
  ...['primeros-pasos-meditacion','pausa-de-presencia','diario-de-integracion'].map(x=>'src/content/recursos/'+x+'.json'),
  'src/content/cursos/jasper-musica-medicina.json'
 ];
-const keys=['heroImage','nucleoImage','onlineImage','encountersImage','coverImage','image'];
+const keys=['heroImage','nucleoImage','onlineImage','onlineCircleImage','encountersImage','coverImage','image'];
 const checks=[];
 for(const f of files){
   const entry=JSON.parse(fs.readFileSync(f,'utf8'));

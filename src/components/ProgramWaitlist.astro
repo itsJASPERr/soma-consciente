@@ -16,6 +16,7 @@ const { signupEnabled } = Astro.props;
       type="button"
       data-program-waitlist
       data-signup-title="Nuestro programa online"
+      data-signup-intro="Dejanos tu contacto para recibir novedades cuando esté listo."
       data-signup-action="Avisame cuando esté listo"
       aria-haspopup="dialog"
       aria-controls="program-launch-dialog"
@@ -28,23 +29,29 @@ const { signupEnabled } = Astro.props;
 
 <style>
   .program-waitlist {
-    max-inline-size: 52rem;
-    margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--line);
-    scroll-margin-top: 1.5rem;
+    max-inline-size: 36rem;
+    margin: clamp(2rem, 5vw, 3.25rem) auto 0;
+    padding-top: clamp(1.4rem, 3vw, 2rem);
+    border-top: 1px solid var(--journey-rule, var(--line));
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: .35rem;
   }
-  .program-waitlist .eyebrow { margin-bottom: .35rem; }
+  .program-waitlist .eyebrow { margin: 0 0 .2rem; }
   .program-waitlist h3 {
     color: var(--pine-dark);
-    margin: 0 0 .4rem;
+    margin: 0;
+    font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+    text-wrap: balance;
   }
   .program-waitlist__description {
-    max-inline-size: 47ch;
-    margin: 0 auto .85rem;
+    max-inline-size: 42ch;
+    margin: .35rem 0 0;
     color: var(--ink);
     text-wrap: pretty;
   }
+  .program-waitlist .btn { margin-top: .85rem; }
   .program-waitlist button {
     cursor: pointer;
     font-family: inherit;

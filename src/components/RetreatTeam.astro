@@ -1,0 +1,146 @@
+---
+import TeamPracticePhoto from './TeamPracticePhoto.astro';
+import { path } from '../lib/paths';
+import { teamMembers } from '../lib/team';
+
+const teamPage = path('/equipo/');
+---
+<section class="retreat-team" id="equipo" aria-labelledby="retreat-team-title">
+  <div class="retreat-team__inner">
+    <div class="retreat-team__head">
+      <h2 id="retreat-team-title">Quiénes te <em>acompañan.</em></h2>
+      <p>Durante el retiro en Casa Sabia compartimos prácticas de presencia, movimiento, sonido y vínculo con los caballos.</p>
+    </div>
+    <ul class="retreat-team__list" role="list">
+      {teamMembers.map((member) => (
+        <li class="retreat-team__member" data-tone={member.tone}>
+          <TeamPracticePhoto photo={member.photo} symbol={member.symbol} tone={member.tone} />
+          <div class="retreat-team__copy">
+            <h3><a href={teamPage + '#' + member.id}>{member.name} <span aria-hidden="true">↗</span></a></h3>
+            <p class="retreat-team__practice">{member.practice}</p>
+            <p>{member.introduction}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <div class="retreat-team__action">
+      <a class="btn btn--outline" href={teamPage}>Conocé al equipo <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .retreat-team {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    padding-block: clamp(2.9rem, 7vw, 6rem) clamp(2.85rem, 6vw, 5rem);
+    background: light-dark(#f6f1e7, var(--paper));
+  }
+  .retreat-team::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 8% -9% auto auto;
+    width: min(38rem, 43%);
+    height: 61%;
+    border-radius: 57% 0 0 46%;
+    background: var(--surface-sand);
+    transform: rotate(-12deg);
+  }
+  .retreat-team::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: auto -10% -3.75rem;
+    height: 7rem;
+    border-radius: 53% 43% 0 0;
+    background: var(--surface-sand);
+    transform: rotate(-2deg);
+  }
+  .retreat-team__inner {
+    width: min(1140px, calc(100% - clamp(2rem, 7vw, 6rem)));
+    margin-inline: auto;
+  }
+  .retreat-team__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+    gap: 1rem 3rem;
+    align-items: end;
+    margin-bottom: clamp(1.75rem, 4.5vw, 3.65rem);
+  }
+  .retreat-team__head h2 {
+    margin: 0;
+    color: var(--pine-dark);
+    font-size: clamp(2.35rem, 5.5vw, 4.65rem);
+    line-height: 1.02;
+  }
+  .retreat-team__head em { display: block; color: var(--journey-clay); }
+  .retreat-team__head p {
+    max-width: 34ch;
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1rem, 1.6vw, 1.22rem);
+    line-height: 1.55;
+  }
+  .retreat-team__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 1.65rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .retreat-team__member {
+    --practice-photo-symbol: 3rem;
+    --practice-photo-dot: .55rem;
+    --practice-photo-inset: .48rem;
+    min-width: 0;
+    --team-accent: light-dark(#315d49, #b3ceb8);
+  }
+  .retreat-team__member[data-tone='earth'] { --team-accent: light-dark(#704735, #e4b5a1); }
+  .retreat-team__member[data-tone='ochre'] { --team-accent: light-dark(#79551a, #e7c791); }
+  .retreat-team__member[data-tone='clay'] { --team-accent: var(--journey-clay); }
+  .retreat-team__copy { margin-top: 1.15rem; }
+  .retreat-team__copy h3 { margin: 0 0 .3rem; color: var(--pine-dark); font-size: clamp(1.23rem, 1.65vw, 1.55rem); }
+  .retreat-team__copy h3 a { text-decoration: none; }
+  .retreat-team__copy h3 a:hover { text-decoration: underline; text-underline-offset: .18em; }
+  .retreat-team__copy h3 span { color: var(--team-accent); font: .65em var(--font-body, sans-serif); }
+  .retreat-team__copy p { margin: 0; color: var(--ink); font-size: .9rem; line-height: 1.55; }
+  .retreat-team__copy .retreat-team__practice { margin-bottom: .4rem; color: var(--team-accent); font-weight: 700; }
+  .retreat-team__action {
+    display: flex;
+    justify-content: end;
+    margin-top: 1.85rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 860px) {
+    .retreat-team__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+  }
+  @media (max-width: 620px) {
+    .retreat-team::before {
+      inset: 7% -13% auto auto;
+      width: 42%;
+      height: 10rem;
+      border-radius: 54% 35% 52% 45%;
+    }
+    .retreat-team__head, .retreat-team__list { grid-template-columns: minmax(0, 1fr); }
+    .retreat-team__list { gap: 0; }
+    .retreat-team__member {
+      --practice-photo-inset: .23rem;
+      --practice-photo-symbol: 1.65rem;
+      --practice-photo-dot: .32rem;
+      --practice-photo-ratio: 1;
+      display: grid;
+      grid-template-columns: minmax(4.6rem, 29%) minmax(0, 1fr);
+      align-items: start;
+      gap: .78rem;
+      padding-block: 1rem;
+    }
+    .retreat-team__member + .retreat-team__member { border-top: 1px solid var(--line); }
+    .retreat-team__copy { margin-top: 0; }
+    .retreat-team__copy p { font-size: .87rem; }
+    .retreat-team__action { margin-top: .3rem; justify-content: start; }
+  }
+</style>

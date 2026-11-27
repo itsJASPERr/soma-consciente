@@ -17,6 +17,7 @@ ORIGIN = 'https://soma-consciente.com'
 SITEMAP_INDEX = ORIGIN + '/sitemap-index.xml'
 NAMESPACE = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
 USER_AGENT = 'SOMA Deployment Check/1.0 (+https://soma-consciente.com/)'
+GOOGLE_TAG_MANAGER_ID = 'GTM-NWH9TMKN'
 NOINDEX = re.compile(r'\bnoindex\b', re.IGNORECASE)
 
 
@@ -28,6 +29,7 @@ class SearchMetadata(HTMLParser):
         self.robots = []
         self.umami = 0
         self.cloudflare = 0
+        self.google_tag_manager = 0
         self.analytics_scripts = set()
 
     def handle_starttag(self, tag, attrs):
@@ -38,18 +40,28 @@ class SearchMetadata(HTMLParser):
             self.og_urls.append(attrs.get('content'))
         if tag == 'meta' and attrs.get('name', '').lower() in ('robots', 'googlebot'):
             self.robots.append(attrs.get('content', ''))
-        if tag == 'script':
-            src = urlsplit(attrs.get('src') or '')
-            hostname = src.hostname or ''
-            if hostname.endswith('.umami.is') or 'data-website-id' in attrs:
-                self.analytics_scripts.add('Umami')
-            if 'data-cf-beacon' in attrs or hostname.endswith('.cloudflareinsights.com'):
-                self.analytics_scripts.add('Cloudflare Web Analytics')
-            if (hostname == 'cloud.umami.is' and src.path == '/script.js'
-                    and attrs.get('data-website-id') == '41a6c926-f20e-4490-80f4-fc75e59ddfa3'):
-                self.umami += 1
-            if hostname == 'static.cloudflareinsights.com' and src.path.startswith('/beacon.min.js'):
-                self.cloudflare += 1
+        if tag not in ('script', 'iframe'):
+            return
+
+        src = urlsplit(attrs.get('src') or '')
+        hostname = src.hostname or ''
+        if hostname == 'googletagmanager.com' or hostname.endswith('.googletagmanager.com'):
+            self.analytics_scripts.add('Google Tag Manager')
+            if (tag == 'script' and src.scheme == 'https' and src.path == '/gtm.js'
+                    and src.query == 'id=' + GOOGLE_TAG_MANAGER_ID):
+                self.google_tag_manager += 1
+        if tag != 'script':
+            return
+
+        if hostname.endswith('.umami.is') or 'data-website-id' in attrs:
+            self.analytics_scripts.add('Umami')
+        if 'data-cf-beacon' in attrs or hostname.endswith('.cloudflareinsights.com'):
+            self.analytics_scripts.add('Cloudflare Web Analytics')
+        if (hostname == 'cloud.umami.is' and src.path == '/script.js'
+                and attrs.get('data-website-id') == '41a6c926-f20e-4490-80f4-fc75e59ddfa3'):
+            self.umami += 1
+        if hostname == 'static.cloudflareinsights.com' and src.path.startswith('/beacon.min.js'):
+            self.cloudflare += 1
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -94,6 +106,7 @@ def check_page(url):
     assert metadata.og_urls == [url], f'{url} declares Open Graph URLs {metadata.og_urls}.'
     assert metadata.umami == 1, f'{url} serves {metadata.umami} SOMA Umami trackers.'
     assert metadata.cloudflare == 1, f'{url} serves {metadata.cloudflare} Cloudflare Web Analytics beacons.'
+    assert metadata.google_tag_manager == 1, f'{url} serves {metadata.google_tag_manager} SOMA Google Tag Manager scripts.'
     directives = metadata.robots + headers.get_all('X-Robots-Tag', [])
     assert not any(NOINDEX.search(rule) for rule in directives), f'{url} is marked noindex.'
 
@@ -153,6 +166,7 @@ def verify_preview_build():
 
 def verify_preview(origin):
     dist, pages = preview_files()
+    is_cloudflare_preview = (urlsplit(origin).hostname or '').endswith('.pages.dev')
     paths = [
         path.relative_to(dist).as_posix().removesuffix('index.html')
         for path in pages
@@ -165,14 +179,16 @@ def verify_preview(origin):
             html, headers = fetch(url, 'text/html')
         except HTTPError as error:
             try:
-                # A password gate may refuse a built page. The homepage must stay public.
-                if path in ('', '/') or error.code != 403:
+                # The inbox can refuse preview access when its password is unavailable.
+                if path != 'mensajes/' or error.code != 403:
                     raise
                 html = error.read().decode(error.headers.get_content_charset() or 'utf-8')
             finally:
                 error.close()
         else:
             assert headers.get_content_type() == 'text/html', f'{url} did not serve HTML.'
+            if is_cloudflare_preview:
+                assert NOINDEX.search(headers.get('X-Robots-Tag', '')), f'{url} is missing the preview noindex header.'
         check_no_analytics(html, url)
 
     with ThreadPoolExecutor(max_workers=4) as pool:
@@ -190,6 +206,8 @@ def verify_preview(origin):
     else:
         raise AssertionError(f'{missing} returned HTTP 200, expected 404.')
     print(f'No analytics trackers on {len(paths)} deployed preview pages or the 404 response.')
+    if is_cloudflare_preview:
+        print('Cloudflare Pages blocks indexing on public preview routes.')
 
 
 if __name__ == '__main__':
@@ -202,7 +220,7 @@ if __name__ == '__main__':
         verify_preview_build()
         raise SystemExit(0)
 
-    check_name = 'Preview analytics' if args.preview else 'Production search'
+    check_name = 'Preview search and analytics' if args.preview else 'Production search'
     # The newest artifact may take a few seconds to reach the public edge.
     for delay in (5, 10, 20, None):
         try:

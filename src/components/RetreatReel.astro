@@ -1,0 +1,112 @@
+---
+import type { RetreatReel } from '../lib/retreat-reels';
+import { path } from '../lib/paths';
+
+interface Props {
+  reel: RetreatReel;
+}
+
+const { reel } = Astro.props;
+const media = path('/media/retreat/reels/' + reel.id);
+const file = path('/media/retreat/reels/video/' + reel.id + '.mp4');
+---
+<figure class="retreat-reel">
+  <div class="retreat-reel__player">
+    <video
+      aria-label={reel.title}
+      poster={media + '.webp'}
+      width="540"
+      height="960"
+      preload="none"
+      playsinline
+      controls
+    >
+      <source src={file} type="video/mp4" />
+      <track kind="captions" src={path('/media/retreat/reels/musica.vtt')} srclang="es" label="Español" />
+      <a href={file}>Ver el video «{reel.title}»</a>
+    </video>
+    <button class="retreat-reel__play" type="button" aria-label={'Reproducir: ' + reel.title} hidden>
+      <span aria-hidden="true"></span>
+    </button>
+  </div>
+  <figcaption>
+    <strong>{reel.title}</strong>
+    <span>{reel.caption}</span>
+  </figcaption>
+</figure>
+
+<script>
+  const videos = document.querySelectorAll<HTMLVideoElement>('.retreat-reel video');
+  for (const video of videos) {
+    video.addEventListener('play', () => {
+      for (const other of videos) {
+        if (other !== video) other.pause();
+      }
+    });
+
+    const play = video.parentElement?.querySelector<HTMLButtonElement>('.retreat-reel__play');
+    if (!play) continue;
+    video.controls = false;
+    play.hidden = false;
+    play.addEventListener('click', () => {
+      video.controls = true;
+      play.hidden = true;
+      video.focus({ preventScroll: true });
+      // Keep the native controls available if the browser declines to start playback.
+      void video.play().catch(() => {});
+    });
+  }
+</script>
+
+<style>
+  .retreat-reel { min-inline-size: 0; margin: 0; }
+  .retreat-reel__player { position: relative; }
+  video {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    border-radius: 1.15rem;
+    background: #172820;
+    color-scheme: dark;
+  }
+  .retreat-reel__play {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 1.15rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .retreat-reel__play:not([hidden]) { display: grid; place-items: center; }
+  .retreat-reel__play span {
+    display: grid;
+    place-items: center;
+    inline-size: 3.55rem;
+    aspect-ratio: 1;
+    border: 1px solid #f7eee0b3;
+    border-radius: 50%;
+    background: #172820d9;
+    color: #fffaf2;
+  }
+  .retreat-reel__play:is(:hover, :focus-visible) span { background: #172820; }
+  .retreat-reel__play span::after {
+    content: '';
+    margin-inline-start: .2rem;
+    border-block: .47rem solid transparent;
+    border-inline-start: .75rem solid currentColor;
+  }
+  :is(video, .retreat-reel__play):focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  figcaption {
+    display: grid;
+    gap: .18rem;
+    margin-block-start: .65rem;
+    color: var(--muted);
+    font-size: .89rem;
+    line-height: 1.45;
+  }
+  figcaption strong { color: var(--pine-dark); font-size: 1rem; }
+</style>

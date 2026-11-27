@@ -1,7 +1,10 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { analyticsEnabled } from '../lib/analytics';
+import { mediaUrl } from '../lib/media';
 import { path } from '../lib/paths';
+import { somaInstagram, somaName, somaOrganizationId } from '../lib/site-identity';
 import '../styles/global.css';
 import '../styles/responsive.css';
 import '../styles/editorial-images.css';
@@ -10,62 +13,175 @@ import '../styles/portrait.css';
 import '../styles/aula-card-layout.css';
 import '../styles/aula-biography.css';
 import '../styles/learning-access.css';
+import '../styles/open-journey.css';
+interface Props {
+  title?: string;
+  description: string;
+  noIndex?: boolean;
+  openJourney?: boolean;
+  revealHeader?: boolean;
+  ogImage?: string | null;
+  ogImageAlt?: string;
+  ogType?: 'article' | 'website';
+  breadcrumbs?: { name: string; href: string }[];
+  breadcrumbName?: string;
+  structuredData?: Record<string, unknown>[];
+}
+
 const {
-  title = 'SOMA CONSCIENTE',
-  description = 'Cuatro caminos, un mismo núcleo. Aprendizaje, prácticas gratuitas y acompañamiento desde el cuerpo, la emoción, la consciencia y la naturaleza.',
+  title,
+  description,
   noIndex = false,
-  ogImage = '/og/soma-consciente.png',
-  ogImageAlt = 'SOMA CONSCIENTE — cuatro caminos, un mismo núcleo, con el emblema original de las cuatro Aulas.'
+  openJourney = false,
+  revealHeader = false,
+  ogImage,
+  ogImageAlt,
+  ogType = 'website',
+  breadcrumbs = [],
+  breadcrumbName = title ?? somaName,
+  structuredData = [],
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// Both URLs are absolute HTTPS URLs. Social crawlers cannot resolve relative assets.
-const socialImage = new URL(ogImage.startsWith('https://') ? ogImage : path(ogImage), Astro.site);
-const pageTitle = title === 'SOMA CONSCIENTE'
-  ? title + ' · Cuatro caminos, un mismo núcleo'
-  : title + ' · SOMA CONSCIENTE';
-const socialDescription = description.trim().length >= 60
-  ? description.trim()
-  : description.trim() + ' Descubrí prácticas, recorridos y reflexiones para aprender e integrar desde SOMA CONSCIENTE.';
+const suppliedImage = mediaUrl(ogImage ?? undefined);
+const customCover = suppliedImage?.startsWith('/') ? suppliedImage : undefined;
+const socialImage = new URL(customCover ?? path('/og/soma-consciente.png'), Astro.site);
+const socialImageAlt = customCover && ogImageAlt
+  ? ogImageAlt
+  : 'Emblema de SOMA CONSCIENTE sobre un fondo claro';
+const imageTypes: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
+const socialImageType = imageTypes[socialImage.pathname.split('.').pop()?.toLowerCase() ?? ''];
+const pageTitle = title ? title + ' · ' + somaName : somaName + ' · Retiros en Córdoba e integración online';
+const schemas: Record<string, unknown>[] = [...structuredData];
+
+if (canonical.pathname === '/') {
+  schemas.push(
+    { '@type': 'WebSite', name: somaName, url: canonical.href },
+    {
+      '@type': 'Organization',
+      '@id': somaOrganizationId(Astro.site),
+      name: somaName,
+      url: canonical.href,
+      description,
+      logo: new URL(path('/media/soma-original-emblem.png'), Astro.site).href,
+      sameAs: [somaInstagram],
+    },
+  );
+}
+
+if (breadcrumbs.length) {
+  schemas.push({
+    '@type': 'BreadcrumbList',
+    itemListElement: [...breadcrumbs, { name: breadcrumbName, href: canonical.pathname }].map(({ name, href }, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name,
+      item: new URL(href, Astro.site).href,
+    })),
+  });
+}
+
 ---
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    {analyticsEnabled && (
+      <>
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { window.dataLayer.push(arguments); }
+          gtag('js', new Date());
+        </script>
+        <script is:inline async src="https://www.googletagmanager.com/gtm.js?id=GTM-NWH9TMKN"></script>
+      </>
+    )}
+    <meta name="color-scheme" content="light dark"/>
     <meta name="theme-color" content="#f7f1e8"/>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const system = window.matchMedia('(prefers-color-scheme: dark)');
+        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const key = 'soma-theme';
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        let selection;
+        let toggle;
+
+        const readTheme = () => {
+          try {
+            const stored = localStorage.getItem(key);
+            return stored === 'light' || stored === 'dark' ? stored : undefined;
+          } catch {
+            return undefined;
+          }
+        };
+        const currentTheme = () => selection ?? (system.matches ? 'dark' : 'light');
+        const apply = () => {
+          const dark = currentTheme() === 'dark';
+          if (selection) root.dataset.theme = selection;
+          else delete root.dataset.theme;
+          themeColor.content = dark ? '#242d25' : '#f7f1e8';
+          toggle?.setAttribute('aria-checked', String(dark));
+        };
+
+        selection = readTheme();
+        apply();
+        system.addEventListener('change', apply);
+        window.addEventListener('storage', (event) => {
+          if (event.key !== key && event.key !== null) return;
+          selection = readTheme();
+          apply();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+          toggle = document.querySelector('[data-theme-toggle]');
+          if (!toggle) return;
+          apply();
+          toggle.hidden = false;
+          toggle.addEventListener('click', () => {
+            selection = currentTheme() === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem(key, selection); } catch {}
+            if (motion.matches || !document.startViewTransition) {
+              apply();
+              return;
+            }
+            document.startViewTransition(apply);
+          });
+        }, { once: true });
+      })();
+    </script>
     <meta name="description" content={description}/>
     {noIndex
       ? <meta name="robots" content="noindex"/>
       : <link rel="canonical" href={canonical.toString()}/>}
     <link rel="sitemap" href={path('/sitemap-index.xml')}/>
     <link rel="icon" type="image/svg+xml" href={path('/favicon.svg')}/>
-    <meta property="og:type" content="website"/>
+    <meta property="og:type" content={ogType}/>
     <meta property="og:locale" content="es_AR"/>
-    <meta property="og:site_name" content="SOMA CONSCIENTE"/>
+    <meta property="og:site_name" content={somaName}/>
     <meta property="og:url" content={canonical.toString()}/>
     <meta property="og:title" content={pageTitle}/>
-    <meta property="og:description" content={socialDescription}/>
+    <meta property="og:description" content={description}/>
     <meta property="og:image" content={socialImage.toString()}/>
     <meta property="og:image:secure_url" content={socialImage.toString()}/>
-    <meta property="og:image:type" content="image/png"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
-    <meta property="og:image:alt" content={ogImageAlt}/>
+    {socialImageType && <meta property="og:image:type" content={socialImageType}/>}
+    {!customCover && (
+      <>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+      </>
+    )}
+    <meta property="og:image:alt" content={socialImageAlt}/>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content={pageTitle}/>
-    <meta name="twitter:description" content={socialDescription}/>
+    <meta name="twitter:description" content={description}/>
     <meta name="twitter:image" content={socialImage.toString()}/>
-    <meta name="twitter:image:alt" content={ogImageAlt}/>
+    <meta name="twitter:image:alt" content={socialImageAlt}/>
     <title>{pageTitle}</title>
-    {canonical.pathname === '/' && (
-      <script type="application/ld+json" set:html={JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'SOMA CONSCIENTE',
-        url: canonical.href,
-      })}></script>
-    )}
-    {import.meta.env.PROD && import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && (
+    {!noIndex && schemas.map(schema => (
+      <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', ...schema }).replace(/</g, '\\u003c')}></script>
+    ))}
+    {analyticsEnabled && (
       <script
         is:inline
         defer
@@ -78,9 +194,9 @@ const socialDescription = description.trim().length >= 60
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
   </head>
-  <body>
+  <body class:list={{ 'journey-page': openJourney }}>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <Header/>
+    <Header reveal={revealHeader}/>
     <main id="contenido"><slot/></main>
     <Footer/>
   </body>

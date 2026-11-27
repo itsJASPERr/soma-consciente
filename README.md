@@ -157,6 +157,36 @@ según el canal y la ubicación del enlace.
 
 [Enlace para la bio de Instagram](https://soma-consciente.com/?utm_source=instagram&utm_medium=social&utm_campaign=programa_online&utm_content=bio#programa-online)
 
+### Medición del retiro de enero de 2027
+
+En Umami, el embudo principal **Retiro de enero 2027 · Clics a WhatsApp**
+parte de una visita a `/encuentros/retiro-enero-2027*` y llega al evento
+`retreat_whatsapp_clicked` en un máximo de 60 minutos. El evento indica que
+se abrió el enlace a WhatsApp. El mensaje y la confirmación del lugar
+suceden fuera del sitio.
+
+| Evento | Qué registra | `placement` |
+| --- | --- | --- |
+| `retreat_listing_clicked` | Clic que abre el listado de encuentros | `site_header`, `integration_page` |
+| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `team_footer` |
+| `retreat_registration_clicked` | Clic en «Consultar por un lugar» que lleva a la sección de inscripción | `retreat_hero` |
+| `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `event_card_registration`, `retreat_registration`, `retreat_pricing` |
+| `retreat_schedule_clicked` | Clic en «Ver el cronograma» | `retreat_hero` |
+| `retreat_pricing_viewed` | Al menos la mitad de la primera opción de pago visible, una vez por carga | |
+
+Para comparar las entradas internas, consultá `retreat_details_clicked`
+por `placement`. Los clics a WhatsApp desde el listado también aparecen
+en Eventos aunque la persona no haya visitado la página del retiro.
+Usá `retreat_registration_clicked` como señal intermedia opcional: las
+personas también pueden desplazarse directamente a la inscripción.
+
+Los clics con una fecha específica y las vistas de precios llevan la propiedad `retreat_edition` (por ejemplo, `retiro-febrero-2027`). Los clics desde las tarjetas de precios también llevan la propiedad `payment_plan`.
+
+Los eventos del retiro no agregan datos personales. Los enlaces de campaña
+deben llevar a la página del retiro para medir el recorrido en el sitio.
+
+[Enlace del retiro para la bio de Instagram](https://soma-consciente.com/encuentros/retiro-enero-2027/?utm_source=instagram&utm_medium=social&utm_campaign=retiro_enero_2027&utm_content=bio)
+
 ## Edición de contenido
 
 Pages CMS ya está vinculado al proyecto. No se necesita otra instancia ni una nueva conexión.

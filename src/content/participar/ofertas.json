@@ -3,15 +3,46 @@
   "offers": [
     {
       "slug": "encuentro-enero",
-      "title": "Encuentro presencial de enero",
-      "when": "15–16 de enero de 2027",
+      "title": "Retiro SOMA Consciente",
+      "when": "23 y 24 de enero de 2027",
       "description": "Dos días para encontrarnos y compartir experiencias en persona.",
-      "venue": "Casa Sabia · La Falda, Córdoba",
-      "details": "Incluye un mes de participación en los círculos de integración online.",
+      "venue": "Casa Sabia · Huerta Grande, Córdoba",
+      "details": "Incluye los dos días y cuatro encuentros grupales de integración online.",
+      "homeNote": "Incluye cuatro encuentros grupales de integración online.",
       "action": "Solicitar inscripción",
       "followUp": "Te contactaremos para compartir los detalles y confirmar tu inscripción.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20de%20SOMA%20del%2015%20y%2016%20de%20enero%20de%202027.",
-      "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio."
+      "context": "",
+      "pending": "",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2023%20y%2024%20de%20enero.",
+      "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+      "dates": [
+        {
+          "slug": "encuentro-enero",
+          "pageSlug": "retiro-enero-2027",
+          "startDate": "2027-01-23",
+          "endDate": "2027-01-24",
+          "language": "Español",
+          "when": "23 y 24 de enero de 2027",
+          "venue": "Casa Sabia · Huerta Grande, Córdoba",
+          "details": "Incluye los dos días y cuatro encuentros grupales de integración online.",
+          "action": "Solicitar inscripción",
+          "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+          "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2023%20y%2024%20de%20enero."
+        },
+        {
+          "slug": "encuentro-febrero",
+          "pageSlug": "retiro-febrero-2027",
+          "startDate": "2027-02-15",
+          "endDate": "2027-02-16",
+          "language": "Español",
+          "when": "15 y 16 de febrero de 2027",
+          "venue": "Casa Sabia · Huerta Grande, Córdoba",
+          "details": "Incluye los dos días y cuatro encuentros grupales de integración online.",
+          "action": "Solicitar inscripción",
+          "actionHint": "Abre un chat con Yanina por WhatsApp. Si hay lugar, el equipo te confirma la inscripción por ese medio.",
+          "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20consultar%20por%20el%20encuentro%20del%2015%20y%2016%20de%20febrero."
+        }
+      ]
     },
     {
       "slug": "circulos",
@@ -20,9 +51,12 @@
       "when": "Una vez por semana",
       "description": "Un espacio grupal para retomar lo vivido y darle lugar en lo cotidiano.",
       "details": "ARS 20.000 por mes",
+      "homeNote": "",
       "action": "Quiero participar",
       "followUp": "Te enviaremos los horarios y los pasos para sumarte al círculo semanal.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20saber%20c%C3%B3mo%20sumarme%20al%20c%C3%ADrculo%20semanal%20de%20integraci%C3%B3n%20de%20SOMA.",
+      "context": "Podés sumarte por tu cuenta. Si participás de un retiro de SOMA, tenés cuatro encuentros grupales de integración incluidos.",
+      "pending": "El precio corresponde a la participación mensual independiente.",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20Quisiera%20saber%20c%C3%B3mo%20sumarme%20al%20c%C3%ADrculo%20semanal%20de%20integraci%C3%B3n.",
       "actionHint": "Por WhatsApp con Yanina."
     },
     {
@@ -32,22 +66,28 @@
       "when": "Fecha a anunciar",
       "description": "Una invitación a conocernos en Casa Sabia.",
       "venue": "Casa Sabia",
-      "details": "La Falda, Córdoba",
+      "details": "Huerta Grande, Córdoba",
+      "homeNote": "",
       "action": "Avisame la fecha",
       "followUp": "Te avisaremos cuando se confirme la fecha de Puerta Abierta en Casa Sabia.",
-      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20%C2%BFMe%20avis%C3%A1s%20cuando%20haya%20fecha%20para%20Puerta%20Abierta%20en%20Casa%20Sabia%3F",
+      "context": "",
+      "pending": "La solicitud es para recibir la fecha cuando esté definida.",
+      "url": "https://wa.me/5493533444784?text=Hola%2C%20Yanina.%20%C2%BFMe%20avis%C3%A1s%20cuando%20haya%20fecha%20para%20Puerta%20Abierta%3F",
       "actionHint": "Abre WhatsApp con Yanina para pedir novedades sobre la fecha."
     },
     {
       "slug": "grupo-whatsapp",
-      "title": "Grupo gratuito de WhatsApp",
+      "title": "SOMA en WhatsApp",
       "when": "",
       "description": "En el grupo general podés presentarte, hacer preguntas y compartir lo que te quedó resonando.",
-      "details": "",
-      "action": "Pedir el enlace",
+      "details": "Comunidad gratuita",
+      "homeNote": "",
+      "action": "Unirme al grupo",
       "followUp": "Te enviaremos el enlace para que puedas sumarte al grupo gratuito.",
+      "context": "",
+      "pending": "",
       "url": "https://chat.whatsapp.com/ChxlvWZHbR28tlMI08V8mN",
-      "actionHint": "Abre la invitación en WhatsApp."
+      "actionHint": "El enlace lleva directo a la invitación de WhatsApp."
     }
   ]
 }
