@@ -79,6 +79,10 @@ content:
             type: object
             list: true
             fields:
+              - { name: slug, label: Identificador de inscripción, type: string, required: true }
+              - { name: pageSlug, label: Identificador de la página del retiro, type: string, required: true }
+              - { name: startDate, label: Primer día (AAAA-MM-DD), type: string, required: true }
+              - { name: endDate, label: Último día (AAAA-MM-DD), type: string, required: true }
               - { name: language, label: Idioma, type: string }
               - { name: when, label: Fecha, type: string, required: true }
               - { name: venue, label: Lugar, type: string, required: true }

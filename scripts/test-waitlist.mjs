@@ -88,6 +88,7 @@ try {
   assert.equal(await submit({ ...request, consent: undefined }), 400);
   assert.equal(await submit(request), 204);
   assert.equal(await submit({ ...request, name: 'Duplicate' }), 204);
+  assert.equal(await submit({ ...request, offering: 'encuentro-febrero' }), 204);
   assert.equal(await submit({ ...request, offering: 'circulos' }), 204);
   const offers = database.prepare(
     'SELECT offering, name, consent_version FROM offering_requests ORDER BY offering',
@@ -95,6 +96,7 @@ try {
   assert.deepEqual(offers, [
     { offering: 'circulos', name: 'María Pérez', consent_version: offeringConsentVersion },
     { offering: 'encuentro-enero', name: 'María Pérez', consent_version: offeringConsentVersion },
+    { offering: 'encuentro-febrero', name: 'María Pérez', consent_version: offeringConsentVersion },
   ]);
   assert.equal(database.prepare('SELECT COUNT(*) AS total FROM waitlist_signups').get().total, 3);
   console.log('PASS: signup requests are routed by offer, deduplicate per offer, and preserve prior waitlist entries.');

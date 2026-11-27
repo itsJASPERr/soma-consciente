@@ -119,8 +119,8 @@ suceden fuera del sitio.
 
 | Evento | Qué registra | `placement` |
 | --- | --- | --- |
-| `retreat_listing_clicked` | Clic en «Ver encuentros» del encabezado que abre el listado | `site_header` |
-| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `integration_page`, `team_footer` |
+| `retreat_listing_clicked` | Clic que abre el listado de encuentros | `site_header`, `integration_page` |
+| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `team_footer` |
 | `retreat_registration_clicked` | Clic en «Consultar por un lugar» que lleva a la sección de inscripción | `retreat_hero` |
 | `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `event_card_registration`, `retreat_registration`, `retreat_pricing` |
 | `retreat_schedule_clicked` | Clic en «Ver el cronograma» | `retreat_hero` |
@@ -132,7 +132,7 @@ en Eventos aunque la persona no haya visitado la página del retiro.
 Usá `retreat_registration_clicked` como señal intermedia opcional: las
 personas también pueden desplazarse directamente a la inscripción.
 
-Los clics desde las tarjetas de precios también llevan la propiedad `payment_plan`.
+Los clics con una fecha específica y las vistas de precios llevan la propiedad `retreat_edition` (por ejemplo, `retiro-febrero-2027`). Los clics desde las tarjetas de precios también llevan la propiedad `payment_plan`.
 
 Los eventos del retiro no agregan datos personales. Los enlaces de campaña
 deben llevar a la página del retiro para medir el recorrido en el sitio.

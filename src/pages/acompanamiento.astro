@@ -41,7 +41,7 @@ const showDialog = requestsEnabled && [circle, community].some(offer => offer &&
   {circle?.context && (
     <div class="container journey-row">
       <p>{circle.context}</p>
-      <a class="journey-link" href={path('/encuentros/retiro-enero-2027/')} {...retreatCta('details', 'integration_page')}>Ver el encuentro de enero <span aria-hidden="true">↗</span></a>
+      <a class="journey-link" href={path('/encuentros/#encuentro-enero')} {...retreatCta('listing', 'integration_page')}>Ver fechas del retiro <span aria-hidden="true">↗</span></a>
     </div>
   )}
   {community && (

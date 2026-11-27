@@ -8,7 +8,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import { loadAulas } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
-import { offeringUrl, offerings, type Offering } from '../lib/offerings';
+import { offeringUrl, offerings, retreatEditions, retreatOffering as encounter } from '../lib/offerings';
 import { retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
 
@@ -17,36 +17,13 @@ const aulas = await loadAulas();
 const areas = ['nicole', 'jasper', 'yanina', 'nico']
   .map((slug) => aulas.find((aula) => aula.slug === slug))
   .filter((aula) => aula !== undefined);
-const encounter = offerings.find(offer => offer.slug === 'encuentro-enero');
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
-const retreatDates = encounter && 'dates' in encounter && encounter.dates?.length
-  ? encounter.dates
-  : [];
-const retreatEvents: Offering[] = encounter
-  ? (retreatDates.length ? retreatDates : [{
-      when: encounter.when || '',
-      venue: encounter.venue || '',
-      details: encounter.details || '',
-      action: encounter.action,
-      actionHint: encounter.actionHint,
-      url: encounter.url,
-    }]).map((date, index) => ({
-      ...encounter,
-      slug: index === 0 ? encounter.slug : encounter.slug + '-' + (index + 1),
-      when: date.when,
-      venue: date.venue,
-      details: date.details,
-      action: date.action,
-      actionHint: date.actionHint,
-      url: date.url,
-    }))
-  : [];
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
-const showDialog = requestsEnabled && [encounter, door].some(offer => offer && !offeringUrl(offer));
+const showDialog = requestsEnabled && [...retreatEditions, door].some(offer => offer && !offeringUrl(offer));
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
-<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. La próxima fecha es el 23 y 24 de enero de 2027 en Casa Sabia, Huerta Grande, e incluye cuatro encuentros grupales de integración online." openJourney>
+<SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. Consultá las próximas fechas en Casa Sabia, Huerta Grande. Cada retiro incluye cuatro encuentros grupales de integración online." openJourney>
   {encounter ? (
     <article id={encounter.slug} class="offering retreat" aria-labelledby="encuentro-title">
       <div class:list={['container', 'journey-hero', { 'journey-hero--photo': fire.src }]}>
@@ -70,21 +47,26 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
       <div class="container retreat-dates">
         <h2>Próximas fechas</h2>
         <div class="event-grid">
-          {retreatEvents.map((event, index) => {
+          {retreatEditions.map((event, index) => {
             const featured = index === 0;
-            const registrationAnalytics = featured && offeringUrl(event)?.startsWith('https://wa.me/')
-              ? retreatCta('whatsapp', 'event_card_registration')
+            const registrationAnalytics = offeringUrl(event)?.startsWith('https://wa.me/')
+              ? retreatCta('whatsapp', 'event_card_registration', event.pageSlug)
               : undefined;
             return (
-              <section class:list={['event-card', { 'event-card--featured': featured }]} aria-labelledby={event.slug + '-card-title'}>
+              <section
+                id={event.slug === encounter.slug ? undefined : event.slug}
+                class:list={['event-card', featured ? 'event-card--featured' : 'event-card--date']}
+                aria-labelledby={event.slug + '-card-title'}
+                aria-describedby={event.slug + '-card-date'}
+              >
                 <div class="event-card__content">
-                  <p class="event-meta event-card__date"><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong>{event.when}</strong></p>
+                  <p class="event-meta event-card__date" id={event.slug + '-card-date'}><Icon name="iconoir:calendar" size={18} aria-hidden="true" /><strong>{event.when}</strong></p>
                   <h3 id={event.slug + '-card-title'}>
-                    {featured ? <>Cuerpo, respiración <em>y naturaleza</em></> : event.title}
+                    Cuerpo, respiración <em>y naturaleza</em>
                   </h3>
                   <div class="event-card__facts">
                     {event.venue && <p class="event-meta"><Icon name="iconoir:map-pin" size={18} aria-hidden="true" /><span>{event.venue}</span></p>}
-                    <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{retreatDates[index]?.language || 'Español'}</span></p>
+                    <p class="event-meta"><Icon name="iconoir:language" size={18} aria-hidden="true" /><span>{event.language}</span></p>
                   </div>
                   {event.details && (
                     <div class="event-benefit">
@@ -94,11 +76,11 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
                     </div>
                   )}
                   <div class="event-card__actions">
-                    {featured && <a class="btn event-card__details" href={path('/encuentros/retiro-enero-2027/')} {...retreatCta('details', 'event_card_details')}>Ver programa y precios <span aria-hidden="true">↗</span></a>}
+                    <a class="btn event-card__details" href={path(event.href)} {...retreatCta('details', 'event_card_details', event.pageSlug)}>Ver programa y precios <span aria-hidden="true">↗</span></a>
                     <OfferingAction
                       offer={event}
                       requestsEnabled={requestsEnabled}
-                      class={featured ? 'btn btn--outline' : 'btn'}
+                      class="btn btn--outline"
                       analytics={registrationAnalytics}
                       showArrow
                     />
@@ -150,7 +132,7 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
       <EditorialPhoto image={journal} class="journey-photo--wide" />
       <div>
         <h2>Después del encuentro</h2>
-        <p>El encuentro de enero incluye cuatro encuentros grupales de integración online. Después del retiro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
+        <p>Cada retiro incluye cuatro encuentros grupales de integración online. Después del retiro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>
         <a class="btn btn--light" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
       </div>
     </div>
@@ -200,19 +182,23 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     background: var(--surface-editorial);
   }
   .event-card h3 { margin: 0 0 .35rem; color: var(--pine-dark); font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
-  .event-card--featured {
-    display: grid;
-    grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
-    align-items: center;
-    gap: 0 clamp(1rem, 3.7vw, 3.2rem);
+  .event-card--featured, .event-card--date {
     grid-column: 1 / -1;
     padding: 0;
     border-inline: 0;
     border-radius: 0;
     background: transparent;
   }
+  .event-card--featured {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
+    align-items: center;
+    gap: 0 clamp(1rem, 3.7vw, 3.2rem);
+  }
+  .event-card--featured + .event-card--date { border-block-start: 0; }
   .event-card__content { min-width: 0; }
-  .event-card--featured .event-card__content { padding-block: clamp(1.45rem, 4vw, 2.75rem); }
+  .event-card--featured .event-card__content,
+  .event-card--date .event-card__content { padding-block: clamp(1.45rem, 4vw, 2.75rem); }
   .event-card .event-card__date {
     color: var(--journey-clay);
     font-size: .9rem;

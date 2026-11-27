@@ -5,7 +5,7 @@ import {
   type CountryCode,
 } from 'libphonenumber-js/min';
 import { offeringConsentVersion, waitlistConsentVersion } from '../../src/lib/waitlist-consent.ts';
-import { offerings } from '../../src/lib/offerings.ts';
+import { offerings, retreatEditions } from '../../src/lib/offerings.ts';
 
 type Context = {
   request: Request;
@@ -58,7 +58,9 @@ export async function onRequest({ request, env }: Context) {
   }
   if (!input || typeof input !== 'object') return response(400, 'format');
   const { offering } = input;
-  if (offering !== undefined && (typeof offering !== 'string' || !offerings.some(offer => offer.slug === offering))) {
+  if (offering !== undefined &&
+      (typeof offering !== 'string' ||
+        (!offerings.some(offer => offer.slug === offering) && !retreatEditions.some(edition => edition.slug === offering)))) {
     return response(400, 'offering');
   }
   const consentVersion = offering ? offeringConsentVersion : waitlistConsentVersion;

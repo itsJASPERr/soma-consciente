@@ -15,6 +15,7 @@ const paths=[
  '/',
  '/encuentros/',
  '/encuentros/retiro-enero-2027/',
+ '/encuentros/retiro-febrero-2027/',
  '/acompanamiento/',
  '/enfoque/',
  '/nucleo/',
@@ -186,9 +187,13 @@ try{
   await page.waitForURL('**/#nuestros-valores');
   assert.equal(await page.locator('.home-hero a[href="#proximos-encuentros"]').count(), 0);
   const hasUmami = (await page.locator('script[data-website-id]').count()) === 1;
-  const verifyRetreatCta = async (link, action, placement) => {
+  const januaryEdition = 'retiro-enero-2027';
+  const februaryEdition = 'retiro-febrero-2027';
+  const februaryPath = '/encuentros/' + februaryEdition + '/';
+  const verifyRetreatCta = async (link, action, placement, edition) => {
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
     assert.equal(await link.getAttribute('data-umami-event-placement'), hasUmami ? placement : null);
+    assert.equal(await link.getAttribute('data-umami-event-retreat_edition'), hasUmami && edition ? edition : null);
   };
   const verifyHeaderCta = async () => {
     const cta = page.locator('.header-cta');
@@ -198,14 +203,23 @@ try{
   };
   const homeCalendar = page.locator('.home-calendar');
   await verifyHeaderCta();
-  await verifyRetreatCta(homeCalendar.locator('h3 a[href="/encuentros/retiro-enero-2027/"]'), 'details', 'home_calendar_title');
-  const homeDetails = homeCalendar.getByRole('link', { name: 'Ver el encuentro' });
-  await verifyRetreatCta(homeDetails, 'details', 'home_calendar_link');
+  const january = homeCalendar.locator('.home-calendar__event--featured');
+  const february = homeCalendar.locator('.home-calendar__event').filter({ hasText: '15 y 16 de febrero de 2027' });
+  await verifyRetreatCta(january.locator('h3 a'), 'details', 'home_calendar_title', januaryEdition);
+  const februaryHomeLink = february.getByRole('link', { name: 'Ver el encuentro' });
+  await verifyRetreatCta(februaryHomeLink, 'details', 'home_calendar_link', februaryEdition);
+  assert.equal(await februaryHomeLink.getAttribute('href'), februaryPath);
+  await februaryHomeLink.click();
+  await page.waitForURL('**' + februaryPath);
+  await page.getByText('15 y 16 de febrero de 2027', { exact: true }).waitFor();
+  await page.goto(HOST + BASE + '/');
+  const homeDetails = january.getByRole('link', { name: 'Ver el encuentro' });
+  await verifyRetreatCta(homeDetails, 'details', 'home_calendar_link', januaryEdition);
   await homeDetails.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/');
   const retreatHero = page.locator('.retreat-hero');
   const scheduleLink = retreatHero.getByRole('link', { name: 'Ver el cronograma' });
-  await verifyRetreatCta(scheduleLink, 'schedule', 'retreat_hero');
+  await verifyRetreatCta(scheduleLink, 'schedule', 'retreat_hero', januaryEdition);
   await verifyHeaderCta();
   assert.equal(await page.locator('[data-retreat-pricing]').count(), hasUmami ? 1 : 0);
   await scheduleLink.click();
@@ -218,11 +232,11 @@ try{
   });
   await page.getByRole('heading', { name: 'Domingo 24' }).waitFor();
   const registrationJump = retreatHero.getByRole('link', { name: 'Consultar por un lugar' });
-  await verifyRetreatCta(registrationJump, 'registration', 'retreat_hero');
+  await verifyRetreatCta(registrationJump, 'registration', 'retreat_hero', januaryEdition);
   await registrationJump.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/#participar');
   const registration = page.locator('#participar:target').getByRole('link', { name: 'Solicitar inscripción' });
-  await verifyRetreatCta(registration, 'whatsapp', 'retreat_registration');
+  await verifyRetreatCta(registration, 'whatsapp', 'retreat_registration', januaryEdition);
   const retreatLink = new URL(await registration.getAttribute('href'));
   assert.equal(retreatLink.origin, 'https://wa.me');
   assert.match(retreatLink.searchParams.get('text'), /23 y 24 de enero/);
@@ -239,7 +253,7 @@ try{
     if (total) await plan.getByText(total, { exact: true }).waitFor();
     const cta = plan.getByRole('link', { name: 'Consultar por WhatsApp · ' + label, exact: true });
     assert.equal((await cta.textContent()).trim(), 'WhatsApp ↗');
-    await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing');
+    await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing', januaryEdition);
     assert.equal(await cta.getAttribute('data-umami-event-payment_plan'), hasUmami ? id : null);
     const url = new URL(await cta.getAttribute('href'));
     assert.equal(url.origin, retreatLink.origin);
@@ -260,20 +274,20 @@ try{
   }
   await page.goto(HOST+BASE+'/encuentros/');
   const encounter = page.locator('article#encuentro-enero');
-  const eventCard = encounter.getByRole('region', { name: 'Cuerpo, respiración y naturaleza' });
+  const eventCard = encounter.locator('.event-card--featured');
   const eventPhoto = eventCard.getByRole('img', { name: /caballos en un claro del bosque/ });
   await eventPhoto.scrollIntoViewIfNeeded();
   await eventPhoto.evaluate(image => image.decode());
   const cardDetails = eventCard.getByRole('link', { name: 'Ver programa y precios' });
-  await verifyRetreatCta(cardDetails, 'details', 'event_card_details');
+  await verifyRetreatCta(cardDetails, 'details', 'event_card_details', januaryEdition);
   await cardDetails.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/');
   await page.goto(HOST+BASE+'/encuentros/');
   await eventCard.getByRole('heading', { name: 'Qué incluye' }).waitFor();
   await eventCard.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
-  await encounter.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
+  await eventCard.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
   const cardRegistration = eventCard.getByRole('link', { name: 'Solicitar inscripción' });
-  await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration');
+  await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration', januaryEdition);
   await verifyHeaderCta();
   const encounterLink = new URL(await cardRegistration.getAttribute('href'));
   assert.equal(encounterLink.origin, 'https://wa.me');
@@ -281,9 +295,35 @@ try{
   const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
   assert.equal(doorLink.pathname, encounterLink.pathname);
   assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
+  const februaryCard = encounter.locator('#encuentro-febrero');
+  const februaryDetails = februaryCard.getByRole('link', { name: 'Ver programa y precios' });
+  const februaryRegistration = februaryCard.getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(februaryDetails, 'details', 'event_card_details', februaryEdition);
+  await verifyRetreatCta(februaryRegistration, 'whatsapp', 'event_card_registration', februaryEdition);
+  const februaryRegistrationUrl = new URL(await februaryRegistration.getAttribute('href'));
+  assert.equal(februaryRegistrationUrl.pathname, encounterLink.pathname);
+  const februaryMessage = februaryRegistrationUrl.searchParams.get('text');
+  assert.match(februaryMessage, /15 y 16 de febrero/);
+  await februaryDetails.click();
+  await page.waitForURL('**' + februaryPath);
+  await page.getByRole('heading', { name: 'Lunes 15' }).waitFor();
+  await page.getByRole('heading', { name: 'Martes 16' }).waitFor();
+  const februaryJoin = page.locator('#participar').getByRole('link', { name: 'Solicitar inscripción' });
+  await verifyRetreatCta(februaryJoin, 'whatsapp', 'retreat_registration', februaryEdition);
+  assert.equal(await februaryJoin.getAttribute('href'), februaryRegistrationUrl.href);
+  const februaryPricing = page.locator('.retreat-plan__action');
+  assert.equal(await februaryPricing.count(), 4);
+  await page.getByText('$610.000', { exact: true }).waitFor();
+  await page.getByText('Total $740.000', { exact: true }).waitFor();
+  for (const link of await februaryPricing.all()) {
+    await verifyRetreatCta(link, 'whatsapp', 'retreat_pricing', februaryEdition);
+    const inquiry = new URL(await link.getAttribute('href')).searchParams.get('text');
+    assert.ok(inquiry.startsWith(februaryMessage + ' Me interesa '));
+  }
+  await page.goto(HOST + BASE + '/encuentros/');
   await eventCard.getByRole('link', { name: 'Conocer los círculos' }).click();
   assert.equal(new URL(page.url()).hash, '#circulos');
-  await verifyRetreatCta(page.getByRole('link', { name: 'Ver el encuentro de enero' }), 'details', 'integration_page');
+  await verifyRetreatCta(page.getByRole('link', { name: 'Ver fechas del retiro' }), 'listing', 'integration_page');
   await page.getByText('Una vez por semana', { exact: true }).waitFor();
   assert.equal(await page.getByText('ARS 20.000 por mes', { exact: true }).count(), 0);
   const circleCta = page.getByRole('link', { name: 'Quiero participar' });
@@ -320,7 +360,7 @@ try{
   }
   const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
   await verifyHeaderCta();
-  await verifyRetreatCta(teamRetreat, 'details', 'team_footer');
+  await verifyRetreatCta(teamRetreat, 'details', 'team_footer', januaryEdition);
   await teamRetreat.click();
   await page.waitForURL('**/encuentros/retiro-enero-2027/');
 

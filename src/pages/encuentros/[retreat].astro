@@ -1,20 +1,25 @@
 ---
+import type { GetStaticPaths } from 'astro';
 import OfferingAction from '../../components/OfferingAction.astro';
 import RetreatTeam from '../../components/RetreatTeam.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { offeringUrl, offerings } from '../../lib/offerings';
+import { offeringUrl, retreatEditions } from '../../lib/offerings';
 import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
 
-const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
-const registrationUrl = encounter ? offeringUrl(encounter) : undefined;
+export const getStaticPaths = (() => retreatEditions.map(encounter => ({
+  params: { retreat: encounter.pageSlug },
+  props: { encounter },
+}))) satisfies GetStaticPaths;
+
+const { encounter } = Astro.props;
+const registrationUrl = offeringUrl(encounter);
 const whatsappUrl = registrationUrl?.startsWith('https://wa.me/') ? registrationUrl : undefined;
-const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registration') : undefined;
+const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registration', encounter.pageSlug) : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
-const canRegister = encounter && (registrationUrl || requestsEnabled);
-const date = encounter?.when || '23 y 24 de enero de 2027';
-const venue = encounter?.venue || 'Casa Sabia · Huerta Grande, Córdoba';
+const canRegister = Boolean(registrationUrl) || requestsEnabled;
+const { when: date, venue } = encounter;
 
 const paymentPlans = [
   { id: 'single', label: 'Pago único', payments: 1, amount: 610000 },
@@ -46,6 +51,13 @@ type ScheduleEntry = {
   text: string;
 } & ({ time: string; end?: string } | { label: string });
 
+const daysFormatter = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', timeZone: 'UTC' });
+const [firstDay, secondDay] = [encounter.startDate, encounter.endDate].map(value => {
+  const label = daysFormatter.format(new Date(value));
+  const id = label.split(' ')[0].normalize('NFD').replace(/\p{M}/gu, '');
+  return { id, title: label.charAt(0).toUpperCase() + label.slice(1) };
+});
+
 const days: {
   id: string;
   title: string;
@@ -54,8 +66,7 @@ const days: {
   schedule: ScheduleEntry[];
 }[] = [
   {
-    id: 'sabado',
-    title: 'Sábado 23',
+    ...firstDay,
     photo: 'caminata-en-el-campo',
     alt: 'Un grupo reunido a la sombra de los árboles al borde del campo',
     schedule: [
@@ -69,8 +80,7 @@ const days: {
     ],
   },
   {
-    id: 'domingo',
-    title: 'Domingo 24',
+    ...secondDay,
     photo: 'encuentro-con-caballos',
     alt: 'Personas y caballos reunidos en un claro junto al bosque',
     schedule: [
@@ -91,7 +101,7 @@ const registrationSteps = [
 ];
 ---
 <SiteLayout
-  title="Retiro SOMA · Cuerpo, respiración y naturaleza"
+  title={'Retiro SOMA · ' + date}
   description={'Retiro SOMA Consciente, ' + date + ' en ' + venue + '. Dos días de prácticas y cuatro encuentros grupales de integración online.'}
   openJourney
 >
@@ -105,11 +115,11 @@ const registrationSteps = [
           <p class="retreat-hero__place">{venue}</p>
           <p class="retreat-hero__intro">Dos días para bajar el ritmo, mover el cuerpo y estar en la naturaleza.</p>
           <div class="retreat-actions">
-            {canRegister && <a class="btn retreat-button" href="#participar" {...retreatCta('registration', 'retreat_hero')}>Consultar por un lugar <span aria-hidden="true">↗</span></a>}
+            {canRegister && <a class="btn retreat-button" href="#participar" {...retreatCta('registration', 'retreat_hero', encounter.pageSlug)}>Consultar por un lugar <span aria-hidden="true">↗</span></a>}
             <a
               class="retreat-link"
               href="#cronograma"
-              {...retreatCta('schedule', 'retreat_hero')}
+              {...retreatCta('schedule', 'retreat_hero', encounter.pageSlug)}
             >Ver el cronograma <span aria-hidden="true">↓</span></a>
           </div>
         </div>
@@ -171,7 +181,7 @@ const registrationSteps = [
     <section class="retreat-integration" aria-labelledby="integracion-title">
       <div class="retreat-inner retreat-integration__layout">
         <div class="retreat-integration__copy">
-          <p class="retreat-label">Después del fin de semana</p>
+          <p class="retreat-label">Después del retiro</p>
           <h2 id="integracion-title">La experiencia <em>sigue.</em></h2>
           <p class="retreat-integration__count"><strong>4</strong> encuentros grupales de integración online</p>
           <p>Están incluidos en el retiro. Nos volvemos a encontrar para compartir lo vivido y llevarlo a lo cotidiano.</p>
@@ -203,7 +213,7 @@ const registrationSteps = [
                 <article
                   class="retreat-plan"
                   aria-labelledby={'plan-' + plan.id}
-                  data-retreat-pricing={analyticsEnabled && index === 0 ? '' : undefined}
+                  data-retreat-pricing={analyticsEnabled && index === 0 ? encounter.pageSlug : undefined}
                 >
                   <h3 id={'plan-' + plan.id}>{plan.label}</h3>
                   <p class="retreat-plan__amount">
@@ -215,7 +225,7 @@ const registrationSteps = [
                       class="btn retreat-plan__action"
                       href={inquiry}
                       aria-label={'Consultar por WhatsApp · ' + plan.label}
-                      {...retreatCta('whatsapp', 'retreat_pricing')}
+                      {...retreatCta('whatsapp', 'retreat_pricing', encounter.pageSlug)}
                       data-umami-event-payment_plan={analyticsEnabled ? plan.id : undefined}
                     >WhatsApp <span aria-hidden="true">↗</span></a>
                   )}
@@ -249,7 +259,7 @@ const registrationSteps = [
       </div>
     </section>
 
-    {canRegister && encounter && (
+    {canRegister && (
       <section id="participar" class="retreat-join" aria-labelledby="participar-title">
         <div class="retreat-inner retreat-join__layout">
           <div class="retreat-join__copy">
@@ -290,13 +300,14 @@ const registrationSteps = [
 
 <script>
   const pricing = import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true'
-    ? document.querySelector('[data-retreat-pricing]')
+    ? document.querySelector<HTMLElement>('[data-retreat-pricing]')
     : null;
+  const edition = pricing?.dataset.retreatPricing;
 
-  if (pricing) {
+  if (pricing && edition) {
     const observePricing = () => {
       const { umami } = window as Window & {
-        umami?: { track(event: 'retreat_pricing_viewed'): unknown };
+        umami?: { track(event: 'retreat_pricing_viewed', properties: { retreat_edition: string }): unknown };
       };
       if (!umami || typeof IntersectionObserver === 'undefined') return;
 
@@ -304,7 +315,7 @@ const registrationSteps = [
         if (!entry || entry.intersectionRatio < 0.5) return;
         observer.disconnect();
         try {
-          await umami.track('retreat_pricing_viewed');
+          await umami.track('retreat_pricing_viewed', { retreat_edition: edition });
         } catch {
           // The page remains usable if analytics is unavailable.
         }

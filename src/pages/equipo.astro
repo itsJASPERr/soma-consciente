@@ -3,12 +3,11 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import TeamPracticePhoto from '../components/TeamPracticePhoto.astro';
 import { retreatCta } from '../lib/analytics';
-import { offerings } from '../lib/offerings';
+import { retreatEditions } from '../lib/offerings';
 import { path } from '../lib/paths';
 import { teamMembers } from '../lib/team';
 
-const retreat = offerings.find((offer) => offer.slug === 'encuentro-enero');
-const retreatPage = path('/encuentros/retiro-enero-2027/');
+const [retreat] = retreatEditions;
 const heroPhoto = {
   src: '/media/retreat/caminata-en-el-campo.webp',
   alt: 'Personas reunidas a la sombra de los árboles al borde del campo.',
@@ -74,7 +73,7 @@ const heroPhoto = {
             <a class="team-retreat__nucleus" href={path('/nucleo/')}>
               Descubrir el Núcleo <span aria-hidden="true">↗</span>
             </a>
-            <a class="btn btn--light" href={retreatPage} {...retreatCta('details', 'team_footer')}>
+            <a class="btn btn--light" href={path(retreat.href)} {...retreatCta('details', 'team_footer', retreat.pageSlug)}>
               Conocé el retiro <span aria-hidden="true">↗</span>
             </a>
           </div>

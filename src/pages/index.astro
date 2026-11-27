@@ -7,7 +7,7 @@ import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import { retreatCta } from '../lib/analytics';
-import { offerings } from '../lib/offerings';
+import { offerings, retreatEditions } from '../lib/offerings';
 import { path } from '../lib/paths';
 
 const aulas = await loadAulas();
@@ -35,22 +35,23 @@ const nucleusStatements = [
   'Acompañamiento e integración',
   'Encuentros y experiencias',
 ];
-const retreatPath = path('/encuentros/retiro-enero-2027/');
-const retreat = offerings.find(offer => offer.slug === 'encuentro-enero');
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
-const retreatDates = retreat && 'dates' in retreat && retreat.dates?.length ? retreat.dates : [];
 const calendar = [
-  ...(retreat ? (retreatDates.length ? retreatDates : [{ when: retreat.when, venue: retreat.venue }]).map((date, index) => ({
-    title: retreat.title,
-    when: date.when,
-    venue: date.venue,
-    href: index === 0 ? retreatPath : path('/encuentros/#' + retreat.slug + '-' + (index + 1)),
-  })) : []),
+  ...retreatEditions.map((edition, index) => ({
+    title: edition.title,
+    when: edition.when,
+    venue: edition.venue,
+    href: path(edition.href),
+    edition: edition.pageSlug,
+    featured: index === 0,
+  })),
   ...(door ? [{
     title: door.title,
     when: door.when,
     venue: [door.venue, door.details].filter(Boolean).join(' · '),
     href: path('/encuentros/#puerta-abierta'),
+    edition: undefined,
+    featured: false,
   }] : []),
 ];
 ---
@@ -120,7 +121,7 @@ const calendar = [
       </div>
       <ul class="home-calendar__list" role="list">
         {calendar.map((event) => {
-          const featured = event.href === retreatPath;
+          const { featured, edition } = event;
           return (
             <li class:list={['home-calendar__event', { 'home-calendar__event--featured': featured }]}>
               {featured && (
@@ -137,10 +138,10 @@ const calendar = [
               <div class="home-calendar__content">
                 <div>
                   {event.when && <p class="home-calendar__date">{event.when}</p>}
-                  <h3><a href={event.href} {...(featured ? retreatCta('details', 'home_calendar_title') : {})}>{event.title}</a></h3>
+                  <h3><a href={event.href} {...(edition ? retreatCta('details', 'home_calendar_title', edition) : {})}>{event.title}</a></h3>
                   {event.venue && <p class="home-calendar__venue">{event.venue}</p>}
                 </div>
-                <a class={featured ? 'btn btn--rust' : 'journey-link'} href={event.href} {...(featured ? retreatCta('details', 'home_calendar_link') : {})}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
+                <a class={featured ? 'btn btn--rust' : 'journey-link'} href={event.href} {...(edition ? retreatCta('details', 'home_calendar_link', edition) : {})}>{edition ? 'Ver el encuentro' : 'Ver el evento'} <span aria-hidden="true">↗</span></a>
               </div>
             </li>
           );
