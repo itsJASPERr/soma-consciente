@@ -233,6 +233,9 @@ try{
   const januaryEdition = 'retiro-enero-2027';
   const februaryEdition = 'retiro-febrero-2027';
   const februaryPath = '/encuentros/' + februaryEdition + '/';
+  const januaryRequest = '/encuentros/' + januaryEdition + '/solicitud/';
+  const februaryRequest = februaryPath + 'solicitud/';
+  const selectedPayment = dialog => dialog.locator('input[name="payment-plan"]:checked').inputValue();
   const verifyRetreatCta = async (link, action, placement, edition) => {
     assert.equal(await link.getAttribute('data-umami-event'), hasUmami ? 'retreat_' + action + '_clicked' : null);
     assert.equal(await link.getAttribute('data-umami-event-placement'), hasUmami ? placement : null);
@@ -274,36 +277,137 @@ try{
     return schedule.top >= headerHeight - 1 && schedule.top <= headerHeight + 16;
   });
   await page.getByRole('heading', { name: 'Domingo 24' }).waitFor();
-  const registrationJump = retreatHero.getByRole('link', { name: 'Consultar por un lugar' });
-  await verifyRetreatCta(registrationJump, 'registration', 'retreat_hero', januaryEdition);
-  await registrationJump.click();
-  await page.waitForURL('**/encuentros/retiro-enero-2027/#participar');
-  const registration = page.locator('#participar:target').getByRole('link', { name: 'Solicitar inscripción' });
+  const hasRetreatRequests = (await page.locator('form[data-retreat-edition]').count()) === 1;
+  if (process.env.REQUIRE_WAITLIST_TRACKING === 'true') assert.ok(hasRetreatRequests);
+  const registration = page.locator('#participar').getByRole('link', { name: 'Hacer una consulta por WhatsApp' });
   await verifyRetreatCta(registration, 'whatsapp', 'retreat_registration', januaryEdition);
   const retreatLink = new URL(await registration.getAttribute('href'));
   assert.equal(retreatLink.origin, 'https://wa.me');
   assert.match(retreatLink.searchParams.get('text'), /23 y 24 de enero/);
+  if (hasRetreatRequests) {
+    const originalViewport = page.viewportSize();
+    await page.setViewportSize({ width: 320, height: 570 });
+    const requestButton = retreatHero.getByRole('button', { name: 'Solicitar un lugar' });
+    await verifyRetreatCta(requestButton, 'registration', 'retreat_hero', januaryEdition);
+    await requestButton.click();
+    const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
+    assert.equal(await selectedPayment(dialog), 'undecided');
+    await page.waitForURL('**' + januaryRequest);
+    const layout = await dialog.evaluate(element => {
+      const body = element.querySelector('[role="region"]');
+      const close = element.querySelector('button[aria-label="Cerrar"]');
+      const startTop = close.getBoundingClientRect().top;
+      body.scrollTop = body.scrollHeight;
+      return {
+        scrolled: body.scrollTop > 0,
+        headerStayed: Math.abs(close.getBoundingClientRect().top - startTop) < 1,
+        modalClips: getComputedStyle(element).overflow === 'hidden',
+        scrollbarHidden: getComputedStyle(body).scrollbarWidth === 'none',
+        fitsWidth: body.scrollWidth <= body.clientWidth,
+      };
+    });
+    assert.deepEqual(layout, { scrolled: true, headerStayed: true, modalClips: true, scrollbarHidden: true, fitsWidth: true });
+    await page.waitForFunction(() => !document.querySelector('dialog[open]').getAnimations().length);
+    const closing = await dialog.evaluate(element => {
+      element.querySelector('button[aria-label="Cerrar"]').click();
+      return element.open && element.hasAttribute('data-closing') &&
+        element.getAnimations().some(animation => animation.transitionProperty === 'opacity');
+    });
+    assert.ok(closing, 'Close should leave the dialog open for its opacity transition');
+    await dialog.waitFor({ state: 'hidden' });
+    await page.waitForURL('**/encuentros/' + januaryEdition + '/#cronograma');
+    await page.setViewportSize(originalViewport);
+  }
   const pricing = page.locator('#inversion');
   await retreatHero.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
-  for (const [label, id, amount, total, message] of [
-    ['Pago único', 'single', '$610.000', null, 'pago único de $610.000'],
-    ['2 pagos', '2_payments', '2 × $330.000', 'Total $660.000', '2 cuotas de $330.000 (total $660.000)'],
-    ['3 pagos', '3_payments', '3 × $230.000', 'Total $690.000', '3 cuotas de $230.000 (total $690.000)'],
-    ['4 pagos', '4_payments', '4 × $185.000', 'Total $740.000', '4 cuotas de $185.000 (total $740.000)'],
+  for (const [label, id, amount, total] of [
+    ['Pago único', 'single', '$610.000', null],
+    ['2 pagos', '2_payments', '2 × $330.000', 'Total $660.000'],
+    ['3 pagos', '3_payments', '3 × $230.000', 'Total $690.000'],
+    ['4 pagos', '4_payments', '4 × $185.000', 'Total $740.000'],
   ]) {
     const plan = pricing.getByRole('article', { name: label, exact: true });
     await plan.getByText(amount, { exact: true }).waitFor();
     if (total) await plan.getByText(total, { exact: true }).waitFor();
-    const cta = plan.getByRole('link', { name: 'Consultar por WhatsApp · ' + label, exact: true });
-    assert.equal((await cta.textContent()).trim(), 'WhatsApp ↗');
-    await verifyRetreatCta(cta, 'whatsapp', 'retreat_pricing', januaryEdition);
+    if (!hasRetreatRequests) continue;
+    const cta = plan.getByRole('button', { name: 'Elegir este plan · ' + label, exact: true });
+    await verifyRetreatCta(cta, 'registration', 'retreat_pricing', januaryEdition);
     assert.equal(await cta.getAttribute('data-umami-event-payment_plan'), hasUmami ? id : null);
-    const url = new URL(await cta.getAttribute('href'));
-    assert.equal(url.origin, retreatLink.origin);
-    assert.equal(url.pathname, retreatLink.pathname);
-    const text = url.searchParams.get('text');
-    assert.ok(text.startsWith(retreatLink.searchParams.get('text')));
-    assert.ok(text.includes(message));
+    assert.equal(await cta.getAttribute('data-payment-plan'), id);
+  }
+  if (hasRetreatRequests) {
+    const trackerEvents = () => page.evaluate(() => window.retreatRequestEvents);
+    await page.evaluate(() => {
+      window.retreatRequestEvents = [];
+      window.umami = { track: (...args) => window.retreatRequestEvents.push(args) };
+    });
+    const submissions = [];
+    const reference = 'SOMA-111122223333';
+    const endpoint = '**/api/waitlist';
+    await page.route(endpoint, async route => {
+      submissions.push(route.request().postDataJSON());
+      const status = [503, 201, 200][submissions.length - 1];
+      await route.fulfill({ status, json: status === 503 ? { error: 'unavailable' } : { reference, paymentPlan: '2_payments', rebates: ['with_friend', 'own_tent'] } });
+    });
+
+    const plan = pricing.getByRole('button', { name: 'Elegir este plan · 2 pagos' });
+    const openRequest = async () => {
+      await plan.click();
+      const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
+      await dialog.getByText(/23 y 24 de enero/).waitFor();
+      assert.equal(await selectedPayment(dialog), '2_payments');
+      assert.equal(await dialog.getByRole('radio', { name: 'WhatsApp' }).isChecked(), true);
+      await dialog.getByLabel('Tu nombre').fill('Persona de prueba');
+      await dialog.getByRole('radio', { name: 'Correo electrónico' }).check();
+      await dialog.getByLabel('Tu correo electrónico').fill('retreat-test@example.com');
+      await dialog.getByRole('checkbox', { name: /10% de descuento/ }).check();
+      await dialog.getByRole('checkbox', { name: /50.000 de descuento/ }).check();
+      const legal = dialog.locator('#request-legal');
+      assert.equal(await legal.getByRole('link', { name: 'Términos y condiciones' }).getAttribute('href'), '/terminos-y-condiciones/');
+      assert.equal(await legal.getByRole('link', { name: 'Política de privacidad' }).getAttribute('href'), '/politica-de-privacidad/');
+      const send = dialog.getByRole('button', { name: 'Enviar solicitud' });
+      assert.equal(await send.isDisabled(), true);
+      await dialog.getByRole('checkbox', { name: /Acepto que SOMA/ }).check();
+      await send.click();
+      return dialog;
+    };
+
+    const dialog = await openRequest();
+    await dialog.getByText('No pudimos guardar tu solicitud.', { exact: false }).waitFor();
+    assert.deepEqual(await trackerEvents(), []);
+    await dialog.getByRole('button', { name: 'Enviar solicitud' }).click();
+    const receipt = page.getByRole('dialog', { name: 'Recibimos tu solicitud' });
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.waitForURL('**' + januaryRequest + 'recibida/');
+    assert.equal(await receipt.getByRole('button', { name: 'Enviar solicitud' }).count(), 0);
+    await receipt.getByText(/te va a contactar por correo electrónico/).waitFor();
+    const handoff = receipt.getByRole('link', { name: 'Continuar por WhatsApp' });
+    await verifyRetreatCta(handoff, 'whatsapp', 'retreat_confirmation', januaryEdition);
+    const prepared = new URL(await handoff.getAttribute('href'));
+    assert.equal(prepared.origin, retreatLink.origin);
+    assert.equal(prepared.pathname, retreatLink.pathname);
+    const message = prepared.searchParams.get('text');
+    for (const detail of [reference, '23 y 24 de enero', '2 cuotas de $330.000', '10% de descuento', '$50.000 de descuento']) assert.ok(message.includes(detail));
+    assert.ok(!message.includes('retreat-test@example.com'));
+    assert.equal(submissions[1].offering, 'encuentro-enero');
+    assert.equal(submissions[1].paymentPlan, '2_payments');
+    assert.deepEqual(submissions[1].rebates, ['with_friend', 'own_tent']);
+    const expectedEvents = hasUmami
+      ? [['retreat_request_submitted', { channel: 'email', retreat_edition: januaryEdition, payment_plan: '2_payments' }]]
+      : [];
+    assert.deepEqual(await trackerEvents(), expectedEvents);
+    await receipt.getByRole('button', { name: 'Cerrar' }).click();
+    await receipt.waitFor({ state: 'hidden' });
+
+    await openRequest();
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    assert.deepEqual(await trackerEvents(), expectedEvents);
+    await page.reload();
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.goBack();
+    await receipt.waitFor({ state: 'hidden' });
+    await page.waitForURL('**/encuentros/' + januaryEdition + '/#cronograma');
+    await page.unroute(endpoint);
   }
   for (const text of [
     'Dos días de retiro.',
@@ -328,40 +432,42 @@ try{
   await page.goto(HOST+BASE+'/encuentros/');
   await eventCard.getByRole('heading', { name: 'Qué incluye' }).waitFor();
   await eventCard.getByText('Casa Sabia · Huerta Grande, Córdoba', { exact: true }).waitFor();
-  await eventCard.getByText(/Si hay lugar, el equipo te confirma/).waitFor();
-  const cardRegistration = eventCard.getByRole('link', { name: 'Solicitar inscripción' });
-  await verifyRetreatCta(cardRegistration, 'whatsapp', 'event_card_registration', januaryEdition);
+  const cardRegistration = eventCard.getByRole('link', { name: hasRetreatRequests ? 'Solicitar un lugar' : 'Solicitar inscripción' });
+  await verifyRetreatCta(cardRegistration, hasRetreatRequests ? 'registration' : 'whatsapp', 'event_card_registration', januaryEdition);
   await verifyHeaderCta();
-  const encounterLink = new URL(await cardRegistration.getAttribute('href'));
-  assert.equal(encounterLink.origin, 'https://wa.me');
-  assert.match(encounterLink.searchParams.get('text'), /23 y 24 de enero/);
+  const encounterLink = retreatLink;
+  assert.equal(await cardRegistration.getAttribute('href'), hasRetreatRequests ? januaryRequest : encounterLink.href);
   const doorLink = new URL(await page.locator('article#puerta-abierta').getByRole('link', { name: 'Avisame la fecha' }).getAttribute('href'));
   assert.equal(doorLink.pathname, encounterLink.pathname);
   assert.match(doorLink.searchParams.get('text'), /Puerta Abierta/);
   const februaryCard = encounter.locator('#encuentro-febrero');
   const februaryDetails = februaryCard.getByRole('link', { name: 'Ver programa y precios' });
-  const februaryRegistration = februaryCard.getByRole('link', { name: 'Solicitar inscripción' });
+  const februaryRegistration = februaryCard.getByRole('link', { name: hasRetreatRequests ? 'Solicitar un lugar' : 'Solicitar inscripción' });
   await verifyRetreatCta(februaryDetails, 'details', 'event_card_details', februaryEdition);
-  await verifyRetreatCta(februaryRegistration, 'whatsapp', 'event_card_registration', februaryEdition);
-  const februaryRegistrationUrl = new URL(await februaryRegistration.getAttribute('href'));
-  assert.equal(februaryRegistrationUrl.pathname, encounterLink.pathname);
-  const februaryMessage = februaryRegistrationUrl.searchParams.get('text');
-  assert.match(februaryMessage, /15 y 16 de febrero/);
+  await verifyRetreatCta(februaryRegistration, hasRetreatRequests ? 'registration' : 'whatsapp', 'event_card_registration', februaryEdition);
+  const februaryRegistrationUrl = await februaryRegistration.getAttribute('href');
+  if (hasRetreatRequests) assert.equal(februaryRegistrationUrl, februaryRequest);
   await februaryDetails.click();
   await page.waitForURL('**' + februaryPath);
   await page.getByRole('heading', { name: 'Lunes 15' }).waitFor();
   await page.getByRole('heading', { name: 'Martes 16' }).waitFor();
-  const februaryJoin = page.locator('#participar').getByRole('link', { name: 'Solicitar inscripción' });
+  const februaryJoin = page.locator('#participar').getByRole('link', { name: 'Hacer una consulta por WhatsApp' });
   await verifyRetreatCta(februaryJoin, 'whatsapp', 'retreat_registration', februaryEdition);
-  assert.equal(await februaryJoin.getAttribute('href'), februaryRegistrationUrl.href);
+  const februaryWhatsapp = new URL(await februaryJoin.getAttribute('href'));
+  assert.equal(februaryWhatsapp.pathname, encounterLink.pathname);
+  assert.match(februaryWhatsapp.searchParams.get('text'), /15 y 16 de febrero/);
+  if (!hasRetreatRequests) assert.equal(februaryWhatsapp.href, februaryRegistrationUrl);
   const februaryPricing = page.locator('.retreat-plan__action');
-  assert.equal(await februaryPricing.count(), 4);
-  await page.getByText('$610.000', { exact: true }).waitFor();
-  await page.getByText('Total $740.000', { exact: true }).waitFor();
-  for (const link of await februaryPricing.all()) {
-    await verifyRetreatCta(link, 'whatsapp', 'retreat_pricing', februaryEdition);
-    const inquiry = new URL(await link.getAttribute('href')).searchParams.get('text');
-    assert.ok(inquiry.startsWith(februaryMessage + ' Me interesa '));
+  assert.equal(await februaryPricing.count(), hasRetreatRequests ? 4 : 0);
+  await page.locator('#inversion').getByText('$610.000', { exact: true }).waitFor();
+  await page.locator('#inversion').getByText('Total $740.000', { exact: true }).waitFor();
+  if (hasRetreatRequests) {
+    await page.goto(HOST + februaryRequest + 'recibida/');
+    await page.waitForURL('**' + februaryRequest);
+    const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
+    await dialog.getByText(/15 y 16 de febrero/).waitFor();
+    assert.equal(await selectedPayment(dialog), 'undecided');
+    await dialog.getByRole('button', { name: 'Cerrar' }).click();
   }
   await page.goto(HOST + BASE + '/encuentros/');
   await eventCard.getByRole('link', { name: 'Conocer los círculos' }).click();
@@ -369,11 +475,80 @@ try{
   await verifyRetreatCta(page.getByRole('link', { name: 'Ver fechas del retiro' }), 'listing', 'integration_page');
   await page.getByText('Una vez por semana', { exact: true }).waitFor();
   assert.equal(await page.getByText('ARS 20.000 por mes', { exact: true }).count(), 0);
-  const circleCta = page.getByRole('link', { name: 'Quiero participar' });
-  assert.equal(await circleCta.getAttribute('data-umami-event'), null);
-  const circleLink = new URL(await circleCta.getAttribute('href'));
-  assert.equal(circleLink.pathname, encounterLink.pathname);
-  assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  const hasCircleRequests = (await page.locator('form[data-request-offering="circulos"]').count()) === 1;
+  if (process.env.REQUIRE_WAITLIST_TRACKING === 'true') assert.ok(hasCircleRequests);
+  if (hasCircleRequests) {
+    const circleCta = page.getByRole('button', { name: 'Quiero participar' });
+    assert.equal(await circleCta.getAttribute('data-umami-event'), hasUmami ? 'circle_registration_clicked' : null);
+    const circleFormUrl = '/acompanamiento/solicitud/';
+    const reference = 'SOMA-000011112222';
+    const endpoint = '**/api/waitlist';
+    const submissions = [];
+    await page.evaluate(() => {
+      window.circleEvents = [];
+      window.umami = { track: (...args) => window.circleEvents.push(args) };
+    });
+    await page.route(endpoint, async route => {
+      submissions.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: submissions.length === 1 ? 201 : 200,
+        json: { reference, paymentPlan: null, rebates: [] },
+      });
+    });
+    const receipt = page.getByRole('dialog', { name: 'Recibimos tu solicitud' });
+    const submitCircle = async () => {
+      await circleCta.click();
+      await page.waitForURL('**' + circleFormUrl);
+      const dialog = page.getByRole('dialog', { name: 'Solicitá participar' });
+      assert.equal(await dialog.locator('input[name="payment-plan"], input[name="rebates"]').count(), 0);
+      assert.equal(await dialog.getByRole('radio', { name: 'WhatsApp' }).isChecked(), true);
+      await dialog.getByLabel('Tu nombre').fill('Persona de prueba');
+      await dialog.getByRole('radio', { name: 'Correo electrónico' }).check();
+      await dialog.getByLabel('Tu correo electrónico').fill('circle-test@example.com');
+      assert.equal(await dialog.getByRole('button', { name: 'Enviar solicitud' }).isDisabled(), true);
+      await dialog.getByRole('link', { name: 'Política de privacidad' }).waitFor();
+      await dialog.getByRole('link', { name: 'Términos y condiciones' }).waitFor();
+      await dialog.getByRole('checkbox', { name: /Acepto que SOMA/ }).check();
+      await dialog.getByRole('button', { name: 'Enviar solicitud' }).click();
+      await page.waitForURL('**' + circleFormUrl + 'recibida/');
+      await receipt.getByText(reference, { exact: true }).waitFor();
+    };
+
+    await submitCircle();
+    await receipt.getByText(/los horarios y los pasos para sumarte al círculo/).waitFor();
+    const handoff = receipt.getByRole('link', { name: 'Continuar por WhatsApp' });
+    assert.equal(await handoff.getAttribute('data-umami-event'), hasUmami ? 'circle_whatsapp_clicked' : null);
+    const circleLink = new URL(await handoff.getAttribute('href'));
+    assert.equal(circleLink.pathname, encounterLink.pathname);
+    const text = circleLink.searchParams.get('text');
+    assert.ok(text.includes('círculo de integración online') && text.includes(reference));
+    assert.ok(!text.includes('circle-test@example.com'));
+    assert.deepEqual(submissions[0], {
+      offering: 'circulos', name: 'Persona de prueba', channel: 'email', contact: 'circle-test@example.com', consent: 'circle-1',
+    });
+    await receipt.getByRole('button', { name: 'Cerrar' }).click();
+    await page.waitForURL('**/acompanamiento/#circulos');
+    await submitCircle();
+    assert.deepEqual(await page.evaluate(() => window.circleEvents), hasUmami ? [['circle_request_submitted', { channel: 'email' }]] : []);
+    await page.reload();
+    await receipt.getByText(reference, { exact: true }).waitFor();
+    await page.goBack();
+    await page.waitForURL('**/acompanamiento/#circulos');
+    await receipt.waitFor({ state: 'hidden' });
+    await page.unroute(endpoint);
+
+    await page.goto(HOST + BASE + circleFormUrl + 'recibida/');
+    await page.waitForURL('**' + circleFormUrl);
+    await page.getByRole('dialog', { name: 'Solicitá participar' }).waitFor();
+    await page.getByRole('button', { name: 'Cerrar' }).click();
+    await page.waitForURL('**/acompanamiento/');
+  } else {
+    const circleCta = page.getByRole('link', { name: 'Quiero participar' });
+    assert.equal(await circleCta.getAttribute('data-umami-event'), null);
+    const circleLink = new URL(await circleCta.getAttribute('href'));
+    assert.equal(circleLink.pathname, encounterLink.pathname);
+    assert.match(circleLink.searchParams.get('text'), /círculo semanal/);
+  }
   const mobileMenu = page.locator('.mobile-nav');
   await mobileMenu.locator('summary').click();
   await mobileMenu.getByRole('link', { name: 'Comunidad', exact: true }).click();
@@ -399,7 +574,18 @@ try{
   for (const [name, shortName, id] of teamMembers) {
     await teamIndex.getByRole('link', { name: shortName, exact: true }).click();
     await page.waitForURL('**/equipo/#' + id);
-    await page.locator('#' + id + ':target').getByRole('heading', { name }).waitFor();
+    const profile = page.locator('#' + id + ':target');
+    await profile.getByRole('heading', { name }).waitFor();
+    const email = shortName.split(' ')[0].toLowerCase() + '@soma-consciente.com';
+    assert.equal(await profile.getByRole('link', { name: 'Correo electrónico de ' + shortName }).getAttribute('href'), 'mailto:' + email);
+    const whatsapp = profile.getByRole('link', { name: 'WhatsApp con ' + shortName });
+    const whatsappLinks = {
+      nicole: 'https://wa.me/34621076042',
+      yanina: await page.getByRole('contentinfo').getByRole('link', { name: 'WhatsApp con Yanina' }).getAttribute('href'),
+      jasper: 'https://wa.me/543536569598',
+    };
+    if (whatsappLinks[id]) assert.equal(await whatsapp.getAttribute('href'), whatsappLinks[id]);
+    else assert.equal(await whatsapp.count(), 0);
   }
   const teamRetreat = page.getByRole('link', { name: 'Conocé el retiro' });
   await verifyHeaderCta();
@@ -428,6 +614,75 @@ try{
   await checkWaitlistTracking(page, HOST+BASE, {
     required: process.env.REQUIRE_WAITLIST_TRACKING === 'true',
   });
+
+  const inbox = await browser.newPage({ viewport: { width: 1080, height: 780 } });
+  const loadedViews = [];
+  const now = Math.floor(Date.now() / 1000);
+  await inbox.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    if (url.hostname !== '127.0.0.1') return route.abort();
+    if (url.pathname === '/api/whatsapp/messages') {
+      loadedViews.push('whatsapp');
+      return route.fulfill({ json: {
+        messages: [{ wa_message_id: 'wamid.preview', from_wa_id: '5491123456789', wa_timestamp: now, text_body: 'Hola, ¿cómo están?', reply_until: now + 3600 }],
+        replies: [], replies_enabled: true,
+      } });
+    }
+    if (url.pathname === '/api/retreat-requests') {
+      const kind = url.searchParams.get('kind');
+      loadedViews.push(kind);
+      return route.fulfill({ json: { requests: kind === 'circle' ? [{
+        reference: 'SOMA-222233334444', name: 'Noa Pérez', offering: 'circulos', payment_plan: null,
+        rebates: [], channel: 'email', contact: 'circle-test@example.com', whatsapp_received: 0,
+      }] : [{
+        reference: 'SOMA-111122223333', name: 'Ana García', offering: 'encuentro-enero', payment_plan: '2_payments',
+        rebates: ['own_tent'], channel: 'whatsapp', contact: '+5491123456789', whatsapp_received: 1,
+      }] } });
+    }
+    return route.continue();
+  });
+  await inbox.goto(HOST + BASE + '/mensajes/');
+  const whatsappTab = inbox.getByRole('tab', { name: 'WhatsApp' });
+  const requestsTab = inbox.getByRole('tab', { name: 'Solicitudes' });
+  const draft = inbox.getByRole('textbox', { name: 'Responder' });
+  await draft.fill('Borrador de prueba');
+  assert.deepEqual(loadedViews, ['whatsapp']);
+  await whatsappTab.focus();
+  await whatsappTab.press('ArrowRight');
+  await inbox.waitForURL('**/mensajes/#solicitudes');
+  await inbox.getByRole('heading', { name: 'Ana García' }).waitFor();
+  assert.equal(await inbox.locator('#inbox-whatsapp').isHidden(), true);
+  assert.equal(await requestsTab.getAttribute('aria-selected'), 'true');
+  await inbox.getByText('Mensaje de WhatsApp recibido').waitFor();
+  const whatsappMessage = new URL(await inbox.getByRole('link', { name: 'Escribir por WhatsApp' }).getAttribute('href'));
+  const whatsappText = whatsappMessage.searchParams.get('text');
+  for (const text of ['Ana García', '23 y 24 de enero', 'SOMA-111122223333']) assert.ok(whatsappText.includes(text));
+  await whatsappTab.click();
+  assert.equal(await draft.inputValue(), 'Borrador de prueba');
+
+  await requestsTab.click();
+  await inbox.getByRole('tab', { name: 'Círculos online' }).click();
+  await inbox.waitForURL('**/mensajes/#solicitudes-circulos');
+  await inbox.getByRole('heading', { name: 'Noa Pérez' }).waitFor();
+  assert.equal(await inbox.locator('#inbox-retreat').isHidden(), true);
+  const email = new URL(await inbox.getByRole('link', { name: 'Enviar correo' }).getAttribute('href'));
+  assert.equal(email.protocol, 'mailto:');
+  assert.equal(email.pathname, 'circle-test@example.com');
+  assert.equal(email.searchParams.get('subject'), 'Círculo de integración online · SOMA-222233334444');
+  assert.match(email.searchParams.get('body'), /Noa Pérez[\s\S]+horarios[\s\S]+SOMA-222233334444/);
+  assert.deepEqual(loadedViews, ['whatsapp', 'retreat', 'circle']);
+
+  await inbox.setViewportSize({ width: 320, height: 650 });
+  loadedViews.length = 0;
+  await inbox.reload();
+  await inbox.getByRole('heading', { name: 'Noa Pérez' }).waitFor();
+  assert.deepEqual(loadedViews, ['circle']);
+  assert.equal(await inbox.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await inbox.getByRole('button', { name: 'Actualizar', exact: true }).click();
+  await inbox.waitForFunction(() => !document.querySelector('#inbox-circle [data-request-refresh]').disabled);
+  assert.deepEqual(loadedViews, ['circle', 'circle']);
+  await inbox.close();
+  console.log('Verified separate inbox views, keyboard navigation, mobile layout, and prepared follow-up drafts.');
 } catch(e){
   errors.push('Test execution failed: '+(e?.stack||String(e)));
 } finally {

@@ -1,3 +1,4 @@
+import { retreatReference } from '../../../src/lib/retreat-requests.ts';
 import { readRequestBytes } from '../../lib/request-bytes.ts';
 
 type BoundStatement = { run(): Promise<unknown> };
@@ -31,8 +32,9 @@ type StoredMessage = {
 const headers = { 'Cache-Control': 'no-store' };
 const maxBodyBytes = 1_048_576;
 const insertSql = `INSERT INTO whatsapp_inbound_messages (
-  wa_message_id, from_wa_id, wa_timestamp, message_type, text_body, raw_json, business_phone_number_id
-) VALUES (?, ?, ?, ?, ?, ?, ?)
+  wa_message_id, from_wa_id, wa_timestamp, message_type, text_body, raw_json, business_phone_number_id,
+  retreat_request_reference
+) VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT reference FROM offering_requests WHERE reference = ?))
 ON CONFLICT(wa_message_id) DO NOTHING`;
 
 function empty(status: number) {
@@ -188,6 +190,7 @@ export async function onRequestPost({ request, env }: Context) {
       insert.bind(
         message.id, message.from, message.timestamp, message.type, message.textBody,
         message.rawJson, message.businessPhoneNumberId,
+        message.textBody?.match(retreatReference)?.[0].toUpperCase() ?? null,
       ),
     ));
   } catch {

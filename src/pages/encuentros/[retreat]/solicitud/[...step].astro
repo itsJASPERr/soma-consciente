@@ -1,0 +1,16 @@
+---
+import type { GetStaticPaths } from 'astro';
+import RetreatPage from '../../../../components/RetreatPage.astro';
+import { retreatEditions } from '../../../../lib/offerings';
+
+export const getStaticPaths = (() => {
+  if (import.meta.env.PROD && import.meta.env.PUBLIC_WAITLIST_ENABLED !== 'true') return [];
+  return retreatEditions.flatMap(encounter => [
+    { params: { retreat: encounter.pageSlug, step: undefined }, props: { encounter, requestState: 'form' as const } },
+    { params: { retreat: encounter.pageSlug, step: 'recibida' }, props: { encounter, requestState: 'receipt' as const } },
+  ]);
+}) satisfies GetStaticPaths;
+
+const { encounter, requestState } = Astro.props;
+---
+<RetreatPage encounter={encounter} requestState={requestState} />

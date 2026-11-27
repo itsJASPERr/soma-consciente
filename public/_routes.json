@@ -2,6 +2,8 @@
   "version": 1,
   "include": [
     "/api/waitlist",
+    "/api/retreat-requests",
+    "/api/retreat-requests/",
     "/api/waitlist/",
     "/api/whatsapp/webhook",
     "/api/whatsapp/webhook/",
