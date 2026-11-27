@@ -128,6 +128,9 @@ export const homepage = defineCollection({
     nucleoAlt: z.string().min(1),
     onlineImage: z.string().min(1),
     onlineAlt: z.string().min(1),
+    onlineCircleImage: z.string().optional(),
+    onlineCircleAlt: z.string().optional(),
+    onlineCirclePosition: z.string().optional(),
     encountersImage: z.string().min(1),
     encountersAlt: z.string().min(1)
   })

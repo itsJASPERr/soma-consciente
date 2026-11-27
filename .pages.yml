@@ -37,6 +37,15 @@ content:
         label: Descripción de la imagen online
         type: string
         required: true
+      - name: onlineCircleImage
+        label: Foto principal del círculo de integración online
+        type: image
+      - name: onlineCircleAlt
+        label: Descripción accesible de la foto del círculo
+        type: string
+      - name: onlineCirclePosition
+        label: Encuadre de la foto del círculo (CSS object-position)
+        type: string
       - name: encountersImage
         label: Imagen de Encuentros
         type: image
