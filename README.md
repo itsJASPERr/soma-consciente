@@ -132,7 +132,9 @@ cuando el navegador vuelve a consultar el mismo envío.
 
 El entorno necesita el ID de la línea de WhatsApp Business en
 `WHATSAPP_PHONE_NUMBER_ID` y un token de Meta con permiso de mensajería en
-`WHATSAPP_TOKEN`. Activá `WHATSAPP_REPLIES_ENABLED=true` cuando esos valores
+`WHATSAPP_TOKEN`. Configurá `WHATSAPP_MESSAGING_ACCOUNT_ID` para seleccionar
+explícitamente la cuenta de mensajería vinculada a esa línea.
+Activá `WHATSAPP_REPLIES_ENABLED=true` cuando esos valores
 correspondan al entorno. Mantené los secretos de producción fuera de las vistas
 previas. Las migraciones se aplican en el despliegue habitual de Pages.
 

@@ -465,6 +465,14 @@ try {
     assert.equal((await (await submit(redirected)).json()).reply.status, 'unknown');
     assert.equal((await (await submit(redirected)).json()).reply.status, 'unknown');
     assert.equal(calls.length, 4);
+
+    outcome = 'accepted';
+    assert.equal((await submit(input(fresh.id), { ...allowed, WHATSAPP_MESSAGING_ACCOUNT_ID: 'invalid' })).status, 503);
+    assert.equal(calls.length, 4);
+    const assigned = await submit(input(fresh.id), { ...allowed, WHATSAPP_MESSAGING_ACCOUNT_ID: ' 456789 ' });
+    assert.equal((await assigned.json()).reply.status, 'accepted');
+    assert.equal(calls.length, 5);
+    assert.equal(calls[4].messaging_account_id, '456789');
   } finally {
     globalThis.fetch = originalFetch;
   }

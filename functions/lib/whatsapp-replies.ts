@@ -1,8 +1,9 @@
-type ReplyConfig = { phoneNumberId: string; token: string };
+type ReplyConfig = { phoneNumberId: string; token: string; messagingAccountId?: string };
 
 export type ReplyEnv = {
   WHATSAPP_REPLIES_ENABLED?: string;
   WHATSAPP_PHONE_NUMBER_ID?: string;
+  WHATSAPP_MESSAGING_ACCOUNT_ID?: string;
   WHATSAPP_TOKEN?: string;
 };
 
@@ -11,13 +12,15 @@ export const replyMaxLength = 4096;
 export const sendTimeoutMs = 10_000;
 const graphBase = 'https://graph.facebook.com/v27.0/';
 
-export function replyConfig({ WHATSAPP_REPLIES_ENABLED, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TOKEN }: ReplyEnv) {
-  const phoneNumberId = WHATSAPP_PHONE_NUMBER_ID?.trim();
-  const token = WHATSAPP_TOKEN?.trim();
-  if (WHATSAPP_REPLIES_ENABLED !== 'true' || !phoneNumberId || !/^\d+$/.test(phoneNumberId) || !token) {
+export function replyConfig(env: ReplyEnv): ReplyConfig | undefined {
+  const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  const token = env.WHATSAPP_TOKEN?.trim();
+  const messagingAccountId = env.WHATSAPP_MESSAGING_ACCOUNT_ID?.trim();
+  if (env.WHATSAPP_REPLIES_ENABLED !== 'true' || !phoneNumberId || !/^\d+$/.test(phoneNumberId) || !token
+    || (messagingAccountId && !/^\d+$/.test(messagingAccountId))) {
     return undefined;
   }
-  return { phoneNumberId, token };
+  return { phoneNumberId, token, messagingAccountId };
 }
 
 type Recipient = { to: string } | { recipient: string };
@@ -80,6 +83,7 @@ export async function sendReply(
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         recipient_type: 'individual',
+        ...(config.messagingAccountId ? { messaging_account_id: config.messagingAccountId } : {}),
         ...recipient,
         context: { message_id: replyTo },
         type: 'text',
