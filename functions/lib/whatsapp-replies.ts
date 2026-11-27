@@ -37,7 +37,8 @@ export async function sendReply(
     const response = await fetch('https://graph.facebook.com/v27.0/' + config.phoneNumberId + '/messages', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + config.token, 'Content-Type': 'application/json' },
-      redirect: 'error',
+      // Workers supports manual redirects. Never forward the bearer token to another URL.
+      redirect: 'manual',
       signal: AbortSignal.timeout(sendTimeoutMs),
       body: JSON.stringify({
         messaging_product: 'whatsapp',

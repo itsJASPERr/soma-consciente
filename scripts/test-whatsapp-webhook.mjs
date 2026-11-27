@@ -373,10 +373,12 @@ try {
   globalThis.fetch = async (url, init) => {
     assert.equal(url, 'https://graph.facebook.com/v27.0/123456/messages');
     assert.equal(init.headers.Authorization, 'Bearer token-fixture');
+    assert.equal(init.redirect, 'manual');
     calls.push(JSON.parse(init.body));
     if (hold) await hold;
     if (outcome === 'failed') return new Response(null, { status:400 });
     if (outcome === 'unknown') throw new Error('simulated timeout');
+    if (outcome === 'redirect') return Response.redirect('https://redirect.invalid/', 307);
     return Response.json({ messages:[{ id:'wamid.OUTBOUND_' + calls.length }] });
   };
   try {
@@ -429,6 +431,12 @@ try {
     assert.equal(inboxAfter.messages.find(message => message.wa_message_id === wrongNumber.id).reply_until, null);
     assert.equal(inboxAfter.messages.find(message => message.wa_message_id === stale.id).reply_until, now-10);
     assert.ok(inboxAfter.messages.find(message => message.wa_message_id === 'legacy').reply_until > now);
+
+    outcome = 'redirect';
+    const redirected = input(fresh.id);
+    assert.equal((await (await submit(redirected)).json()).reply.status, 'unknown');
+    assert.equal((await (await submit(redirected)).json()).reply.status, 'unknown');
+    assert.equal(calls.length, 4);
   } finally {
     globalThis.fetch = originalFetch;
   }
