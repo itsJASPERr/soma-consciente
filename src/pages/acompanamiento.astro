@@ -3,8 +3,7 @@ import EditorialPhoto from '../components/EditorialPhoto.astro';
 import OfferingAction from '../components/OfferingAction.astro';
 import SignupDialog from '../components/SignupDialog.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { loadHomepage } from '../lib/home';
-import { mediaUrl } from '../lib/media';
+import { getOnlineCirclePhoto, loadHomepage } from '../lib/home';
 import { offeringUrl, offerings } from '../lib/offerings';
 import { retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
@@ -12,10 +11,7 @@ import { path } from '../lib/paths';
 const home = await loadHomepage();
 const circle = offerings.find(offer => offer.slug === 'circulos');
 const community = offerings.find(offer => offer.slug === 'grupo-whatsapp');
-const circlePhotoSrc = mediaUrl(home.onlineCircleImage);
-const circlePhoto = circlePhotoSrc
-  ? { src: circlePhotoSrc, alt: home.onlineCircleAlt ?? '', position: home.onlineCirclePosition }
-  : { src: mediaUrl(home.onlineImage) ?? undefined, alt: home.onlineAlt };
+const circlePhoto = getOnlineCirclePhoto(home);
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [circle, community].some(offer => offer && !offeringUrl(offer));
 ---
@@ -36,7 +32,7 @@ const showDialog = requestsEnabled && [circle, community].some(offer => offer &&
           {!offeringUrl(circle) && requestsEnabled && circle.followUp && <p>{circle.followUp}</p>}
         </div>
       </div>
-      <EditorialPhoto image={circlePhoto} class={circlePhotoSrc ? 'circle-hero__photo' : undefined} priority />
+      <EditorialPhoto image={circlePhoto} class="journey-photo--circle" priority />
     </article>
   ) : (
     <section class="container journey-hero"><h1>Integración online</h1></section>
@@ -65,7 +61,6 @@ const showDialog = requestsEnabled && [circle, community].some(offer => offer &&
 </SiteLayout>
 
 <style>
-  #circulos :global(.circle-hero__photo .journey-photo__image) { aspect-ratio: 1.1; }
   .circle-frequency {
     max-inline-size: 24rem;
     padding-block: .75rem;

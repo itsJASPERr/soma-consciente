@@ -6,7 +6,7 @@ import SignupDialog from '../components/SignupDialog.astro';
 import SomaAulaSymbol from '../components/SomaAulaSymbol.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { loadAulas } from '../lib/content';
-import { loadHomepage } from '../lib/home';
+import { getOnlineCirclePhoto, loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import { offeringUrl, offerings, retreatEditions, retreatOffering as encounter } from '../lib/offerings';
 import { retreatCta } from '../lib/analytics';
@@ -21,7 +21,7 @@ const door = offerings.find(offer => offer.slug === 'puerta-abierta');
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [...retreatEditions, door].some(offer => offer && !offeringUrl(offer));
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
-const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
+const circlePhoto = getOnlineCirclePhoto(home);
 ---
 <SiteLayout title="Retiro SOMA Consciente" description="Retiro SOMA Consciente. El encuentro presencial reúne las cuatro áreas. Consultá las próximas fechas en Casa Sabia, Huerta Grande. Cada retiro incluye cuatro encuentros grupales de integración online." openJourney>
   {encounter ? (
@@ -128,8 +128,8 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
     </section>
   )}
   <section class="journey-band">
-    <div class:list={['container', 'journey-hero', 'continuity', { 'journey-hero--photo': journal.src }]}>
-      <EditorialPhoto image={journal} class="journey-photo--wide" />
+    <div class:list={['container', 'journey-hero', 'continuity', { 'journey-hero--photo': circlePhoto.src }]}>
+      <EditorialPhoto image={circlePhoto} class="journey-photo--circle" />
       <div>
         <h2>Después del encuentro</h2>
         <p>Cada retiro incluye cuatro encuentros grupales de integración online. Después del retiro, el equipo te comparte por WhatsApp los horarios y cómo sumarte.</p>

@@ -4,6 +4,7 @@ import OfferingAction from '../../components/OfferingAction.astro';
 import RetreatTeam from '../../components/RetreatTeam.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getOnlineCirclePhoto, loadHomepage } from '../../lib/home';
 import { offeringUrl, retreatEditions } from '../../lib/offerings';
 import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
@@ -20,6 +21,7 @@ const whatsappAnalytics = whatsappUrl ? retreatCta('whatsapp', 'retreat_registra
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = Boolean(registrationUrl) || requestsEnabled;
 const { when: date, venue } = encounter;
+const circlePhoto = getOnlineCirclePhoto(await loadHomepage());
 
 const paymentPlans = [
   { id: 'single', label: 'Pago único', payments: 1, amount: 610000 },
@@ -179,7 +181,7 @@ const registrationSteps = [
     <RetreatTeam />
 
     <section class="retreat-integration" aria-labelledby="integracion-title">
-      <div class="retreat-inner retreat-integration__layout">
+      <div class:list={['retreat-inner', { 'retreat-integration__layout': circlePhoto.src }]}>
         <div class="retreat-integration__copy">
           <p class="retreat-label">Después del retiro</p>
           <h2 id="integracion-title">La experiencia <em>sigue.</em></h2>
@@ -187,16 +189,17 @@ const registrationSteps = [
           <p>Están incluidos en el retiro. Nos volvemos a encontrar para compartir lo vivido y llevarlo a lo cotidiano.</p>
           <a class="retreat-link" href={path('/acompanamiento/#circulos')}>Conocer los círculos <span aria-hidden="true">↗</span></a>
         </div>
-        <figure class="retreat-integration__image">
-          <img
-            src={path('/media/retreat/circulo-entre-arboles.webp')}
-            alt="Un grupo sentado en círculo entre los árboles"
-            width="471"
-            height="840"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
+        {circlePhoto.src && (
+          <figure class="retreat-integration__image">
+            <img
+              src={circlePhoto.src}
+              alt={circlePhoto.alt}
+              loading="lazy"
+              decoding="async"
+              style={circlePhoto.position ? { objectPosition: circlePhoto.position } : undefined}
+            />
+          </figure>
+        )}
       </div>
     </section>
 
@@ -547,7 +550,6 @@ const registrationSteps = [
     height: auto;
     aspect-ratio: .87;
     object-fit: cover;
-    object-position: center 62%;
     border-radius: 47% 54% 43% 46% / 56% 45% 55% 45%;
   }
   .retreat-integration__image::before,

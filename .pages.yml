@@ -38,7 +38,7 @@ content:
         type: string
         required: true
       - name: onlineCircleImage
-        label: Foto principal del círculo de integración online
+        label: Foto del círculo de integración online
         type: image
       - name: onlineCircleAlt
         label: Descripción accesible de la foto del círculo
