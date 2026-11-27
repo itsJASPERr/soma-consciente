@@ -269,6 +269,20 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .aula-page-theme--symbol-body { --page-accent:light-dark(#282224,#d9c5cf); --symbol-surface:#eee9e5; }
 .aula-icon { width:145px; height:145px; display:block; color:initial; }
 .soma-aula-source { display:block; width:100%; height:100%; object-fit:contain; }
+.soma-symbol-badge {
+  display:grid;
+  place-items:center;
+  inline-size:var(--soma-symbol-size);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:var(--symbol-paper,#f3ecde);
+}
+.soma-symbol-badge[data-symbol='heart'] { --symbol-paper:#e5eadc; }
+.soma-symbol-badge[data-symbol='sound'] { --symbol-paper:#f3e1d6; }
+.soma-symbol-badge[data-symbol='body'] { --symbol-paper:#efe3db; }
+.soma-symbol-badge[data-symbol='horse'] { --symbol-paper:#f5e8cb; }
+.soma-symbol-badge > img { inline-size:76%; block-size:auto; }
+.soma-symbol-badge[data-symbol='horse'] > img { filter:brightness(.86); }
 .aula-feature-mark {
   position:relative;
   display:grid;

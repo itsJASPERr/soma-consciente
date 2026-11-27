@@ -35,7 +35,9 @@ const heroPhoto = {
         <nav class="team-index" aria-label="Integrantes de SOMA">
           {teamMembers.map((member) => (
             <a href={'#' + member.id}>
-              <SomaAulaSymbol symbol={member.symbol} />
+              <span class="soma-symbol-badge" data-symbol={member.symbol} aria-hidden="true">
+                <SomaAulaSymbol symbol={member.symbol} />
+              </span>
               <span>{member.shortName}</span>
               <span class="team-index__arrow" aria-hidden="true">↓</span>
             </a>
@@ -108,13 +110,14 @@ const heroPhoto = {
   .team-hero__copy h1 em { display: block; }
   .team-hero__copy > p:last-child { max-width: 48ch; font-size: clamp(1rem, 1.38vw, 1.13rem); line-height: 1.65; }
   .team-index {
+    --soma-symbol-size: 2.35rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     border-block: 1px solid var(--line);
   }
   .team-index a {
     display: grid;
-    grid-template-columns: 1.9rem minmax(0, 1fr) auto;
+    grid-template-columns: var(--soma-symbol-size) minmax(0, 1fr) auto;
     align-items: center;
     gap: .6rem;
     min-height: 3.55rem;
@@ -125,7 +128,6 @@ const heroPhoto = {
   }
   .team-index a + a { border-inline-start: 1px solid var(--line); }
   .team-index a:hover { background: var(--surface-sand); }
-  .team-index :global(img) { width: 100%; height: auto; }
   .team-index__arrow { color: var(--journey-clay); }
 
   .team-profile {
