@@ -3,13 +3,13 @@ import OfferingAction from '../../components/OfferingAction.astro';
 import SignupDialog from '../../components/SignupDialog.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { offeringUrl, offerings } from '../../lib/offerings';
+import { analyticsEnabled, retreatCta } from '../../lib/analytics';
 import { path } from '../../lib/paths';
 
 const encounter = offerings.find((offer) => offer.slug === 'encuentro-enero');
 const registrationUrl = encounter ? offeringUrl(encounter) : undefined;
-const analyticsEnabled = import.meta.env.PROD && import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true';
-const whatsappEvent = analyticsEnabled && registrationUrl && new URL(registrationUrl, Astro.site).hostname === 'wa.me'
-  ? 'retreat_whatsapp_clicked'
+const whatsappAnalytics = registrationUrl?.startsWith('https://wa.me/')
+  ? retreatCta('whatsapp', 'retreat_registration')
   : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const canRegister = encounter && (registrationUrl || requestsEnabled);
@@ -68,7 +68,11 @@ const registrationSteps = [
   title="Retiro SOMA · Cuerpo, respiración y naturaleza"
   description={'Retiro SOMA Consciente, ' + date + ' en ' + venue + '. Dos días de prácticas y cuatro encuentros grupales de integración online.'}
   openJourney
-  journeyAction={canRegister ? { label: 'Consultar por un lugar', href: '#participar' } : undefined}
+  journeyAction={canRegister ? {
+    label: 'Consultar por un lugar',
+    href: '#participar',
+    analytics: retreatCta('registration', 'retreat_header'),
+  } : undefined}
 >
   <article class="retreat">
     <header class="retreat-hero">
@@ -80,11 +84,11 @@ const registrationSteps = [
           <p class="retreat-hero__place">{venue}</p>
           <p class="retreat-hero__intro">Dos días para bajar el ritmo, mover el cuerpo y estar en la naturaleza.</p>
           <div class="retreat-actions">
-            {canRegister && <a class="btn retreat-button" href="#participar">Consultar por un lugar <span aria-hidden="true">↗</span></a>}
+            {canRegister && <a class="btn retreat-button" href="#participar" {...retreatCta('registration', 'retreat_hero')}>Consultar por un lugar <span aria-hidden="true">↗</span></a>}
             <a
               class="retreat-link"
               href="#cronograma"
-              data-umami-event={analyticsEnabled ? 'retreat_schedule_clicked' : undefined}
+              {...retreatCta('schedule', 'retreat_hero')}
             >Ver el cronograma <span aria-hidden="true">↓</span></a>
           </div>
         </div>
@@ -216,7 +220,7 @@ const registrationSteps = [
               offer={encounter}
               requestsEnabled={requestsEnabled}
               class="btn retreat-button"
-              analyticsEvent={whatsappEvent}
+              analytics={whatsappAnalytics}
               showArrow
             />
             {!registrationUrl && <SignupDialog />}

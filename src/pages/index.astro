@@ -8,6 +8,7 @@ import SignupDialog from '../components/SignupDialog.astro';
 import { loadAulas, loadResources } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
+import { retreatCta } from '../lib/analytics';
 import { offerings } from '../lib/offerings';
 import { path } from '../lib/paths';
 
@@ -29,6 +30,7 @@ const nucleusStatements = [
   'Acompañamiento e integración',
   'Encuentros y experiencias',
 ];
+const retreatPath = path('/encuentros/retiro-enero-2027/');
 const retreat = offerings.find(offer => offer.slug === 'encuentro-enero');
 const door = offerings.find(offer => offer.slug === 'puerta-abierta');
 const retreatDates = retreat && 'dates' in retreat && retreat.dates?.length ? retreat.dates : [];
@@ -37,7 +39,7 @@ const calendar = [
     title: retreat.title,
     when: date.when,
     venue: date.venue,
-    href: index === 0 ? path('/encuentros/retiro-enero-2027/') : path('/encuentros/#' + retreat.slug + '-' + (index + 1)),
+    href: index === 0 ? retreatPath : path('/encuentros/#' + retreat.slug + '-' + (index + 1)),
   })) : []),
   ...(door ? [{
     title: door.title,
@@ -135,13 +137,13 @@ const calendar = [
         {calendar.map((event) => (
           <li>
             <div>
-              <h3><a href={event.href}>{event.title}</a></h3>
+              <h3><a href={event.href} {...(event.href === retreatPath ? retreatCta('details', 'home_calendar_title') : {})}>{event.title}</a></h3>
               <p>
                 {event.when && <span><Icon name="iconoir:calendar" size={18} aria-hidden="true" />{event.when}</span>}
                 {event.venue && <span><Icon name="iconoir:map-pin" size={18} aria-hidden="true" />{event.venue}</span>}
               </p>
             </div>
-            <a class="journey-link" href={event.href}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
+            <a class="journey-link" href={event.href} {...(event.href === retreatPath ? retreatCta('details', 'home_calendar_link') : {})}>{event.title === door?.title ? 'Ver el evento' : 'Ver el encuentro'} <span aria-hidden="true">↗</span></a>
           </li>
         ))}
       </ul>

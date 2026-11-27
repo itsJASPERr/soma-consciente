@@ -9,6 +9,7 @@ import { loadAulas } from '../lib/content';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import { offeringUrl, offerings, type Offering } from '../lib/offerings';
+import { retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
 
 const home = await loadHomepage();
@@ -44,7 +45,11 @@ const link = encounter && offeringUrl(encounter);
 const message = link?.startsWith('https://wa.me/') ? new URL(link).searchParams.get('text') : undefined;
 const requestsEnabled = import.meta.env.DEV || import.meta.env.PUBLIC_WAITLIST_ENABLED === 'true';
 const showDialog = requestsEnabled && [encounter, door].some(offer => offer && !offeringUrl(offer));
-const action = encounter && link ? { label: encounter.action, href: link } : undefined;
+const action = encounter && link ? {
+  label: encounter.action,
+  href: link,
+  analytics: link.startsWith('https://wa.me/') ? retreatCta('whatsapp', 'events_header') : undefined,
+} : undefined;
 const fire = { src: mediaUrl(home.encountersImage), alt: home.encountersAlt };
 const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
 ---
@@ -79,6 +84,9 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
         <div class="event-grid">
           {retreatEvents.map((event, index) => {
             const featured = index === 0;
+            const registrationAnalytics = featured && offeringUrl(event)?.startsWith('https://wa.me/')
+              ? retreatCta('whatsapp', 'event_card_registration')
+              : undefined;
             return (
               <section class:list={['event-card', { 'event-card--featured': featured }]} aria-labelledby={event.slug + '-card-title'}>
                 <div class="event-card__content">
@@ -98,8 +106,14 @@ const journal = { src: mediaUrl(home.onlineImage), alt: home.onlineAlt };
                     </div>
                   )}
                   <div class="event-card__actions">
-                    {featured && <a class="btn event-card__details" href={path('/encuentros/retiro-enero-2027/')}>Ver programa y precios <span aria-hidden="true">↗</span></a>}
-                    <OfferingAction offer={event} requestsEnabled={requestsEnabled} class={featured ? 'btn btn--outline' : 'btn'} showArrow />
+                    {featured && <a class="btn event-card__details" href={path('/encuentros/retiro-enero-2027/')} {...retreatCta('details', 'event_card_details')}>Ver programa y precios <span aria-hidden="true">↗</span></a>}
+                    <OfferingAction
+                      offer={event}
+                      requestsEnabled={requestsEnabled}
+                      class={featured ? 'btn btn--outline' : 'btn'}
+                      analytics={registrationAnalytics}
+                      showArrow
+                    />
                   </div>
                 </div>
                 {featured && (

@@ -6,6 +6,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import { loadHomepage } from '../lib/home';
 import { mediaUrl } from '../lib/media';
 import { offeringUrl, offerings } from '../lib/offerings';
+import { retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
 
 const home = await loadHomepage();
@@ -43,7 +44,7 @@ const showDialog = requestsEnabled && [circle, community].some(offer => offer &&
   {circle?.context && (
     <div class="container journey-row">
       <p>{circle.context}</p>
-      <a class="journey-link" href={path('/encuentros/retiro-enero-2027/')}>Ver el encuentro de enero <span aria-hidden="true">↗</span></a>
+      <a class="journey-link" href={path('/encuentros/retiro-enero-2027/')} {...retreatCta('details', 'integration_page')}>Ver el encuentro de enero <span aria-hidden="true">↗</span></a>
     </div>
   )}
   {community && (

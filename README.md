@@ -111,15 +111,26 @@ según el canal y la ubicación del enlace.
 
 ### Medición del retiro de enero de 2027
 
-En Umami, el embudo **Retiro de enero 2027 · Consultas por WhatsApp**
+En Umami, el embudo principal **Retiro de enero 2027 · Clics a WhatsApp**
 parte de una visita a `/encuentros/retiro-enero-2027*` y llega al evento
-`retreat_whatsapp_clicked` en un máximo de 60 minutos. El evento mide el
-clic que abre WhatsApp desde la página del retiro. La confirmación del
-lugar se coordina con Yanina por separado.
+`retreat_whatsapp_clicked` en un máximo de 60 minutos. El evento indica que
+se abrió el enlace a WhatsApp. El mensaje y la confirmación del lugar
+suceden fuera del sitio.
 
-- `retreat_schedule_clicked` registra el clic en **Ver el cronograma**.
-- `retreat_pricing_viewed` se registra una vez por carga, cuando se ve al
-  menos la mitad del bloque que muestra los precios.
+| Evento | Qué registra | `placement` |
+| --- | --- | --- |
+| `retreat_listing_clicked` | Clic en «Ver el encuentro» del encabezado que abre el listado | `site_header` |
+| `retreat_details_clicked` | Clic hacia la página del retiro | `home_calendar_title`, `home_calendar_link`, `event_card_details`, `integration_page` |
+| `retreat_registration_clicked` | Clic en «Consultar por un lugar» que lleva a la sección de inscripción | `retreat_header`, `retreat_hero` |
+| `retreat_whatsapp_clicked` | Clic que abre WhatsApp para consultar por el retiro | `events_header`, `event_card_registration`, `retreat_registration` |
+| `retreat_schedule_clicked` | Clic en «Ver el cronograma» | `retreat_hero` |
+| `retreat_pricing_viewed` | Al menos la mitad del bloque de precios visible, una vez por carga | |
+
+Para comparar las entradas internas, consultá `retreat_details_clicked`
+por `placement`. Los clics a WhatsApp desde el listado también aparecen
+en Eventos aunque la persona no haya visitado la página del retiro.
+Usá `retreat_registration_clicked` como señal intermedia opcional: las
+personas también pueden desplazarse directamente a la inscripción.
 
 Los eventos del retiro no agregan datos personales. Los enlaces de campaña
 deben llevar a la página del retiro para medir el recorrido en el sitio.

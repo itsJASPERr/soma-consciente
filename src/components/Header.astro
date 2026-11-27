@@ -1,8 +1,15 @@
 ---
 import Brand from './Brand.astro';
 import { Icon } from 'astro-icon/components';
+import type { AnalyticsLinkAttributes } from '../lib/analytics';
 import { path } from '../lib/paths';
-const { action, reveal = false } = Astro.props as { action?: { label: string; href: string }; reveal?: boolean };
+
+interface Props {
+  action?: { label: string; href: string; analytics?: AnalyticsLinkAttributes };
+  reveal?: boolean;
+}
+
+const { action, reveal = false } = Astro.props;
 const links = [
   { label: 'Encuentros', href: '/encuentros/' },
   { label: 'Círculos', href: '/acompanamiento/#circulos' },
@@ -19,7 +26,7 @@ const links = [
     <nav class="desktop-nav" aria-label="Navegación principal">
       {links.map((link) => <a href={path(link.href)}>{link.label}</a>)}
     </nav>
-    {action && <a class="header-cta" href={action.href}>{action.label} <span aria-hidden="true">↗</span></a>}
+    {action && <a class="header-cta" href={action.href} {...(action.analytics ?? {})}>{action.label} <span aria-hidden="true">↗</span></a>}
     <details class="mobile-nav">
       <summary aria-label="Abrir menú de navegación">Menú <Icon name="iconoir:menu" size={20} aria-hidden="true"/></summary>
       <nav aria-label="Navegación móvil">

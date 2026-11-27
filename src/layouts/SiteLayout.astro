@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { analyticsEnabled, retreatCta } from '../lib/analytics';
 import { path } from '../lib/paths';
 import '../styles/global.css';
 import '../styles/responsive.css';
@@ -17,7 +18,7 @@ const {
   noIndex = false,
   openJourney = false,
   revealHeader = false,
-  journeyAction = { label: 'Ver el encuentro', href: path('/encuentros/#encuentro-enero') },
+  journeyAction = { label: 'Ver el encuentro', href: path('/encuentros/#encuentro-enero'), analytics: retreatCta('listing', 'site_header') },
   ogImage = '/og/soma-consciente.png',
   ogImageAlt = 'SOMA CONSCIENTE — cuatro caminos, un mismo núcleo, con el emblema original de las cuatro Aulas.'
 } = Astro.props;
@@ -69,7 +70,7 @@ const socialDescription = description.trim().length >= 60
         url: canonical.href,
       })}></script>
     )}
-    {import.meta.env.PROD && import.meta.env.PUBLIC_ANALYTICS_ENABLED === 'true' && (
+    {analyticsEnabled && (
       <script
         is:inline
         defer
