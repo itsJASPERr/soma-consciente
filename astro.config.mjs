@@ -28,7 +28,7 @@ export default defineConfig({
     sitemap({
       filter: page => {
         const pathname = new URL(page).pathname;
-        return !excludedPaths.has(pathname) && !/^\/(?:encuentros\/[^/]+|acompanamiento)\/solicitud\//.test(pathname);
+        return !excludedPaths.has(pathname) && !/^\/(?:encuentros\/[^/]+|acompanamiento|programa-online)\/solicitud\//.test(pathname);
       },
     }),
   ],
