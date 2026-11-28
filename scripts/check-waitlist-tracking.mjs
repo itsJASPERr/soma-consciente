@@ -113,9 +113,10 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   await page.reload();
   await receipt.waitFor();
   await page.goBack();
-  await dialog.waitFor({ state: 'hidden' });
   await page.waitForURL(homeUrl);
+  await page.locator('#program-launch-dialog').waitFor({ state: 'hidden' });
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(homeUrl, { waitUntil: 'load' });
   const desktopPosition = await positionOpener();
   await opener.click();
   await dialog.waitFor();
