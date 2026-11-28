@@ -460,7 +460,8 @@ const countries = getCountries()
       submission = undefined;
       form.inert = false;
       resetForm();
-      opener?.focus({ preventScroll: true });
+      const closedTrigger = opener;
+      closedTrigger?.focus({ preventScroll: true });
       opener = undefined;
       dialog.removeAttribute('data-closing');
       if (!restoreUrlOnClose) {
@@ -469,8 +470,13 @@ const countries = getCountries()
       }
       if (offeringUrl && isRequestPath()) {
         const state = currentRequestState();
-        if (state?.fromOffering || state?.fromRetreat) history.back();
-        else if (waitlistReturn) {
+        if (state?.fromOffering || state?.fromRetreat) {
+          window.addEventListener('popstate', () => {
+            // Back to a section anchor can move focus after the dialog closes.
+            window.requestAnimationFrame(() => closedTrigger?.focus({ preventScroll: true }));
+          }, { once: true });
+          history.back();
+        } else if (waitlistReturn) {
           const returnUrl = new URL(waitlistReturn, location.origin);
           returnUrl.search = location.search;
           location.replace(returnUrl);

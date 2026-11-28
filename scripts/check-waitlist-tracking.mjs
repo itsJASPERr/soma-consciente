@@ -12,7 +12,8 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   });
 
   const endpoint = new URL('/api/waitlist', baseURL).href;
-  const homeUrl = new URL('/?utm_source=waitlist_test#programa-online', baseURL).href;
+  const homeUrl = new URL('/?utm_source=waitlist_test', baseURL).href;
+  const waitlistAnchorUrl = homeUrl + '#programa-online';
   const formUrl = new URL('/programa-online/solicitud/?utm_source=waitlist_test', baseURL).href;
   const receiptUrl = new URL('/programa-online/solicitud/recibida/?utm_source=waitlist_test', baseURL).href;
   let programSubmissions = 0;
@@ -132,6 +133,6 @@ export async function checkWaitlistTracking(page, baseURL, { required }) {
   await page.waitForURL(formUrl);
   await dialog.waitFor();
   await dialog.getByRole('button', { name: 'Cerrar' }).click();
-  await page.waitForURL(homeUrl);
+  await page.waitForURL(waitlistAnchorUrl);
   console.log('Program waitlist URLs, fixed header, position, focus, consent, payload and analytics verified.');
 }
