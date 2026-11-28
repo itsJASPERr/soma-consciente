@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import HomePage from '../../../components/HomePage.astro';
+
+export const getStaticPaths = (() => {
+  if (import.meta.env.PROD && import.meta.env.PUBLIC_WAITLIST_ENABLED !== 'true') return [];
+  return [
+    { params: { step: undefined }, props: { requestState: 'form' as const } },
+    { params: { step: 'recibida' }, props: { requestState: 'receipt' as const } },
+  ];
+}) satisfies GetStaticPaths;
+
+const { requestState } = Astro.props;
+---
+<HomePage requestState={requestState} />

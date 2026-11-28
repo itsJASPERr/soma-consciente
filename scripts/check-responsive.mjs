@@ -200,6 +200,7 @@ try{
   await waitForDarkMode(false);
   const lightBackground = await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor);
   assert.notEqual(lightBackground, darkBackground);
+  assert.equal(await page.locator('.site-header').evaluate(header => getComputedStyle(header).backgroundColor), 'rgb(247, 241, 232)');
   const lightScheme = await page.locator('html').evaluate(html => getComputedStyle(html).colorScheme);
   assert.deepEqual(lightScheme.split(' ').sort(), ['light', 'only']);
   assert.equal(await page.locator('meta[name="color-scheme"]').getAttribute('content'), 'only light');
@@ -363,6 +364,7 @@ try{
     const plan = pricing.getByRole('button', { name: 'Elegir este plan · 2 pagos' });
     const openRequest = async () => {
       await plan.click();
+      await page.waitForURL('**' + januaryRequest);
       const dialog = page.getByRole('dialog', { name: 'Solicitá tu lugar' });
       await dialog.getByText(/23 y 24 de enero/).waitFor();
       assert.equal(await selectedPayment(dialog), '2_payments');
@@ -408,6 +410,7 @@ try{
     assert.deepEqual(await trackerEvents(), expectedEvents);
     await receipt.getByRole('button', { name: 'Cerrar' }).click();
     await receipt.waitFor({ state: 'hidden' });
+    await page.waitForURL('**/encuentros/' + januaryEdition + '/#cronograma');
 
     await openRequest();
     await receipt.getByText(reference, { exact: true }).waitFor();

@@ -24,7 +24,7 @@
   --blue: light-dark(#587785, #a7c5ce);
   --line: light-dark(#dfd6c9, #566653);
   --site-header-height: 97px;
-  --header-surface: color-mix(in srgb, var(--cream) 96%, transparent);
+  --header-surface: light-dark(var(--paper), color-mix(in srgb, var(--cream) 96%, transparent));
   --font-display:'Asul', Georgia, serif;
   --font-wordmark:'DM Serif Display', Georgia, serif;
   --font-body:'Bricolage Grotesque', sans-serif;
